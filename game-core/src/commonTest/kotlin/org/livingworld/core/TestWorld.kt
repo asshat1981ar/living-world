@@ -192,7 +192,8 @@ class TestWorld(
             )
 
             val npcs = mutableMapOf<NpcId, Npc>()
-            for (((idStr, name), occupation) in npcDefinitions) {
+            for ((idAndName, occupation) in npcDefinitions) {
+                val (idStr, name) = idAndName
                 val npcId = NpcId(idStr)
                 val factionSet = when (idStr) {
                     "guildmaster_titus", "blacksmith_krag", "miner_derek" -> setOf(ironGuild.id)

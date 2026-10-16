@@ -1,6 +1,7 @@
 package org.livingworld.core.simulation
 
 import kotlinx.serialization.Serializable
+import kotlin.jvm.JvmInline
 import org.livingworld.core.beliefs.Belief
 import org.livingworld.core.ids.*
 import org.livingworld.core.npc.Condition

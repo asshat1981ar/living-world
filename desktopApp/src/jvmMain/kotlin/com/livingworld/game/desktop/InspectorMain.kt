@@ -6,12 +6,17 @@ import org.livingworld.core.ids.ItemId
 import org.livingworld.core.simulation.SimulationEngine
 import org.livingworld.core.time.WorldDuration
 import org.livingworld.core.world.DefaultVillageFactory
+import org.livingworld.persistence.SaveManager
 import org.livingworld.ui.compose.ChimeraUiLayoutEngine
 import org.livingworld.ui.sprites.SpriteManifest
+import java.io.File
 
 fun main(args: Array<String>) = runBlocking {
-    val days = args.getOrNull(0)?.toIntOrNull() ?: 30
-    val tail = args.getOrNull(1)?.toIntOrNull() ?: 10
+    // Usage: <days> <tail> [--save=<path>]   (positional args keep INSTRUCTIONS.md's `--args="30 10"` working)
+    val savePath = args.firstOrNull { it.startsWith("--save=") }?.removePrefix("--save=")
+    val positional = args.filterNot { it.startsWith("--") }
+    val days = positional.getOrNull(0)?.toIntOrNull() ?: 30
+    val tail = positional.getOrNull(1)?.toIntOrNull() ?: 10
 
     println("=== Living-World Inspector (Milestone quest-procedural-005 & compose-combat-006) ===")
     println("world=marketVillage  duration=${days}d  tail=$tail")
@@ -28,6 +33,11 @@ fun main(args: Array<String>) = runBlocking {
     println("Events recorded : ${world.events.size}")
     println("Alive NPCs      : ${world.npcs.values.count { it.isAlive }} / ${world.npcs.size}")
     println("Wall time       : ${elapsedMs}ms")
+    println("Fingerprint     : ${SaveManager.computeDeterministicFingerprint(world)}")
+    if (savePath != null) {
+        File(savePath).apply { parentFile?.mkdirs() }.writeText(SaveManager.serializeEnvelope(world))
+        println("Saved envelope  : $savePath")
+    }
     println()
 
     println("=== Event census ===")

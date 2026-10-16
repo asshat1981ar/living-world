@@ -399,7 +399,8 @@ class SimulationKernelTest {
         val chain = world.eventLedger.traceCausalChain(hostilityEvent.id)
 
         assertTrue(chain.size >= 4, "Causal chain must link back through antecedent events")
-        assertEquals(allegianceEvent.id, chain.first().id, "Chain root must be the allegiance shift")
+        assertEquals(rumorEvent.id, chain.first().id, "Chain root must be the rumor that caused the allegiance shift")
+        assertEquals(allegianceEvent.id, chain[1].id, "Allegiance shift must follow the rumor")
         assertEquals(hostilityEvent.id, chain.last().id, "Chain terminus must be the hostility declaration")
 
         assertEquals("Shopkeeper (Alden's Sundries)", world.npc(apprenticeId).identity.occupation)

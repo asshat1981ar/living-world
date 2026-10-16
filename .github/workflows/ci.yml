@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  invariants-and-python:
+    name: Invariants + Python tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: G1/G8/G9 invariant check
+        run: python3 tools/check_invariants.py --all
+      - name: Tooling tests
+        run: python3 -m unittest discover -s tools -p 'test_*.py'
+      - name: Sprite + HuggingFace adapter tests
+        run: |
+          python3 test_ui_sprites.py
+          python3 test_huggingface_adapter.py
+
+  kotlin-check:
+    name: Gradle check (KMP + Android lint)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: android-actions/setup-android@v3
+      - name: Install Android SDK 34
+        run: sdkmanager "platforms;android-34" "build-tools;34.0.0"
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Validate Gradle wrapper
+        uses: gradle/actions/wrapper-validation@v4
+      - name: Check
+        run: ./gradlew check --no-daemon --console=plain
+      - name: Upload reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: |
+            **/build/reports/
+            **/build/test-results/

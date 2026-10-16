@@ -58,7 +58,7 @@ data class EventLedger(
         eventsList.filter { it.time in start..end }
 
     inline fun <reified T : GameEvent> ofType(): List<T> =
-        eventsList.filterIsInstance<T>()
+        all().filterIsInstance<T>()
 
     /**
      * Reconstruct the causal chain leading up to a specific event.

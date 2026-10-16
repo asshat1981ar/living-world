@@ -7,30 +7,28 @@ import kotlin.jvm.JvmInline
 sealed interface EntityId {
     val identifier: String
 
-    @JvmInline
+    // Subclasses are data classes, not value classes: a value class cannot carry the polymorphic "type"
+    // discriminator, and kotlinx.serialization then wrote it into the next JSON structure (corrupt, unloadable saves).
     @Serializable
-    value class Npc(val id: NpcId) : EntityId {
+    data class Npc(val id: NpcId) : EntityId {
         override val identifier: String get() = id.value
         override fun toString(): String = "Npc($identifier)"
     }
 
-    @JvmInline
     @Serializable
-    value class Player(val id: String = "player") : EntityId {
+    data class Player(val id: String = "player") : EntityId {
         override val identifier: String get() = id
         override fun toString(): String = "Player($id)"
     }
 
-    @JvmInline
     @Serializable
-    value class Faction(val id: FactionId) : EntityId {
+    data class Faction(val id: FactionId) : EntityId {
         override val identifier: String get() = id.value
         override fun toString(): String = "Faction($identifier)"
     }
 
-    @JvmInline
     @Serializable
-    value class Location(val id: LocationId) : EntityId {
+    data class Location(val id: LocationId) : EntityId {
         override val identifier: String get() = id.value
         override fun toString(): String = "Location($identifier)"
     }

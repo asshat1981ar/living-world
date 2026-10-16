@@ -1,14 +1,18 @@
 plugins {
     kotlin("multiplatform")
     kotlin("plugin.serialization")
+    id("com.android.library")
 }
 
 kotlin {
     jvm()
     androidTarget()
-    iosX64()
-    iosArm64()
-    iosSimulatorArm64()
+    // Apple targets need a macOS host (Xcode); skip them elsewhere (e.g. the Linux build box).
+    if (System.getProperty("os.name").startsWith("Mac")) {
+        iosX64()
+        iosArm64()
+        iosSimulatorArm64()
+    }
 
     jvmToolchain(17)
 
@@ -27,5 +31,17 @@ kotlin {
                 implementation(project(":game-core"))
             }
         }
+    }
+}
+
+android {
+    namespace = "org.livingworld.persistence"
+    compileSdk = 34
+    defaultConfig {
+        minSdk = 24
+    }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 }

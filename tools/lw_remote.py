@@ -36,7 +36,8 @@ LOCK = "/tmp/lw-deploy.lock"
 LIVE_JOB_MARKER = "/tmp/awsbox-live-job"
 KEEP = [".gradle", "build", ".kotlin", "local.properties"]  # remote-only build state, never pushed or deleted
 REPO = Path(__file__).resolve().parents[1]
-GRADLE = "cd ~/living-world && nice -n 10 ./gradlew --no-daemon --console=plain -Dorg.gradle.workers.max=3"
+# flock: the Stop gate, the MCP server and manual runs share one remote tree; Gradle runs queue instead of colliding.
+GRADLE = "cd ~/living-world && flock /tmp/lw-gradle.lock nice -n 10 ./gradlew --no-daemon --console=plain -Dorg.gradle.workers.max=3"
 
 
 def aws(*args: str) -> dict:

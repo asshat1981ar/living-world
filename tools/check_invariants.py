@@ -123,8 +123,9 @@ def main(argv: list[str] | None = None) -> int:
         names = subprocess.run(["git", "diff", "--cached", "--name-only", "--diff-filter=ACM"], cwd=REPO,
                                capture_output=True, text=True, check=True).stdout.split()
         for name in names:
-            blob = subprocess.run(["git", "show", f":{name}"], cwd=REPO, capture_output=True, text=True)
-            old = subprocess.run(["git", "show", f"HEAD:{name}"], cwd=REPO, capture_output=True, text=True)
+            blob = subprocess.run(["git", "show", f":{name}"], cwd=REPO, capture_output=True, text=True, errors="replace")
+            old = subprocess.run(["git", "show", f"HEAD:{name}"], cwd=REPO, capture_output=True, text=True,
+                                 errors="replace")
             findings += introduced(name, old.stdout if old.returncode == 0 else "", blob.stdout)
         deps = isolation_gate(subprocess.run(["git", "diff", "--cached", "-U0", "--", "*.gradle.kts"], cwd=REPO,
                                              capture_output=True, text=True).stdout)

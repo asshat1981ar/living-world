@@ -11,6 +11,18 @@
           }
         ]
       }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -I \"${CLAUDE_PROJECT_DIR}/tools/hooks/stop_gate.py\"",
+            "timeout": 1800,
+            "statusMessage": "living-world stop gate: invariants, tool tests, Kotlin check on awsbox"
+          }
+        ]
+      }
     ]
   }
 }

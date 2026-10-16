@@ -1,3 +1,11 @@
+pluginManagement {
+    repositories {
+        google()
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
+
 rootProject.name = "living-world"
 
 include(":game-core")
