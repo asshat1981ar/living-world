@@ -1,0 +1,3139 @@
+{
+  "version": "1.1.0",
+  "style": "gothic_manuscript_inkwash",
+  "generated": "2026-10-07",
+  "total_assets": 197,
+  "seed": "0x4348494d455241",
+  "categories": [
+    {
+      "category": "NPC_PORTRAIT",
+      "description": "NPC character portraits with expression variants (12 NPCs x 6 expressions)",
+      "entries": [
+        {
+          "id": "npc_elara_neutral",
+          "baseName": "npc_elara_neutral",
+          "npcId": "elara",
+          "expression": "neutral",
+          "prompt": "Dark gothic manuscript portrait of a young woman herbalist, sumi-e ink wash on aged parchment, visible brush strokes, calm composed expression, neutral posture, steady gaze, medieval fantasy character, silver-streaked dark hair and calm keen eyes, wearing hooded linen robe with dried flora pouches, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint emerald accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_elara_tense",
+          "baseName": "npc_elara_tense",
+          "npcId": "elara",
+          "expression": "tense",
+          "prompt": "Dark gothic manuscript portrait of a young woman herbalist, sumi-e ink wash on aged parchment, visible brush strokes, hostile narrowed eyes, clenched jaw, furrowed brow, defensive angle, medieval fantasy character, silver-streaked dark hair and calm keen eyes, wearing hooded linen robe with dried flora pouches, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint emerald accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_elara_wounded",
+          "baseName": "npc_elara_wounded",
+          "npcId": "elara",
+          "expression": "wounded",
+          "prompt": "Dark gothic manuscript portrait of a young woman herbalist, sumi-e ink wash on aged parchment, visible brush strokes, bloodied cheek, labored breathing, grimacing pain, ink wash splatter, medieval fantasy character, silver-streaked dark hair and calm keen eyes, wearing hooded linen robe with dried flora pouches, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint emerald accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_elara_grateful",
+          "baseName": "npc_elara_grateful",
+          "npcId": "elara",
+          "expression": "grateful",
+          "prompt": "Dark gothic manuscript portrait of a young woman herbalist, sumi-e ink wash on aged parchment, visible brush strokes, softened gaze, faint nod of relief, relaxed posture, medieval fantasy character, silver-streaked dark hair and calm keen eyes, wearing hooded linen robe with dried flora pouches, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint emerald accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_elara_hostile",
+          "baseName": "npc_elara_hostile",
+          "npcId": "elara",
+          "expression": "hostile",
+          "prompt": "Dark gothic manuscript portrait of a young woman herbalist, sumi-e ink wash on aged parchment, visible brush strokes, venomous glare, bared teeth, fierce scowl, aggressive shadow, medieval fantasy character, silver-streaked dark hair and calm keen eyes, wearing hooded linen robe with dried flora pouches, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint emerald accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_elara_oathbound",
+          "baseName": "npc_elara_oathbound",
+          "npcId": "elara",
+          "expression": "oathbound",
+          "prompt": "Dark gothic manuscript portrait of a young woman herbalist, sumi-e ink wash on aged parchment, visible brush strokes, solemn resolute gaze, upright posture, faint glowing sigil aura, medieval fantasy character, silver-streaked dark hair and calm keen eyes, wearing hooded linen robe with dried flora pouches, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint emerald accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_thorne_neutral",
+          "baseName": "npc_thorne_neutral",
+          "npcId": "thorne",
+          "expression": "neutral",
+          "prompt": "Dark gothic manuscript portrait of a weathered man sworn mercenary, sumi-e ink wash on aged parchment, visible brush strokes, calm composed expression, neutral posture, steady gaze, medieval fantasy character, scarred jawline and grey stubble, wearing battered iron chainmail and faded heraldic tabard, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint steel accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_thorne_tense",
+          "baseName": "npc_thorne_tense",
+          "npcId": "thorne",
+          "expression": "tense",
+          "prompt": "Dark gothic manuscript portrait of a weathered man sworn mercenary, sumi-e ink wash on aged parchment, visible brush strokes, hostile narrowed eyes, clenched jaw, furrowed brow, defensive angle, medieval fantasy character, scarred jawline and grey stubble, wearing battered iron chainmail and faded heraldic tabard, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint steel accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_thorne_wounded",
+          "baseName": "npc_thorne_wounded",
+          "npcId": "thorne",
+          "expression": "wounded",
+          "prompt": "Dark gothic manuscript portrait of a weathered man sworn mercenary, sumi-e ink wash on aged parchment, visible brush strokes, bloodied cheek, labored breathing, grimacing pain, ink wash splatter, medieval fantasy character, scarred jawline and grey stubble, wearing battered iron chainmail and faded heraldic tabard, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint steel accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_thorne_grateful",
+          "baseName": "npc_thorne_grateful",
+          "npcId": "thorne",
+          "expression": "grateful",
+          "prompt": "Dark gothic manuscript portrait of a weathered man sworn mercenary, sumi-e ink wash on aged parchment, visible brush strokes, softened gaze, faint nod of relief, relaxed posture, medieval fantasy character, scarred jawline and grey stubble, wearing battered iron chainmail and faded heraldic tabard, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint steel accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_thorne_hostile",
+          "baseName": "npc_thorne_hostile",
+          "npcId": "thorne",
+          "expression": "hostile",
+          "prompt": "Dark gothic manuscript portrait of a weathered man sworn mercenary, sumi-e ink wash on aged parchment, visible brush strokes, venomous glare, bared teeth, fierce scowl, aggressive shadow, medieval fantasy character, scarred jawline and grey stubble, wearing battered iron chainmail and faded heraldic tabard, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint steel accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_thorne_oathbound",
+          "baseName": "npc_thorne_oathbound",
+          "npcId": "thorne",
+          "expression": "oathbound",
+          "prompt": "Dark gothic manuscript portrait of a weathered man sworn mercenary, sumi-e ink wash on aged parchment, visible brush strokes, solemn resolute gaze, upright posture, faint glowing sigil aura, medieval fantasy character, scarred jawline and grey stubble, wearing battered iron chainmail and faded heraldic tabard, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint steel accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_merchant_neutral",
+          "baseName": "npc_merchant_neutral",
+          "npcId": "merchant",
+          "expression": "neutral",
+          "prompt": "Dark gothic manuscript portrait of a middle-aged man prosperous merchant, sumi-e ink wash on aged parchment, visible brush strokes, calm composed expression, neutral posture, steady gaze, medieval fantasy character, calculating gaze and trimmed pointed beard, wearing furred velvet doublet and gold coin chain, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint gold accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_merchant_tense",
+          "baseName": "npc_merchant_tense",
+          "npcId": "merchant",
+          "expression": "tense",
+          "prompt": "Dark gothic manuscript portrait of a middle-aged man prosperous merchant, sumi-e ink wash on aged parchment, visible brush strokes, hostile narrowed eyes, clenched jaw, furrowed brow, defensive angle, medieval fantasy character, calculating gaze and trimmed pointed beard, wearing furred velvet doublet and gold coin chain, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint gold accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_merchant_wounded",
+          "baseName": "npc_merchant_wounded",
+          "npcId": "merchant",
+          "expression": "wounded",
+          "prompt": "Dark gothic manuscript portrait of a middle-aged man prosperous merchant, sumi-e ink wash on aged parchment, visible brush strokes, bloodied cheek, labored breathing, grimacing pain, ink wash splatter, medieval fantasy character, calculating gaze and trimmed pointed beard, wearing furred velvet doublet and gold coin chain, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint gold accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_merchant_grateful",
+          "baseName": "npc_merchant_grateful",
+          "npcId": "merchant",
+          "expression": "grateful",
+          "prompt": "Dark gothic manuscript portrait of a middle-aged man prosperous merchant, sumi-e ink wash on aged parchment, visible brush strokes, softened gaze, faint nod of relief, relaxed posture, medieval fantasy character, calculating gaze and trimmed pointed beard, wearing furred velvet doublet and gold coin chain, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint gold accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_merchant_hostile",
+          "baseName": "npc_merchant_hostile",
+          "npcId": "merchant",
+          "expression": "hostile",
+          "prompt": "Dark gothic manuscript portrait of a middle-aged man prosperous merchant, sumi-e ink wash on aged parchment, visible brush strokes, venomous glare, bared teeth, fierce scowl, aggressive shadow, medieval fantasy character, calculating gaze and trimmed pointed beard, wearing furred velvet doublet and gold coin chain, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint gold accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_merchant_oathbound",
+          "baseName": "npc_merchant_oathbound",
+          "npcId": "merchant",
+          "expression": "oathbound",
+          "prompt": "Dark gothic manuscript portrait of a middle-aged man prosperous merchant, sumi-e ink wash on aged parchment, visible brush strokes, solemn resolute gaze, upright posture, faint glowing sigil aura, medieval fantasy character, calculating gaze and trimmed pointed beard, wearing furred velvet doublet and gold coin chain, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint gold accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_apprentice_neutral",
+          "baseName": "npc_apprentice_neutral",
+          "npcId": "apprentice",
+          "expression": "neutral",
+          "prompt": "Dark gothic manuscript portrait of a youthful man shop apprentice, sumi-e ink wash on aged parchment, visible brush strokes, calm composed expression, neutral posture, steady gaze, medieval fantasy character, smudged cheeks and observant wide eyes, wearing stained leather work apron and coarse woolen shirt, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint copper accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_apprentice_tense",
+          "baseName": "npc_apprentice_tense",
+          "npcId": "apprentice",
+          "expression": "tense",
+          "prompt": "Dark gothic manuscript portrait of a youthful man shop apprentice, sumi-e ink wash on aged parchment, visible brush strokes, hostile narrowed eyes, clenched jaw, furrowed brow, defensive angle, medieval fantasy character, smudged cheeks and observant wide eyes, wearing stained leather work apron and coarse woolen shirt, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint copper accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_apprentice_wounded",
+          "baseName": "npc_apprentice_wounded",
+          "npcId": "apprentice",
+          "expression": "wounded",
+          "prompt": "Dark gothic manuscript portrait of a youthful man shop apprentice, sumi-e ink wash on aged parchment, visible brush strokes, bloodied cheek, labored breathing, grimacing pain, ink wash splatter, medieval fantasy character, smudged cheeks and observant wide eyes, wearing stained leather work apron and coarse woolen shirt, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint copper accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_apprentice_grateful",
+          "baseName": "npc_apprentice_grateful",
+          "npcId": "apprentice",
+          "expression": "grateful",
+          "prompt": "Dark gothic manuscript portrait of a youthful man shop apprentice, sumi-e ink wash on aged parchment, visible brush strokes, softened gaze, faint nod of relief, relaxed posture, medieval fantasy character, smudged cheeks and observant wide eyes, wearing stained leather work apron and coarse woolen shirt, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint copper accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_apprentice_hostile",
+          "baseName": "npc_apprentice_hostile",
+          "npcId": "apprentice",
+          "expression": "hostile",
+          "prompt": "Dark gothic manuscript portrait of a youthful man shop apprentice, sumi-e ink wash on aged parchment, visible brush strokes, venomous glare, bared teeth, fierce scowl, aggressive shadow, medieval fantasy character, smudged cheeks and observant wide eyes, wearing stained leather work apron and coarse woolen shirt, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint copper accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_apprentice_oathbound",
+          "baseName": "npc_apprentice_oathbound",
+          "npcId": "apprentice",
+          "expression": "oathbound",
+          "prompt": "Dark gothic manuscript portrait of a youthful man shop apprentice, sumi-e ink wash on aged parchment, visible brush strokes, solemn resolute gaze, upright posture, faint glowing sigil aura, medieval fantasy character, smudged cheeks and observant wide eyes, wearing stained leather work apron and coarse woolen shirt, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint copper accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_guard_captain_neutral",
+          "baseName": "npc_guard_captain_neutral",
+          "npcId": "guard_captain",
+          "expression": "neutral",
+          "prompt": "Dark gothic manuscript portrait of a mature man guard captain, sumi-e ink wash on aged parchment, visible brush strokes, calm composed expression, neutral posture, steady gaze, medieval fantasy character, battle-worn stoic expression and scarred brow, wearing blackened iron breastplate and wolf-pelt mantle, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint crimson accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_guard_captain_tense",
+          "baseName": "npc_guard_captain_tense",
+          "npcId": "guard_captain",
+          "expression": "tense",
+          "prompt": "Dark gothic manuscript portrait of a mature man guard captain, sumi-e ink wash on aged parchment, visible brush strokes, hostile narrowed eyes, clenched jaw, furrowed brow, defensive angle, medieval fantasy character, battle-worn stoic expression and scarred brow, wearing blackened iron breastplate and wolf-pelt mantle, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint crimson accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_guard_captain_wounded",
+          "baseName": "npc_guard_captain_wounded",
+          "npcId": "guard_captain",
+          "expression": "wounded",
+          "prompt": "Dark gothic manuscript portrait of a mature man guard captain, sumi-e ink wash on aged parchment, visible brush strokes, bloodied cheek, labored breathing, grimacing pain, ink wash splatter, medieval fantasy character, battle-worn stoic expression and scarred brow, wearing blackened iron breastplate and wolf-pelt mantle, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint crimson accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_guard_captain_grateful",
+          "baseName": "npc_guard_captain_grateful",
+          "npcId": "guard_captain",
+          "expression": "grateful",
+          "prompt": "Dark gothic manuscript portrait of a mature man guard captain, sumi-e ink wash on aged parchment, visible brush strokes, softened gaze, faint nod of relief, relaxed posture, medieval fantasy character, battle-worn stoic expression and scarred brow, wearing blackened iron breastplate and wolf-pelt mantle, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint crimson accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_guard_captain_hostile",
+          "baseName": "npc_guard_captain_hostile",
+          "npcId": "guard_captain",
+          "expression": "hostile",
+          "prompt": "Dark gothic manuscript portrait of a mature man guard captain, sumi-e ink wash on aged parchment, visible brush strokes, venomous glare, bared teeth, fierce scowl, aggressive shadow, medieval fantasy character, battle-worn stoic expression and scarred brow, wearing blackened iron breastplate and wolf-pelt mantle, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint crimson accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_guard_captain_oathbound",
+          "baseName": "npc_guard_captain_oathbound",
+          "npcId": "guard_captain",
+          "expression": "oathbound",
+          "prompt": "Dark gothic manuscript portrait of a mature man guard captain, sumi-e ink wash on aged parchment, visible brush strokes, solemn resolute gaze, upright posture, faint glowing sigil aura, medieval fantasy character, battle-worn stoic expression and scarred brow, wearing blackened iron breastplate and wolf-pelt mantle, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint crimson accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_guildmaster_titus_neutral",
+          "baseName": "npc_guildmaster_titus_neutral",
+          "npcId": "guildmaster_titus",
+          "expression": "neutral",
+          "prompt": "Dark gothic manuscript portrait of a commanding elder man guildmaster, sumi-e ink wash on aged parchment, visible brush strokes, calm composed expression, neutral posture, steady gaze, medieval fantasy character, steely squint and braided iron-grey beard, wearing heavy damask robes and carved obsidian signet rings, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint obsidian accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_guildmaster_titus_tense",
+          "baseName": "npc_guildmaster_titus_tense",
+          "npcId": "guildmaster_titus",
+          "expression": "tense",
+          "prompt": "Dark gothic manuscript portrait of a commanding elder man guildmaster, sumi-e ink wash on aged parchment, visible brush strokes, hostile narrowed eyes, clenched jaw, furrowed brow, defensive angle, medieval fantasy character, steely squint and braided iron-grey beard, wearing heavy damask robes and carved obsidian signet rings, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint obsidian accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_guildmaster_titus_wounded",
+          "baseName": "npc_guildmaster_titus_wounded",
+          "npcId": "guildmaster_titus",
+          "expression": "wounded",
+          "prompt": "Dark gothic manuscript portrait of a commanding elder man guildmaster, sumi-e ink wash on aged parchment, visible brush strokes, bloodied cheek, labored breathing, grimacing pain, ink wash splatter, medieval fantasy character, steely squint and braided iron-grey beard, wearing heavy damask robes and carved obsidian signet rings, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint obsidian accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_guildmaster_titus_grateful",
+          "baseName": "npc_guildmaster_titus_grateful",
+          "npcId": "guildmaster_titus",
+          "expression": "grateful",
+          "prompt": "Dark gothic manuscript portrait of a commanding elder man guildmaster, sumi-e ink wash on aged parchment, visible brush strokes, softened gaze, faint nod of relief, relaxed posture, medieval fantasy character, steely squint and braided iron-grey beard, wearing heavy damask robes and carved obsidian signet rings, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint obsidian accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_guildmaster_titus_hostile",
+          "baseName": "npc_guildmaster_titus_hostile",
+          "npcId": "guildmaster_titus",
+          "expression": "hostile",
+          "prompt": "Dark gothic manuscript portrait of a commanding elder man guildmaster, sumi-e ink wash on aged parchment, visible brush strokes, venomous glare, bared teeth, fierce scowl, aggressive shadow, medieval fantasy character, steely squint and braided iron-grey beard, wearing heavy damask robes and carved obsidian signet rings, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint obsidian accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_guildmaster_titus_oathbound",
+          "baseName": "npc_guildmaster_titus_oathbound",
+          "npcId": "guildmaster_titus",
+          "expression": "oathbound",
+          "prompt": "Dark gothic manuscript portrait of a commanding elder man guildmaster, sumi-e ink wash on aged parchment, visible brush strokes, solemn resolute gaze, upright posture, faint glowing sigil aura, medieval fantasy character, steely squint and braided iron-grey beard, wearing heavy damask robes and carved obsidian signet rings, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint obsidian accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_elder_rowan_neutral",
+          "baseName": "npc_elder_rowan_neutral",
+          "npcId": "elder_rowan",
+          "expression": "neutral",
+          "prompt": "Dark gothic manuscript portrait of a ancient woman village elder, sumi-e ink wash on aged parchment, visible brush strokes, calm composed expression, neutral posture, steady gaze, medieval fantasy character, deeply lined wise face and silver braided hair, wearing embroidered ritual vestments and carved oak talisman, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint moss accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_elder_rowan_tense",
+          "baseName": "npc_elder_rowan_tense",
+          "npcId": "elder_rowan",
+          "expression": "tense",
+          "prompt": "Dark gothic manuscript portrait of a ancient woman village elder, sumi-e ink wash on aged parchment, visible brush strokes, hostile narrowed eyes, clenched jaw, furrowed brow, defensive angle, medieval fantasy character, deeply lined wise face and silver braided hair, wearing embroidered ritual vestments and carved oak talisman, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint moss accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_elder_rowan_wounded",
+          "baseName": "npc_elder_rowan_wounded",
+          "npcId": "elder_rowan",
+          "expression": "wounded",
+          "prompt": "Dark gothic manuscript portrait of a ancient woman village elder, sumi-e ink wash on aged parchment, visible brush strokes, bloodied cheek, labored breathing, grimacing pain, ink wash splatter, medieval fantasy character, deeply lined wise face and silver braided hair, wearing embroidered ritual vestments and carved oak talisman, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint moss accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_elder_rowan_grateful",
+          "baseName": "npc_elder_rowan_grateful",
+          "npcId": "elder_rowan",
+          "expression": "grateful",
+          "prompt": "Dark gothic manuscript portrait of a ancient woman village elder, sumi-e ink wash on aged parchment, visible brush strokes, softened gaze, faint nod of relief, relaxed posture, medieval fantasy character, deeply lined wise face and silver braided hair, wearing embroidered ritual vestments and carved oak talisman, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint moss accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_elder_rowan_hostile",
+          "baseName": "npc_elder_rowan_hostile",
+          "npcId": "elder_rowan",
+          "expression": "hostile",
+          "prompt": "Dark gothic manuscript portrait of a ancient woman village elder, sumi-e ink wash on aged parchment, visible brush strokes, venomous glare, bared teeth, fierce scowl, aggressive shadow, medieval fantasy character, deeply lined wise face and silver braided hair, wearing embroidered ritual vestments and carved oak talisman, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint moss accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_elder_rowan_oathbound",
+          "baseName": "npc_elder_rowan_oathbound",
+          "npcId": "elder_rowan",
+          "expression": "oathbound",
+          "prompt": "Dark gothic manuscript portrait of a ancient woman village elder, sumi-e ink wash on aged parchment, visible brush strokes, solemn resolute gaze, upright posture, faint glowing sigil aura, medieval fantasy character, deeply lined wise face and silver braided hair, wearing embroidered ritual vestments and carved oak talisman, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint moss accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_blacksmith_krag_neutral",
+          "baseName": "npc_blacksmith_krag_neutral",
+          "npcId": "blacksmith_krag",
+          "expression": "neutral",
+          "prompt": "Dark gothic manuscript portrait of a robust man blacksmith, sumi-e ink wash on aged parchment, visible brush strokes, calm composed expression, neutral posture, steady gaze, medieval fantasy character, broad sooted features and fierce focused brow, wearing thick hide apron over bare scarred arms, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint ember accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_blacksmith_krag_tense",
+          "baseName": "npc_blacksmith_krag_tense",
+          "npcId": "blacksmith_krag",
+          "expression": "tense",
+          "prompt": "Dark gothic manuscript portrait of a robust man blacksmith, sumi-e ink wash on aged parchment, visible brush strokes, hostile narrowed eyes, clenched jaw, furrowed brow, defensive angle, medieval fantasy character, broad sooted features and fierce focused brow, wearing thick hide apron over bare scarred arms, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint ember accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_blacksmith_krag_wounded",
+          "baseName": "npc_blacksmith_krag_wounded",
+          "npcId": "blacksmith_krag",
+          "expression": "wounded",
+          "prompt": "Dark gothic manuscript portrait of a robust man blacksmith, sumi-e ink wash on aged parchment, visible brush strokes, bloodied cheek, labored breathing, grimacing pain, ink wash splatter, medieval fantasy character, broad sooted features and fierce focused brow, wearing thick hide apron over bare scarred arms, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint ember accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_blacksmith_krag_grateful",
+          "baseName": "npc_blacksmith_krag_grateful",
+          "npcId": "blacksmith_krag",
+          "expression": "grateful",
+          "prompt": "Dark gothic manuscript portrait of a robust man blacksmith, sumi-e ink wash on aged parchment, visible brush strokes, softened gaze, faint nod of relief, relaxed posture, medieval fantasy character, broad sooted features and fierce focused brow, wearing thick hide apron over bare scarred arms, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint ember accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_blacksmith_krag_hostile",
+          "baseName": "npc_blacksmith_krag_hostile",
+          "npcId": "blacksmith_krag",
+          "expression": "hostile",
+          "prompt": "Dark gothic manuscript portrait of a robust man blacksmith, sumi-e ink wash on aged parchment, visible brush strokes, venomous glare, bared teeth, fierce scowl, aggressive shadow, medieval fantasy character, broad sooted features and fierce focused brow, wearing thick hide apron over bare scarred arms, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint ember accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_blacksmith_krag_oathbound",
+          "baseName": "npc_blacksmith_krag_oathbound",
+          "npcId": "blacksmith_krag",
+          "expression": "oathbound",
+          "prompt": "Dark gothic manuscript portrait of a robust man blacksmith, sumi-e ink wash on aged parchment, visible brush strokes, solemn resolute gaze, upright posture, faint glowing sigil aura, medieval fantasy character, broad sooted features and fierce focused brow, wearing thick hide apron over bare scarred arms, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint ember accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_innkeeper_mara_neutral",
+          "baseName": "npc_innkeeper_mara_neutral",
+          "npcId": "innkeeper_mara",
+          "expression": "neutral",
+          "prompt": "Dark gothic manuscript portrait of a warm woman tavernkeeper, sumi-e ink wash on aged parchment, visible brush strokes, calm composed expression, neutral posture, steady gaze, medieval fantasy character, shrewd welcoming smile and pinned braided auburn hair, wearing linen kirtle with brass cellar keys at her hip, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint amber accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_innkeeper_mara_tense",
+          "baseName": "npc_innkeeper_mara_tense",
+          "npcId": "innkeeper_mara",
+          "expression": "tense",
+          "prompt": "Dark gothic manuscript portrait of a warm woman tavernkeeper, sumi-e ink wash on aged parchment, visible brush strokes, hostile narrowed eyes, clenched jaw, furrowed brow, defensive angle, medieval fantasy character, shrewd welcoming smile and pinned braided auburn hair, wearing linen kirtle with brass cellar keys at her hip, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint amber accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_innkeeper_mara_wounded",
+          "baseName": "npc_innkeeper_mara_wounded",
+          "npcId": "innkeeper_mara",
+          "expression": "wounded",
+          "prompt": "Dark gothic manuscript portrait of a warm woman tavernkeeper, sumi-e ink wash on aged parchment, visible brush strokes, bloodied cheek, labored breathing, grimacing pain, ink wash splatter, medieval fantasy character, shrewd welcoming smile and pinned braided auburn hair, wearing linen kirtle with brass cellar keys at her hip, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint amber accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_innkeeper_mara_grateful",
+          "baseName": "npc_innkeeper_mara_grateful",
+          "npcId": "innkeeper_mara",
+          "expression": "grateful",
+          "prompt": "Dark gothic manuscript portrait of a warm woman tavernkeeper, sumi-e ink wash on aged parchment, visible brush strokes, softened gaze, faint nod of relief, relaxed posture, medieval fantasy character, shrewd welcoming smile and pinned braided auburn hair, wearing linen kirtle with brass cellar keys at her hip, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint amber accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_innkeeper_mara_hostile",
+          "baseName": "npc_innkeeper_mara_hostile",
+          "npcId": "innkeeper_mara",
+          "expression": "hostile",
+          "prompt": "Dark gothic manuscript portrait of a warm woman tavernkeeper, sumi-e ink wash on aged parchment, visible brush strokes, venomous glare, bared teeth, fierce scowl, aggressive shadow, medieval fantasy character, shrewd welcoming smile and pinned braided auburn hair, wearing linen kirtle with brass cellar keys at her hip, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint amber accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_innkeeper_mara_oathbound",
+          "baseName": "npc_innkeeper_mara_oathbound",
+          "npcId": "innkeeper_mara",
+          "expression": "oathbound",
+          "prompt": "Dark gothic manuscript portrait of a warm woman tavernkeeper, sumi-e ink wash on aged parchment, visible brush strokes, solemn resolute gaze, upright posture, faint glowing sigil aura, medieval fantasy character, shrewd welcoming smile and pinned braided auburn hair, wearing linen kirtle with brass cellar keys at her hip, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint amber accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_hunter_bram_neutral",
+          "baseName": "npc_hunter_bram_neutral",
+          "npcId": "hunter_bram",
+          "expression": "neutral",
+          "prompt": "Dark gothic manuscript portrait of a rugged man forest scout, sumi-e ink wash on aged parchment, visible brush strokes, calm composed expression, neutral posture, steady gaze, medieval fantasy character, sharp hawkish gaze and wind-chapped skin, wearing mottled forest cape and quiver harness, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint forest accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_hunter_bram_tense",
+          "baseName": "npc_hunter_bram_tense",
+          "npcId": "hunter_bram",
+          "expression": "tense",
+          "prompt": "Dark gothic manuscript portrait of a rugged man forest scout, sumi-e ink wash on aged parchment, visible brush strokes, hostile narrowed eyes, clenched jaw, furrowed brow, defensive angle, medieval fantasy character, sharp hawkish gaze and wind-chapped skin, wearing mottled forest cape and quiver harness, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint forest accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_hunter_bram_wounded",
+          "baseName": "npc_hunter_bram_wounded",
+          "npcId": "hunter_bram",
+          "expression": "wounded",
+          "prompt": "Dark gothic manuscript portrait of a rugged man forest scout, sumi-e ink wash on aged parchment, visible brush strokes, bloodied cheek, labored breathing, grimacing pain, ink wash splatter, medieval fantasy character, sharp hawkish gaze and wind-chapped skin, wearing mottled forest cape and quiver harness, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint forest accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_hunter_bram_grateful",
+          "baseName": "npc_hunter_bram_grateful",
+          "npcId": "hunter_bram",
+          "expression": "grateful",
+          "prompt": "Dark gothic manuscript portrait of a rugged man forest scout, sumi-e ink wash on aged parchment, visible brush strokes, softened gaze, faint nod of relief, relaxed posture, medieval fantasy character, sharp hawkish gaze and wind-chapped skin, wearing mottled forest cape and quiver harness, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint forest accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_hunter_bram_hostile",
+          "baseName": "npc_hunter_bram_hostile",
+          "npcId": "hunter_bram",
+          "expression": "hostile",
+          "prompt": "Dark gothic manuscript portrait of a rugged man forest scout, sumi-e ink wash on aged parchment, visible brush strokes, venomous glare, bared teeth, fierce scowl, aggressive shadow, medieval fantasy character, sharp hawkish gaze and wind-chapped skin, wearing mottled forest cape and quiver harness, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint forest accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_hunter_bram_oathbound",
+          "baseName": "npc_hunter_bram_oathbound",
+          "npcId": "hunter_bram",
+          "expression": "oathbound",
+          "prompt": "Dark gothic manuscript portrait of a rugged man forest scout, sumi-e ink wash on aged parchment, visible brush strokes, solemn resolute gaze, upright posture, faint glowing sigil aura, medieval fantasy character, sharp hawkish gaze and wind-chapped skin, wearing mottled forest cape and quiver harness, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint forest accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_miner_derek_neutral",
+          "baseName": "npc_miner_derek_neutral",
+          "npcId": "miner_derek",
+          "expression": "neutral",
+          "prompt": "Dark gothic manuscript portrait of a haggard man quarry miner, sumi-e ink wash on aged parchment, visible brush strokes, calm composed expression, neutral posture, steady gaze, medieval fantasy character, dark sunken eyes and soot-embedded calluses, wearing hemp miner smock and heavy rope belt, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint rust accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_miner_derek_tense",
+          "baseName": "npc_miner_derek_tense",
+          "npcId": "miner_derek",
+          "expression": "tense",
+          "prompt": "Dark gothic manuscript portrait of a haggard man quarry miner, sumi-e ink wash on aged parchment, visible brush strokes, hostile narrowed eyes, clenched jaw, furrowed brow, defensive angle, medieval fantasy character, dark sunken eyes and soot-embedded calluses, wearing hemp miner smock and heavy rope belt, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint rust accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_miner_derek_wounded",
+          "baseName": "npc_miner_derek_wounded",
+          "npcId": "miner_derek",
+          "expression": "wounded",
+          "prompt": "Dark gothic manuscript portrait of a haggard man quarry miner, sumi-e ink wash on aged parchment, visible brush strokes, bloodied cheek, labored breathing, grimacing pain, ink wash splatter, medieval fantasy character, dark sunken eyes and soot-embedded calluses, wearing hemp miner smock and heavy rope belt, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint rust accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_miner_derek_grateful",
+          "baseName": "npc_miner_derek_grateful",
+          "npcId": "miner_derek",
+          "expression": "grateful",
+          "prompt": "Dark gothic manuscript portrait of a haggard man quarry miner, sumi-e ink wash on aged parchment, visible brush strokes, softened gaze, faint nod of relief, relaxed posture, medieval fantasy character, dark sunken eyes and soot-embedded calluses, wearing hemp miner smock and heavy rope belt, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint rust accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_miner_derek_hostile",
+          "baseName": "npc_miner_derek_hostile",
+          "npcId": "miner_derek",
+          "expression": "hostile",
+          "prompt": "Dark gothic manuscript portrait of a haggard man quarry miner, sumi-e ink wash on aged parchment, visible brush strokes, venomous glare, bared teeth, fierce scowl, aggressive shadow, medieval fantasy character, dark sunken eyes and soot-embedded calluses, wearing hemp miner smock and heavy rope belt, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint rust accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_miner_derek_oathbound",
+          "baseName": "npc_miner_derek_oathbound",
+          "npcId": "miner_derek",
+          "expression": "oathbound",
+          "prompt": "Dark gothic manuscript portrait of a haggard man quarry miner, sumi-e ink wash on aged parchment, visible brush strokes, solemn resolute gaze, upright posture, faint glowing sigil aura, medieval fantasy character, dark sunken eyes and soot-embedded calluses, wearing hemp miner smock and heavy rope belt, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint rust accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_lyra_neutral",
+          "baseName": "npc_lyra_neutral",
+          "npcId": "lyra",
+          "expression": "neutral",
+          "prompt": "Dark gothic manuscript portrait of a reclusive woman apothecary, sumi-e ink wash on aged parchment, visible brush strokes, calm composed expression, neutral posture, steady gaze, medieval fantasy character, quiet contemplative gaze and raven hair, wearing tattered dark cloak and herbal satchel, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint sage accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_lyra_tense",
+          "baseName": "npc_lyra_tense",
+          "npcId": "lyra",
+          "expression": "tense",
+          "prompt": "Dark gothic manuscript portrait of a reclusive woman apothecary, sumi-e ink wash on aged parchment, visible brush strokes, hostile narrowed eyes, clenched jaw, furrowed brow, defensive angle, medieval fantasy character, quiet contemplative gaze and raven hair, wearing tattered dark cloak and herbal satchel, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint sage accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_lyra_wounded",
+          "baseName": "npc_lyra_wounded",
+          "npcId": "lyra",
+          "expression": "wounded",
+          "prompt": "Dark gothic manuscript portrait of a reclusive woman apothecary, sumi-e ink wash on aged parchment, visible brush strokes, bloodied cheek, labored breathing, grimacing pain, ink wash splatter, medieval fantasy character, quiet contemplative gaze and raven hair, wearing tattered dark cloak and herbal satchel, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint sage accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_lyra_grateful",
+          "baseName": "npc_lyra_grateful",
+          "npcId": "lyra",
+          "expression": "grateful",
+          "prompt": "Dark gothic manuscript portrait of a reclusive woman apothecary, sumi-e ink wash on aged parchment, visible brush strokes, softened gaze, faint nod of relief, relaxed posture, medieval fantasy character, quiet contemplative gaze and raven hair, wearing tattered dark cloak and herbal satchel, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint sage accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_lyra_hostile",
+          "baseName": "npc_lyra_hostile",
+          "npcId": "lyra",
+          "expression": "hostile",
+          "prompt": "Dark gothic manuscript portrait of a reclusive woman apothecary, sumi-e ink wash on aged parchment, visible brush strokes, venomous glare, bared teeth, fierce scowl, aggressive shadow, medieval fantasy character, quiet contemplative gaze and raven hair, wearing tattered dark cloak and herbal satchel, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint sage accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_lyra_oathbound",
+          "baseName": "npc_lyra_oathbound",
+          "npcId": "lyra",
+          "expression": "oathbound",
+          "prompt": "Dark gothic manuscript portrait of a reclusive woman apothecary, sumi-e ink wash on aged parchment, visible brush strokes, solemn resolute gaze, upright posture, faint glowing sigil aura, medieval fantasy character, quiet contemplative gaze and raven hair, wearing tattered dark cloak and herbal satchel, single candlelight from upper left, deep shadows, ink bleed edges, monochrome with faint sage accent, asymmetric composition, negative space dominant, no clean lines, expressive brushwork, parchment grain texture, isolated portrait, centered upper body, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_generic_neutral",
+          "baseName": "npc_generic_neutral",
+          "npcId": "generic",
+          "expression": "neutral",
+          "prompt": "Generic hooded traveler silhouette, sumi-e ink wash on aged parchment",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category": "NPC_TOKEN",
+      "description": "Overhead map tokens for NPCs",
+      "entries": [
+        {
+          "id": "npc_elara_token",
+          "baseName": "npc_elara_token",
+          "npcId": "elara",
+          "prompt": "Overhead map token silhouette of Elara the herbalist, dark gothic sumi-e ink stamp, circular border, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 64,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_thorne_token",
+          "baseName": "npc_thorne_token",
+          "npcId": "thorne",
+          "prompt": "Overhead map token silhouette of Thorne the sworn mercenary, dark gothic sumi-e ink stamp, circular border, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 64,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_merchant_token",
+          "baseName": "npc_merchant_token",
+          "npcId": "merchant",
+          "prompt": "Overhead map token silhouette of Alden the prosperous merchant, dark gothic sumi-e ink stamp, circular border, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 64,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_apprentice_token",
+          "baseName": "npc_apprentice_token",
+          "npcId": "apprentice",
+          "prompt": "Overhead map token silhouette of Finn the shop apprentice, dark gothic sumi-e ink stamp, circular border, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 64,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_guard_captain_token",
+          "baseName": "npc_guard_captain_token",
+          "npcId": "guard_captain",
+          "prompt": "Overhead map token silhouette of Captain Vane the guard captain, dark gothic sumi-e ink stamp, circular border, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 64,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_guildmaster_titus_token",
+          "baseName": "npc_guildmaster_titus_token",
+          "npcId": "guildmaster_titus",
+          "prompt": "Overhead map token silhouette of Titus Ironforge the guildmaster, dark gothic sumi-e ink stamp, circular border, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 64,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_elder_rowan_token",
+          "baseName": "npc_elder_rowan_token",
+          "npcId": "elder_rowan",
+          "prompt": "Overhead map token silhouette of Elder Rowan the village elder, dark gothic sumi-e ink stamp, circular border, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 64,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_blacksmith_krag_token",
+          "baseName": "npc_blacksmith_krag_token",
+          "npcId": "blacksmith_krag",
+          "prompt": "Overhead map token silhouette of Krag the blacksmith, dark gothic sumi-e ink stamp, circular border, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 64,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_innkeeper_mara_token",
+          "baseName": "npc_innkeeper_mara_token",
+          "npcId": "innkeeper_mara",
+          "prompt": "Overhead map token silhouette of Mara the tavernkeeper, dark gothic sumi-e ink stamp, circular border, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 64,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_hunter_bram_token",
+          "baseName": "npc_hunter_bram_token",
+          "npcId": "hunter_bram",
+          "prompt": "Overhead map token silhouette of Bram the forest scout, dark gothic sumi-e ink stamp, circular border, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 64,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_miner_derek_token",
+          "baseName": "npc_miner_derek_token",
+          "npcId": "miner_derek",
+          "prompt": "Overhead map token silhouette of Derek Deepdelve the quarry miner, dark gothic sumi-e ink stamp, circular border, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 64,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_lyra_token",
+          "baseName": "npc_lyra_token",
+          "npcId": "lyra",
+          "prompt": "Overhead map token silhouette of Lyra the apothecary, dark gothic sumi-e ink stamp, circular border, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 64,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "npc_generic_token",
+          "baseName": "npc_generic_token",
+          "npcId": "generic",
+          "prompt": "Generic traveler silhouette overhead map token",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 64,
+              "density": "XHDPI"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category": "COMBAT_PLAYER",
+      "description": "Player combat stance sprites across health states",
+      "entries": [
+        {
+          "id": "combat_player_strike",
+          "baseName": "combat_player_strike",
+          "stance": "strike",
+          "state": "ready",
+          "prompt": "Dark gothic ink wash figure of valiant player adventurer in strike combat stance, dynamic action pose frozen, sumi-e brush strokes, motion blur effect, poised blade, focused center of gravity, medieval fantasy combatant, ink splash energy, monochrome with charcoal edge tint, aggressive posture, weapon raised, isolated figure, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 180,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "combat_player_strike_wounded",
+          "baseName": "combat_player_strike_wounded",
+          "stance": "strike",
+          "state": "wounded",
+          "prompt": "Dark gothic ink wash figure of valiant player adventurer in strike combat stance, dynamic action pose frozen, sumi-e brush strokes, motion blur effect, bloodied armor, dripping crimson wash, ragged breathing, medieval fantasy combatant, ink splash energy, monochrome with crimson edge tint, aggressive posture, weapon raised, isolated figure, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 180,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "combat_player_strike_critical",
+          "baseName": "combat_player_strike_critical",
+          "stance": "strike",
+          "state": "critical",
+          "prompt": "Dark gothic ink wash figure of valiant player adventurer in strike combat stance, dynamic action pose frozen, sumi-e brush strokes, motion blur effect, bloodied armor, dripping crimson wash, ragged breathing, medieval fantasy combatant, ink splash energy, monochrome with crimson edge tint, aggressive posture, weapon raised, isolated figure, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 180,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "combat_player_ward",
+          "baseName": "combat_player_ward",
+          "stance": "ward",
+          "state": "ready",
+          "prompt": "Dark gothic ink wash figure of valiant player adventurer in ward combat stance, dynamic action pose frozen, sumi-e brush strokes, motion blur effect, poised blade, focused center of gravity, medieval fantasy combatant, ink splash energy, monochrome with charcoal edge tint, aggressive posture, weapon raised, isolated figure, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 180,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "combat_player_ward_wounded",
+          "baseName": "combat_player_ward_wounded",
+          "stance": "ward",
+          "state": "wounded",
+          "prompt": "Dark gothic ink wash figure of valiant player adventurer in ward combat stance, dynamic action pose frozen, sumi-e brush strokes, motion blur effect, bloodied armor, dripping crimson wash, ragged breathing, medieval fantasy combatant, ink splash energy, monochrome with crimson edge tint, aggressive posture, weapon raised, isolated figure, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 180,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "combat_player_ward_critical",
+          "baseName": "combat_player_ward_critical",
+          "stance": "ward",
+          "state": "critical",
+          "prompt": "Dark gothic ink wash figure of valiant player adventurer in ward combat stance, dynamic action pose frozen, sumi-e brush strokes, motion blur effect, bloodied armor, dripping crimson wash, ragged breathing, medieval fantasy combatant, ink splash energy, monochrome with crimson edge tint, aggressive posture, weapon raised, isolated figure, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 180,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "combat_player_feint",
+          "baseName": "combat_player_feint",
+          "stance": "feint",
+          "state": "ready",
+          "prompt": "Dark gothic ink wash figure of valiant player adventurer in feint combat stance, dynamic action pose frozen, sumi-e brush strokes, motion blur effect, poised blade, focused center of gravity, medieval fantasy combatant, ink splash energy, monochrome with charcoal edge tint, aggressive posture, weapon raised, isolated figure, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 180,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "combat_player_feint_wounded",
+          "baseName": "combat_player_feint_wounded",
+          "stance": "feint",
+          "state": "wounded",
+          "prompt": "Dark gothic ink wash figure of valiant player adventurer in feint combat stance, dynamic action pose frozen, sumi-e brush strokes, motion blur effect, bloodied armor, dripping crimson wash, ragged breathing, medieval fantasy combatant, ink splash energy, monochrome with crimson edge tint, aggressive posture, weapon raised, isolated figure, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 180,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "combat_player_feint_critical",
+          "baseName": "combat_player_feint_critical",
+          "stance": "feint",
+          "state": "critical",
+          "prompt": "Dark gothic ink wash figure of valiant player adventurer in feint combat stance, dynamic action pose frozen, sumi-e brush strokes, motion blur effect, bloodied armor, dripping crimson wash, ragged breathing, medieval fantasy combatant, ink splash energy, monochrome with crimson edge tint, aggressive posture, weapon raised, isolated figure, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 180,
+              "density": "XHDPI"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category": "COMBAT_OPPONENT",
+      "description": "Enemy archetype combat stances (6 archetypes x 3 stances x 2 health states)",
+      "entries": [
+        {
+          "id": "combat_hollow_knight_strike",
+          "baseName": "combat_hollow_knight_strike",
+          "archetype": "hollow_knight",
+          "stance": "strike",
+          "prompt": "Dark gothic ink wash figure of hollow knight in strike combat stance, dynamic action pose frozen, sumi-e brush strokes, motion blur effect, poised blade, focused center of gravity, medieval fantasy combatant, ink splash energy, monochrome with charcoal edge tint, aggressive posture, weapon raised, isolated figure, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 180,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "combat_hollow_knight_strike_wounded",
+          "baseName": "combat_hollow_knight_strike_wounded",
+          "archetype": "hollow_knight",
+          "stance": "strike",
+          "prompt": "Dark gothic ink wash figure of hollow knight in strike combat stance, dynamic action pose frozen, sumi-e brush strokes, motion blur effect, bloodied armor, dripping crimson wash, ragged breathing, medieval fantasy combatant, ink splash energy, monochrome with crimson edge tint, aggressive posture, weapon raised, isolated figure, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 180,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "combat_hollow_knight_ward",
+          "baseName": "combat_hollow_knight_ward",
+          "archetype": "hollow_knight",
+          "stance": "ward",
+          "prompt": "Dark gothic ink wash figure of hollow knight in ward combat stance, dynamic action pose frozen, sumi-e brush strokes, motion blur effect, poised blade, focused center of gravity, medieval fantasy combatant, ink splash energy, monochrome with charcoal edge tint, aggressive posture, weapon raised, isolated figure, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 180,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "combat_hollow_knight_ward_wounded",
+          "baseName": "combat_hollow_knight_ward_wounded",
+          "archetype": "hollow_knight",
+          "stance": "ward",
+          "prompt": "Dark gothic ink wash figure of hollow knight in ward combat stance, dynamic action pose frozen, sumi-e brush strokes, motion blur effect, bloodied armor, dripping crimson wash, ragged breathing, medieval fantasy combatant, ink splash energy, monochrome with crimson edge tint, aggressive posture, weapon raised, isolated figure, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 180,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "combat_hollow_knight_feint",
+          "baseName": "combat_hollow_knight_feint",
+          "archetype": "hollow_knight",
+          "stance": "feint",
+          "prompt": "Dark gothic ink wash figure of hollow knight in feint combat stance, dynamic action pose frozen, sumi-e brush strokes, motion blur effect, poised blade, focused center of gravity, medieval fantasy combatant, ink splash energy, monochrome with charcoal edge tint, aggressive posture, weapon raised, isolated figure, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 180,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "combat_hollow_knight_feint_wounded",
+          "baseName": "combat_hollow_knight_feint_wounded",
+          "archetype": "hollow_knight",
+          "stance": "feint",
+          "prompt": "Dark gothic ink wash figure of hollow knight in feint combat stance, dynamic action pose frozen, sumi-e brush strokes, motion blur effect, bloodied armor, dripping crimson wash, ragged breathing, medieval fantasy combatant, ink splash energy, monochrome with crimson edge tint, aggressive posture, weapon raised, isolated figure, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 180,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "combat_bandit_raider_strike",
+          "baseName": "combat_bandit_raider_strike",
+          "archetype": "bandit_raider",
+          "stance": "strike",
+          "prompt": "Dark gothic ink wash figure of bandit raider in strike combat stance, dynamic action pose frozen, sumi-e brush strokes, motion blur effect, poised blade, focused center of gravity, medieval fantasy combatant, ink splash energy, monochrome with charcoal edge tint, aggressive posture, weapon raised, isolated figure, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 180,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "combat_bandit_raider_strike_wounded",
+          "baseName": "combat_bandit_raider_strike_wounded",
+          "archetype": "bandit_raider",
+          "stance": "strike",
+          "prompt": "Dark gothic ink wash figure of bandit raider in strike combat stance, dynamic action pose frozen, sumi-e brush strokes, motion blur effect, bloodied armor, dripping crimson wash, ragged breathing, medieval fantasy combatant, ink splash energy, monochrome with crimson edge tint, aggressive posture, weapon raised, isolated figure, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 180,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "combat_bandit_raider_ward",
+          "baseName": "combat_bandit_raider_ward",
+          "archetype": "bandit_raider",
+          "stance": "ward",
+          "prompt": "Dark gothic ink wash figure of bandit raider in ward combat stance, dynamic action pose frozen, sumi-e brush strokes, motion blur effect, poised blade, focused center of gravity, medieval fantasy combatant, ink splash energy, monochrome with charcoal edge tint, aggressive posture, weapon raised, isolated figure, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 180,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "combat_bandit_raider_ward_wounded",
+          "baseName": "combat_bandit_raider_ward_wounded",
+          "archetype": "bandit_raider",
+          "stance": "ward",
+          "prompt": "Dark gothic ink wash figure of bandit raider in ward combat stance, dynamic action pose frozen, sumi-e brush strokes, motion blur effect, bloodied armor, dripping crimson wash, ragged breathing, medieval fantasy combatant, ink splash energy, monochrome with crimson edge tint, aggressive posture, weapon raised, isolated figure, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 180,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "combat_bandit_raider_feint",
+          "baseName": "combat_bandit_raider_feint",
+          "archetype": "bandit_raider",
+          "stance": "feint",
+          "prompt": "Dark gothic ink wash figure of bandit raider in feint combat stance, dynamic action pose frozen, sumi-e brush strokes, motion blur effect, poised blade, focused center of gravity, medieval fantasy combatant, ink splash energy, monochrome with charcoal edge tint, aggressive posture, weapon raised, isolated figure, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 180,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "combat_bandit_raider_feint_wounded",
+          "baseName": "combat_bandit_raider_feint_wounded",
+          "archetype": "bandit_raider",
+          "stance": "feint",
+          "prompt": "Dark gothic ink wash figure of bandit raider in feint combat stance, dynamic action pose frozen, sumi-e brush strokes, motion blur effect, bloodied armor, dripping crimson wash, ragged breathing, medieval fantasy combatant, ink splash energy, monochrome with crimson edge tint, aggressive posture, weapon raised, isolated figure, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 180,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "combat_guild_enforcer_strike",
+          "baseName": "combat_guild_enforcer_strike",
+          "archetype": "guild_enforcer",
+          "stance": "strike",
+          "prompt": "Dark gothic ink wash figure of guild enforcer in strike combat stance, dynamic action pose frozen, sumi-e brush strokes, motion blur effect, poised blade, focused center of gravity, medieval fantasy combatant, ink splash energy, monochrome with charcoal edge tint, aggressive posture, weapon raised, isolated figure, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 180,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "combat_guild_enforcer_strike_wounded",
+          "baseName": "combat_guild_enforcer_strike_wounded",
+          "archetype": "guild_enforcer",
+          "stance": "strike",
+          "prompt": "Dark gothic ink wash figure of guild enforcer in strike combat stance, dynamic action pose frozen, sumi-e brush strokes, motion blur effect, bloodied armor, dripping crimson wash, ragged breathing, medieval fantasy combatant, ink splash energy, monochrome with crimson edge tint, aggressive posture, weapon raised, isolated figure, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 180,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "combat_guild_enforcer_ward",
+          "baseName": "combat_guild_enforcer_ward",
+          "archetype": "guild_enforcer",
+          "stance": "ward",
+          "prompt": "Dark gothic ink wash figure of guild enforcer in ward combat stance, dynamic action pose frozen, sumi-e brush strokes, motion blur effect, poised blade, focused center of gravity, medieval fantasy combatant, ink splash energy, monochrome with charcoal edge tint, aggressive posture, weapon raised, isolated figure, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 180,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "combat_guild_enforcer_ward_wounded",
+          "baseName": "combat_guild_enforcer_ward_wounded",
+          "archetype": "guild_enforcer",
+          "stance": "ward",
+          "prompt": "Dark gothic ink wash figure of guild enforcer in ward combat stance, dynamic action pose frozen, sumi-e brush strokes, motion blur effect, bloodied armor, dripping crimson wash, ragged breathing, medieval fantasy combatant, ink splash energy, monochrome with crimson edge tint, aggressive posture, weapon raised, isolated figure, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 180,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "combat_guild_enforcer_feint",
+          "baseName": "combat_guild_enforcer_feint",
+          "archetype": "guild_enforcer",
+          "stance": "feint",
+          "prompt": "Dark gothic ink wash figure of guild enforcer in feint combat stance, dynamic action pose frozen, sumi-e brush strokes, motion blur effect, poised blade, focused center of gravity, medieval fantasy combatant, ink splash energy, monochrome with charcoal edge tint, aggressive posture, weapon raised, isolated figure, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 180,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "combat_guild_enforcer_feint_wounded",
+          "baseName": "combat_guild_enforcer_feint_wounded",
+          "archetype": "guild_enforcer",
+          "stance": "feint",
+          "prompt": "Dark gothic ink wash figure of guild enforcer in feint combat stance, dynamic action pose frozen, sumi-e brush strokes, motion blur effect, bloodied armor, dripping crimson wash, ragged breathing, medieval fantasy combatant, ink splash energy, monochrome with crimson edge tint, aggressive posture, weapon raised, isolated figure, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 180,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "combat_feral_wolf_strike",
+          "baseName": "combat_feral_wolf_strike",
+          "archetype": "feral_wolf",
+          "stance": "strike",
+          "prompt": "Dark gothic ink wash figure of feral wolf in strike combat stance, dynamic action pose frozen, sumi-e brush strokes, motion blur effect, poised blade, focused center of gravity, medieval fantasy combatant, ink splash energy, monochrome with charcoal edge tint, aggressive posture, weapon raised, isolated figure, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 180,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "combat_feral_wolf_strike_wounded",
+          "baseName": "combat_feral_wolf_strike_wounded",
+          "archetype": "feral_wolf",
+          "stance": "strike",
+          "prompt": "Dark gothic ink wash figure of feral wolf in strike combat stance, dynamic action pose frozen, sumi-e brush strokes, motion blur effect, bloodied armor, dripping crimson wash, ragged breathing, medieval fantasy combatant, ink splash energy, monochrome with crimson edge tint, aggressive posture, weapon raised, isolated figure, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 180,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "combat_feral_wolf_ward",
+          "baseName": "combat_feral_wolf_ward",
+          "archetype": "feral_wolf",
+          "stance": "ward",
+          "prompt": "Dark gothic ink wash figure of feral wolf in ward combat stance, dynamic action pose frozen, sumi-e brush strokes, motion blur effect, poised blade, focused center of gravity, medieval fantasy combatant, ink splash energy, monochrome with charcoal edge tint, aggressive posture, weapon raised, isolated figure, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 180,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "combat_feral_wolf_ward_wounded",
+          "baseName": "combat_feral_wolf_ward_wounded",
+          "archetype": "feral_wolf",
+          "stance": "ward",
+          "prompt": "Dark gothic ink wash figure of feral wolf in ward combat stance, dynamic action pose frozen, sumi-e brush strokes, motion blur effect, bloodied armor, dripping crimson wash, ragged breathing, medieval fantasy combatant, ink splash energy, monochrome with crimson edge tint, aggressive posture, weapon raised, isolated figure, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 180,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "combat_feral_wolf_feint",
+          "baseName": "combat_feral_wolf_feint",
+          "archetype": "feral_wolf",
+          "stance": "feint",
+          "prompt": "Dark gothic ink wash figure of feral wolf in feint combat stance, dynamic action pose frozen, sumi-e brush strokes, motion blur effect, poised blade, focused center of gravity, medieval fantasy combatant, ink splash energy, monochrome with charcoal edge tint, aggressive posture, weapon raised, isolated figure, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 180,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "combat_feral_wolf_feint_wounded",
+          "baseName": "combat_feral_wolf_feint_wounded",
+          "archetype": "feral_wolf",
+          "stance": "feint",
+          "prompt": "Dark gothic ink wash figure of feral wolf in feint combat stance, dynamic action pose frozen, sumi-e brush strokes, motion blur effect, bloodied armor, dripping crimson wash, ragged breathing, medieval fantasy combatant, ink splash energy, monochrome with crimson edge tint, aggressive posture, weapon raised, isolated figure, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 180,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "combat_void_cultist_strike",
+          "baseName": "combat_void_cultist_strike",
+          "archetype": "void_cultist",
+          "stance": "strike",
+          "prompt": "Dark gothic ink wash figure of void cultist in strike combat stance, dynamic action pose frozen, sumi-e brush strokes, motion blur effect, poised blade, focused center of gravity, medieval fantasy combatant, ink splash energy, monochrome with charcoal edge tint, aggressive posture, weapon raised, isolated figure, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 180,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "combat_void_cultist_strike_wounded",
+          "baseName": "combat_void_cultist_strike_wounded",
+          "archetype": "void_cultist",
+          "stance": "strike",
+          "prompt": "Dark gothic ink wash figure of void cultist in strike combat stance, dynamic action pose frozen, sumi-e brush strokes, motion blur effect, bloodied armor, dripping crimson wash, ragged breathing, medieval fantasy combatant, ink splash energy, monochrome with crimson edge tint, aggressive posture, weapon raised, isolated figure, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 180,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "combat_void_cultist_ward",
+          "baseName": "combat_void_cultist_ward",
+          "archetype": "void_cultist",
+          "stance": "ward",
+          "prompt": "Dark gothic ink wash figure of void cultist in ward combat stance, dynamic action pose frozen, sumi-e brush strokes, motion blur effect, poised blade, focused center of gravity, medieval fantasy combatant, ink splash energy, monochrome with charcoal edge tint, aggressive posture, weapon raised, isolated figure, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 180,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "combat_void_cultist_ward_wounded",
+          "baseName": "combat_void_cultist_ward_wounded",
+          "archetype": "void_cultist",
+          "stance": "ward",
+          "prompt": "Dark gothic ink wash figure of void cultist in ward combat stance, dynamic action pose frozen, sumi-e brush strokes, motion blur effect, bloodied armor, dripping crimson wash, ragged breathing, medieval fantasy combatant, ink splash energy, monochrome with crimson edge tint, aggressive posture, weapon raised, isolated figure, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 180,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "combat_void_cultist_feint",
+          "baseName": "combat_void_cultist_feint",
+          "archetype": "void_cultist",
+          "stance": "feint",
+          "prompt": "Dark gothic ink wash figure of void cultist in feint combat stance, dynamic action pose frozen, sumi-e brush strokes, motion blur effect, poised blade, focused center of gravity, medieval fantasy combatant, ink splash energy, monochrome with charcoal edge tint, aggressive posture, weapon raised, isolated figure, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 180,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "combat_void_cultist_feint_wounded",
+          "baseName": "combat_void_cultist_feint_wounded",
+          "archetype": "void_cultist",
+          "stance": "feint",
+          "prompt": "Dark gothic ink wash figure of void cultist in feint combat stance, dynamic action pose frozen, sumi-e brush strokes, motion blur effect, bloodied armor, dripping crimson wash, ragged breathing, medieval fantasy combatant, ink splash energy, monochrome with crimson edge tint, aggressive posture, weapon raised, isolated figure, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 180,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "combat_chimera_aberration_strike",
+          "baseName": "combat_chimera_aberration_strike",
+          "archetype": "chimera_aberration",
+          "stance": "strike",
+          "prompt": "Dark gothic ink wash figure of chimera aberration in strike combat stance, dynamic action pose frozen, sumi-e brush strokes, motion blur effect, poised blade, focused center of gravity, medieval fantasy combatant, ink splash energy, monochrome with charcoal edge tint, aggressive posture, weapon raised, isolated figure, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 180,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "combat_chimera_aberration_strike_wounded",
+          "baseName": "combat_chimera_aberration_strike_wounded",
+          "archetype": "chimera_aberration",
+          "stance": "strike",
+          "prompt": "Dark gothic ink wash figure of chimera aberration in strike combat stance, dynamic action pose frozen, sumi-e brush strokes, motion blur effect, bloodied armor, dripping crimson wash, ragged breathing, medieval fantasy combatant, ink splash energy, monochrome with crimson edge tint, aggressive posture, weapon raised, isolated figure, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 180,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "combat_chimera_aberration_ward",
+          "baseName": "combat_chimera_aberration_ward",
+          "archetype": "chimera_aberration",
+          "stance": "ward",
+          "prompt": "Dark gothic ink wash figure of chimera aberration in ward combat stance, dynamic action pose frozen, sumi-e brush strokes, motion blur effect, poised blade, focused center of gravity, medieval fantasy combatant, ink splash energy, monochrome with charcoal edge tint, aggressive posture, weapon raised, isolated figure, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 180,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "combat_chimera_aberration_ward_wounded",
+          "baseName": "combat_chimera_aberration_ward_wounded",
+          "archetype": "chimera_aberration",
+          "stance": "ward",
+          "prompt": "Dark gothic ink wash figure of chimera aberration in ward combat stance, dynamic action pose frozen, sumi-e brush strokes, motion blur effect, bloodied armor, dripping crimson wash, ragged breathing, medieval fantasy combatant, ink splash energy, monochrome with crimson edge tint, aggressive posture, weapon raised, isolated figure, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 180,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "combat_chimera_aberration_feint",
+          "baseName": "combat_chimera_aberration_feint",
+          "archetype": "chimera_aberration",
+          "stance": "feint",
+          "prompt": "Dark gothic ink wash figure of chimera aberration in feint combat stance, dynamic action pose frozen, sumi-e brush strokes, motion blur effect, poised blade, focused center of gravity, medieval fantasy combatant, ink splash energy, monochrome with charcoal edge tint, aggressive posture, weapon raised, isolated figure, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 180,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "combat_chimera_aberration_feint_wounded",
+          "baseName": "combat_chimera_aberration_feint_wounded",
+          "archetype": "chimera_aberration",
+          "stance": "feint",
+          "prompt": "Dark gothic ink wash figure of chimera aberration in feint combat stance, dynamic action pose frozen, sumi-e brush strokes, motion blur effect, bloodied armor, dripping crimson wash, ragged breathing, medieval fantasy combatant, ink splash energy, monochrome with crimson edge tint, aggressive posture, weapon raised, isolated figure, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 180,
+              "density": "XHDPI"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category": "MAP_NODE",
+      "description": "World map node and connection sprites across quest states",
+      "entries": [
+        {
+          "id": "map_village_square_active",
+          "baseName": "map_village_square_active",
+          "nodeType": "village_square",
+          "state": "active",
+          "prompt": "Dark gothic architectural ink wash, birds-eye view of village square, medieval fantasy map marker, sumi-e on aged parchment, open stone ruins glowing with faint amber torchlight, accessible path, ruins and crumbling stone, visible brush strokes, ink pooling effects, monochrome charcoal with faint amber glow, no clean lines, top-down perspective, game asset, square format, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 96,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "map_village_square_hidden",
+          "baseName": "map_village_square_hidden",
+          "nodeType": "village_square",
+          "state": "hidden",
+          "prompt": "Dark gothic architectural ink wash, birds-eye view of village square, medieval fantasy map marker, sumi-e on aged parchment, overgrown crumbling rubble concealed by brambles and heavy fog, ruins and crumbling stone, visible brush strokes, ink pooling effects, monochrome charcoal with faint amber glow, no clean lines, top-down perspective, game asset, square format, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 96,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "map_village_square_completed",
+          "baseName": "map_village_square_completed",
+          "nodeType": "village_square",
+          "state": "completed",
+          "prompt": "Dark gothic architectural ink wash, birds-eye view of village square, medieval fantasy map marker, sumi-e on aged parchment, cleansed sanctified ruins with glowing gold sigils etched in stone, ruins and crumbling stone, visible brush strokes, ink pooling effects, monochrome charcoal with faint amber glow, no clean lines, top-down perspective, game asset, square format, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 96,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "map_village_square_failed",
+          "baseName": "map_village_square_failed",
+          "nodeType": "village_square",
+          "state": "failed",
+          "prompt": "Dark gothic architectural ink wash, birds-eye view of village square, medieval fantasy map marker, sumi-e on aged parchment, collapsed smoking debris surrounded by charred ash and broken stakes, ruins and crumbling stone, visible brush strokes, ink pooling effects, monochrome charcoal with faint amber glow, no clean lines, top-down perspective, game asset, square format, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 96,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "map_village_square_blocked",
+          "baseName": "map_village_square_blocked",
+          "nodeType": "village_square",
+          "state": "blocked",
+          "prompt": "Dark gothic architectural ink wash, birds-eye view of village square, medieval fantasy map marker, sumi-e on aged parchment, heavily barred portcullis with iron chains and hostile faction banners, ruins and crumbling stone, visible brush strokes, ink pooling effects, monochrome charcoal with faint amber glow, no clean lines, top-down perspective, game asset, square format, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 96,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "map_ruins_active",
+          "baseName": "map_ruins_active",
+          "nodeType": "ruins",
+          "state": "active",
+          "prompt": "Dark gothic architectural ink wash, birds-eye view of ruins, medieval fantasy map marker, sumi-e on aged parchment, open stone ruins glowing with faint amber torchlight, accessible path, ruins and crumbling stone, visible brush strokes, ink pooling effects, monochrome charcoal with faint amber glow, no clean lines, top-down perspective, game asset, square format, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 96,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "map_ruins_hidden",
+          "baseName": "map_ruins_hidden",
+          "nodeType": "ruins",
+          "state": "hidden",
+          "prompt": "Dark gothic architectural ink wash, birds-eye view of ruins, medieval fantasy map marker, sumi-e on aged parchment, overgrown crumbling rubble concealed by brambles and heavy fog, ruins and crumbling stone, visible brush strokes, ink pooling effects, monochrome charcoal with faint amber glow, no clean lines, top-down perspective, game asset, square format, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 96,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "map_ruins_completed",
+          "baseName": "map_ruins_completed",
+          "nodeType": "ruins",
+          "state": "completed",
+          "prompt": "Dark gothic architectural ink wash, birds-eye view of ruins, medieval fantasy map marker, sumi-e on aged parchment, cleansed sanctified ruins with glowing gold sigils etched in stone, ruins and crumbling stone, visible brush strokes, ink pooling effects, monochrome charcoal with faint amber glow, no clean lines, top-down perspective, game asset, square format, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 96,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "map_ruins_failed",
+          "baseName": "map_ruins_failed",
+          "nodeType": "ruins",
+          "state": "failed",
+          "prompt": "Dark gothic architectural ink wash, birds-eye view of ruins, medieval fantasy map marker, sumi-e on aged parchment, collapsed smoking debris surrounded by charred ash and broken stakes, ruins and crumbling stone, visible brush strokes, ink pooling effects, monochrome charcoal with faint amber glow, no clean lines, top-down perspective, game asset, square format, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 96,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "map_ruins_blocked",
+          "baseName": "map_ruins_blocked",
+          "nodeType": "ruins",
+          "state": "blocked",
+          "prompt": "Dark gothic architectural ink wash, birds-eye view of ruins, medieval fantasy map marker, sumi-e on aged parchment, heavily barred portcullis with iron chains and hostile faction banners, ruins and crumbling stone, visible brush strokes, ink pooling effects, monochrome charcoal with faint amber glow, no clean lines, top-down perspective, game asset, square format, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 96,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "map_shrine_active",
+          "baseName": "map_shrine_active",
+          "nodeType": "shrine",
+          "state": "active",
+          "prompt": "Dark gothic architectural ink wash, birds-eye view of shrine, medieval fantasy map marker, sumi-e on aged parchment, open stone ruins glowing with faint amber torchlight, accessible path, ruins and crumbling stone, visible brush strokes, ink pooling effects, monochrome charcoal with faint amber glow, no clean lines, top-down perspective, game asset, square format, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 96,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "map_shrine_hidden",
+          "baseName": "map_shrine_hidden",
+          "nodeType": "shrine",
+          "state": "hidden",
+          "prompt": "Dark gothic architectural ink wash, birds-eye view of shrine, medieval fantasy map marker, sumi-e on aged parchment, overgrown crumbling rubble concealed by brambles and heavy fog, ruins and crumbling stone, visible brush strokes, ink pooling effects, monochrome charcoal with faint amber glow, no clean lines, top-down perspective, game asset, square format, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 96,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "map_shrine_completed",
+          "baseName": "map_shrine_completed",
+          "nodeType": "shrine",
+          "state": "completed",
+          "prompt": "Dark gothic architectural ink wash, birds-eye view of shrine, medieval fantasy map marker, sumi-e on aged parchment, cleansed sanctified ruins with glowing gold sigils etched in stone, ruins and crumbling stone, visible brush strokes, ink pooling effects, monochrome charcoal with faint amber glow, no clean lines, top-down perspective, game asset, square format, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 96,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "map_shrine_failed",
+          "baseName": "map_shrine_failed",
+          "nodeType": "shrine",
+          "state": "failed",
+          "prompt": "Dark gothic architectural ink wash, birds-eye view of shrine, medieval fantasy map marker, sumi-e on aged parchment, collapsed smoking debris surrounded by charred ash and broken stakes, ruins and crumbling stone, visible brush strokes, ink pooling effects, monochrome charcoal with faint amber glow, no clean lines, top-down perspective, game asset, square format, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 96,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "map_shrine_blocked",
+          "baseName": "map_shrine_blocked",
+          "nodeType": "shrine",
+          "state": "blocked",
+          "prompt": "Dark gothic architectural ink wash, birds-eye view of shrine, medieval fantasy map marker, sumi-e on aged parchment, heavily barred portcullis with iron chains and hostile faction banners, ruins and crumbling stone, visible brush strokes, ink pooling effects, monochrome charcoal with faint amber glow, no clean lines, top-down perspective, game asset, square format, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 96,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "map_market_active",
+          "baseName": "map_market_active",
+          "nodeType": "market",
+          "state": "active",
+          "prompt": "Dark gothic architectural ink wash, birds-eye view of market, medieval fantasy map marker, sumi-e on aged parchment, open stone ruins glowing with faint amber torchlight, accessible path, ruins and crumbling stone, visible brush strokes, ink pooling effects, monochrome charcoal with faint amber glow, no clean lines, top-down perspective, game asset, square format, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 96,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "map_market_hidden",
+          "baseName": "map_market_hidden",
+          "nodeType": "market",
+          "state": "hidden",
+          "prompt": "Dark gothic architectural ink wash, birds-eye view of market, medieval fantasy map marker, sumi-e on aged parchment, overgrown crumbling rubble concealed by brambles and heavy fog, ruins and crumbling stone, visible brush strokes, ink pooling effects, monochrome charcoal with faint amber glow, no clean lines, top-down perspective, game asset, square format, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 96,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "map_market_completed",
+          "baseName": "map_market_completed",
+          "nodeType": "market",
+          "state": "completed",
+          "prompt": "Dark gothic architectural ink wash, birds-eye view of market, medieval fantasy map marker, sumi-e on aged parchment, cleansed sanctified ruins with glowing gold sigils etched in stone, ruins and crumbling stone, visible brush strokes, ink pooling effects, monochrome charcoal with faint amber glow, no clean lines, top-down perspective, game asset, square format, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 96,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "map_market_failed",
+          "baseName": "map_market_failed",
+          "nodeType": "market",
+          "state": "failed",
+          "prompt": "Dark gothic architectural ink wash, birds-eye view of market, medieval fantasy map marker, sumi-e on aged parchment, collapsed smoking debris surrounded by charred ash and broken stakes, ruins and crumbling stone, visible brush strokes, ink pooling effects, monochrome charcoal with faint amber glow, no clean lines, top-down perspective, game asset, square format, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 96,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "map_market_blocked",
+          "baseName": "map_market_blocked",
+          "nodeType": "market",
+          "state": "blocked",
+          "prompt": "Dark gothic architectural ink wash, birds-eye view of market, medieval fantasy map marker, sumi-e on aged parchment, heavily barred portcullis with iron chains and hostile faction banners, ruins and crumbling stone, visible brush strokes, ink pooling effects, monochrome charcoal with faint amber glow, no clean lines, top-down perspective, game asset, square format, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 96,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "map_mine_active",
+          "baseName": "map_mine_active",
+          "nodeType": "mine",
+          "state": "active",
+          "prompt": "Dark gothic architectural ink wash, birds-eye view of mine, medieval fantasy map marker, sumi-e on aged parchment, open stone ruins glowing with faint amber torchlight, accessible path, ruins and crumbling stone, visible brush strokes, ink pooling effects, monochrome charcoal with faint amber glow, no clean lines, top-down perspective, game asset, square format, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 96,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "map_mine_hidden",
+          "baseName": "map_mine_hidden",
+          "nodeType": "mine",
+          "state": "hidden",
+          "prompt": "Dark gothic architectural ink wash, birds-eye view of mine, medieval fantasy map marker, sumi-e on aged parchment, overgrown crumbling rubble concealed by brambles and heavy fog, ruins and crumbling stone, visible brush strokes, ink pooling effects, monochrome charcoal with faint amber glow, no clean lines, top-down perspective, game asset, square format, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 96,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "map_mine_completed",
+          "baseName": "map_mine_completed",
+          "nodeType": "mine",
+          "state": "completed",
+          "prompt": "Dark gothic architectural ink wash, birds-eye view of mine, medieval fantasy map marker, sumi-e on aged parchment, cleansed sanctified ruins with glowing gold sigils etched in stone, ruins and crumbling stone, visible brush strokes, ink pooling effects, monochrome charcoal with faint amber glow, no clean lines, top-down perspective, game asset, square format, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 96,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "map_mine_failed",
+          "baseName": "map_mine_failed",
+          "nodeType": "mine",
+          "state": "failed",
+          "prompt": "Dark gothic architectural ink wash, birds-eye view of mine, medieval fantasy map marker, sumi-e on aged parchment, collapsed smoking debris surrounded by charred ash and broken stakes, ruins and crumbling stone, visible brush strokes, ink pooling effects, monochrome charcoal with faint amber glow, no clean lines, top-down perspective, game asset, square format, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 96,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "map_mine_blocked",
+          "baseName": "map_mine_blocked",
+          "nodeType": "mine",
+          "state": "blocked",
+          "prompt": "Dark gothic architectural ink wash, birds-eye view of mine, medieval fantasy map marker, sumi-e on aged parchment, heavily barred portcullis with iron chains and hostile faction banners, ruins and crumbling stone, visible brush strokes, ink pooling effects, monochrome charcoal with faint amber glow, no clean lines, top-down perspective, game asset, square format, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 96,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "map_path_active",
+          "baseName": "map_path_active",
+          "prompt": "Gothic cobblestone pathway segment, sumi-e ink wash, transparent background",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 64,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "map_path_blocked",
+          "baseName": "map_path_blocked",
+          "prompt": "Blocked pathway segment with barricade and thorn briars, ink wash, transparent background",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 64,
+              "density": "XHDPI"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category": "CAMP_ITEM",
+      "description": "Crafting recipe ingredients, trade commodities, and camp ambient elements",
+      "entries": [
+        {
+          "id": "camp_item_herb_bundle",
+          "baseName": "camp_item_herb_bundle",
+          "itemId": "herb_bundle",
+          "prompt": "Dark gothic botanical/craft illustration of herb bundle, medieval still life on aged parchment, wild curative herbs and dried roots bound in hemp twine, sumi-e ink with restrained gold wash, detailed crosshatching, specimen drawing style, ink bleed edges, scientific labeling aesthetic, square format, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "camp_item_iron_ingot",
+          "baseName": "camp_item_iron_ingot",
+          "itemId": "iron_ingot",
+          "prompt": "Dark gothic botanical/craft illustration of iron ingot, medieval still life on aged parchment, smelted bog iron bar with guild stamp impression, sumi-e ink with restrained gold wash, detailed crosshatching, specimen drawing style, ink bleed edges, scientific labeling aesthetic, square format, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "camp_item_parchment",
+          "baseName": "camp_item_parchment",
+          "itemId": "parchment",
+          "prompt": "Dark gothic botanical/craft illustration of parchment, medieval still life on aged parchment, vellum scroll sheet with faded runic marginalia, sumi-e ink with restrained gold wash, detailed crosshatching, specimen drawing style, ink bleed edges, scientific labeling aesthetic, square format, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "camp_item_omen_stone",
+          "baseName": "camp_item_omen_stone",
+          "itemId": "omen_stone",
+          "prompt": "Dark gothic botanical/craft illustration of omen stone, medieval still life on aged parchment, black meteorite shard pulsing with cold violet glow, sumi-e ink with restrained gold wash, detailed crosshatching, specimen drawing style, ink bleed edges, scientific labeling aesthetic, square format, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "camp_item_void_ash",
+          "baseName": "camp_item_void_ash",
+          "itemId": "void_ash",
+          "prompt": "Dark gothic botanical/craft illustration of void ash, medieval still life on aged parchment, luminescent ash residue stored in a stoppered glass vial, sumi-e ink with restrained gold wash, detailed crosshatching, specimen drawing style, ink bleed edges, scientific labeling aesthetic, square format, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "camp_item_bread",
+          "baseName": "camp_item_bread",
+          "itemId": "bread",
+          "prompt": "Dark gothic botanical/craft illustration of bread, medieval still life on aged parchment, crusty hearty rye loaf scored with cross patterns, sumi-e ink with restrained gold wash, detailed crosshatching, specimen drawing style, ink bleed edges, scientific labeling aesthetic, square format, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "camp_item_iron_sword",
+          "baseName": "camp_item_iron_sword",
+          "itemId": "iron_sword",
+          "prompt": "Dark gothic botanical/craft illustration of iron sword, medieval still life on aged parchment, straight-bladed iron arming sword with leather hilt wrap, sumi-e ink with restrained gold wash, detailed crosshatching, specimen drawing style, ink bleed edges, scientific labeling aesthetic, square format, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "camp_item_healing_salve",
+          "baseName": "camp_item_healing_salve",
+          "itemId": "healing_salve",
+          "prompt": "Dark gothic botanical/craft illustration of healing salve, medieval still life on aged parchment, ceramic jar of pungent green herb wax, sumi-e ink with restrained gold wash, detailed crosshatching, specimen drawing style, ink bleed edges, scientific labeling aesthetic, square format, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "camp_item_silver_coin",
+          "baseName": "camp_item_silver_coin",
+          "itemId": "silver_coin",
+          "prompt": "Dark gothic botanical/craft illustration of silver coin, medieval still life on aged parchment, hand-struck silver shilling with crowned owl sigil, sumi-e ink with restrained gold wash, detailed crosshatching, specimen drawing style, ink bleed edges, scientific labeling aesthetic, square format, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "camp_item_leather_hide",
+          "baseName": "camp_item_leather_hide",
+          "itemId": "leather_hide",
+          "prompt": "Dark gothic botanical/craft illustration of leather hide, medieval still life on aged parchment, tanned cured pelt rolled and buckled with brass strap, sumi-e ink with restrained gold wash, detailed crosshatching, specimen drawing style, ink bleed edges, scientific labeling aesthetic, square format, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "camp_ambient_campfire_lit",
+          "baseName": "camp_ambient_campfire_lit",
+          "prompt": "Dark gothic camp object: roaring campfire with glowing sumi embers on stone hearth, sumi-e ink wash on aged parchment, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "camp_ambient_campfire_dim",
+          "baseName": "camp_ambient_campfire_dim",
+          "prompt": "Dark gothic camp object: dying campfire with smoldering grey charcoal and faint embers, sumi-e ink wash on aged parchment, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "camp_ambient_tent_shelter",
+          "baseName": "camp_ambient_tent_shelter",
+          "prompt": "Dark gothic camp object: weathered leather traveler tent pitched with guy lines, sumi-e ink wash on aged parchment, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "camp_ambient_tent_ragged",
+          "baseName": "camp_ambient_tent_ragged",
+          "prompt": "Dark gothic camp object: torn linen tent battered by wind and rain, sumi-e ink wash on aged parchment, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "camp_ambient_bedroll_open",
+          "baseName": "camp_ambient_bedroll_open",
+          "prompt": "Dark gothic camp object: unrolled wool bedroll laid over dry pine needles, sumi-e ink wash on aged parchment, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "camp_ambient_bedroll_packed",
+          "baseName": "camp_ambient_bedroll_packed",
+          "prompt": "Dark gothic camp object: tightly lashed canvas bedroll strapped with leather belts, sumi-e ink wash on aged parchment, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "camp_ambient_supply_crate",
+          "baseName": "camp_ambient_supply_crate",
+          "prompt": "Dark gothic camp object: iron-banded wooden provisions crate with guild mark, sumi-e ink wash on aged parchment, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "camp_ambient_cooking_pot",
+          "baseName": "camp_ambient_cooking_pot",
+          "prompt": "Dark gothic camp object: cast iron cauldron hanging from tripod over embers, sumi-e ink wash on aged parchment, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "camp_item_generic",
+          "baseName": "camp_item_generic",
+          "itemId": "generic",
+          "prompt": "Unidentified wrapped commodity bundle on aged parchment",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category": "CHARACTER_CREATION",
+      "description": "Character creation UI and parchment background chrome",
+      "entries": [
+        {
+          "id": "char_creation_bg_parchment",
+          "baseName": "char_creation_bg_parchment",
+          "prompt": "Full aged gothic parchment texture with burned edges and ink wash vignette",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 256,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "char_creation_ink_splatter_1",
+          "baseName": "char_creation_ink_splatter_1",
+          "prompt": "Sumi-e ink splatter spray on parchment, organic droplets, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 256,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "char_creation_ink_splatter_2",
+          "baseName": "char_creation_ink_splatter_2",
+          "prompt": "Dense ink pooling blot with bleeding feathered edges, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 256,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "char_creation_quill_cursor",
+          "baseName": "char_creation_quill_cursor",
+          "prompt": "Ornate raven feather quill pen with gold nib and wet black ink tip",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 256,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "char_creation_wax_seal_stamp",
+          "baseName": "char_creation_wax_seal_stamp",
+          "prompt": "Heavy brass signet stamp with engraved chimera beast crest",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 256,
+              "density": "XHDPI"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category": "PLAYER_CARD",
+      "description": "Player status and chapter card decorative elements",
+      "entries": [
+        {
+          "id": "player_card_card_frame",
+          "baseName": "player_card_card_frame",
+          "prompt": "Illuminated gothic manuscript miniature portrait frame with gold filigree",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "player_card_resolve_heart",
+          "baseName": "player_card_resolve_heart",
+          "prompt": "Anatomical ink wash heart encircled with iron thorns, glowing faint crimson",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "player_card_omen_orb",
+          "baseName": "player_card_omen_orb",
+          "prompt": "Deep obsidian scrying orb with swirling violet mist core",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "player_card_crest_backer",
+          "baseName": "player_card_crest_backer",
+          "prompt": "Shield heraldry backer with parchment texture and crosshatch shading",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "player_card_ribbon_banner",
+          "baseName": "player_card_ribbon_banner",
+          "prompt": "Parchment scroll banner ribbon for player title, split fork ends",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "category": "SHARED_UI",
+      "description": "Shared UI frames, seals, and particle textures",
+      "entries": [
+        {
+          "id": "ui_frame_gold",
+          "baseName": "ui_frame_gold",
+          "category": "SHARED_UI",
+          "prompt": "Medieval illuminated manuscript border fragment, gold leaf accent, gothic filigree",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "ui_seal_common",
+          "baseName": "ui_seal_common",
+          "category": "SHARED_UI",
+          "prompt": "Lead wax seal impression, circular, rustic cross mark, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "ui_seal_rare",
+          "baseName": "ui_seal_rare",
+          "category": "SHARED_UI",
+          "prompt": "Crimson wax seal impression, ornate chimera crest, gold leaf rim, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "ui_seal_legendary",
+          "baseName": "ui_seal_legendary",
+          "category": "SHARED_UI",
+          "prompt": "Violet and gold royal seal impression with twin dragons, transparent background",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "ui_divider_ornate",
+          "baseName": "ui_divider_ornate",
+          "category": "SHARED_UI",
+          "prompt": "Horizontal gothic filigree divider bar with central diamond knop",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "ui_scroll_handle",
+          "baseName": "ui_scroll_handle",
+          "category": "SHARED_UI",
+          "prompt": "Turned wooden dowel handle for scroll document with brass finials",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "effect_ember_1",
+          "baseName": "effect_ember_1",
+          "category": "SHARED_EFFECT",
+          "prompt": "Single burning gold/crimson ember flake with faint smoke trail",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "effect_smoke_puff",
+          "baseName": "effect_smoke_puff",
+          "category": "SHARED_EFFECT",
+          "prompt": "Sumi-e ink wash billowing smoke puff cloud, soft edges",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "effect_blood_drop",
+          "baseName": "effect_blood_drop",
+          "category": "SHARED_EFFECT",
+          "prompt": "Dark crimson seal wax droplet with specular highlight",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        },
+        {
+          "id": "effect_ink_bleed",
+          "baseName": "effect_ink_bleed",
+          "category": "SHARED_EFFECT",
+          "prompt": "Organic ink bleeding into wet paper fibers, branched dendritic edges",
+          "negativePrompt": "bright colors, cartoon, anime, 3D render, photorealistic,\nclean lines, vector art, flat design, neon, vibrant, modern UI, glossy,\ngradient backgrounds, text, watermark",
+          "transparent": true,
+          "variants": [
+            {
+              "suffix": "",
+              "resolution": 128,
+              "density": "XHDPI"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

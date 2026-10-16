@@ -1,0 +1,31 @@
+# Large / local model binaries (header-only stubs stay tracked)
+/*.gguf
+assets/models/*.gguf
+!assets/models/smollm2-135m-q4_k_m.gguf
+!assets/models/smollm2-135m-stub.gguf
+
+# Archived PDF printouts of an old dump (not source)
+_archive/
+
+# Gradle / Kotlin / Android build output
+build/
+.gradle/
+.kotlin/
+local.properties
+captures/
+*.apk
+*.aab
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Logs / local Claude settings
+*.log
+.claude/settings.local.json

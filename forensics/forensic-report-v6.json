@@ -1,0 +1,294 @@
+{
+  "project": "living-world-v6",
+  "file_count": 20,
+  "total_loc": 2981,
+  "hotspots": [
+    {
+      "path": "./simulate_village.py",
+      "loc": 659,
+      "nesting": 1,
+      "mccabe_approx": 60,
+      "cognitive_approx": 61,
+      "hotspot": 4019.9
+    },
+    {
+      "path": "./game-core/src/commonMain/kotlin/org/livingworld/core/world/WorldReducer.kt",
+      "loc": 283,
+      "nesting": 7,
+      "mccabe_approx": 40,
+      "cognitive_approx": 47,
+      "hotspot": 1330.1
+    },
+    {
+      "path": "./game-core/src/commonMain/kotlin/org/livingworld/core/simulation/SimulationEngine.kt",
+      "loc": 218,
+      "nesting": 6,
+      "mccabe_approx": 24,
+      "cognitive_approx": 30,
+      "hotspot": 654.0
+    },
+    {
+      "path": "./game-core/src/commonMain/kotlin/org/livingworld/core/events/GameEvent.kt",
+      "loc": 171,
+      "nesting": 2,
+      "mccabe_approx": 31,
+      "cognitive_approx": 33,
+      "hotspot": 564.3
+    },
+    {
+      "path": "./game-core/src/commonTest/kotlin/org/livingworld/core/TestWorld.kt",
+      "loc": 243,
+      "nesting": 7,
+      "mccabe_approx": 12,
+      "cognitive_approx": 19,
+      "hotspot": 461.7
+    },
+    {
+      "path": "./game-core/src/commonMain/kotlin/org/livingworld/core/simulation/NpcDecisionEngine.kt",
+      "loc": 128,
+      "nesting": 6,
+      "mccabe_approx": 29,
+      "cognitive_approx": 35,
+      "hotspot": 448.0
+    },
+    {
+      "path": "./game-core/src/commonMain/kotlin/org/livingworld/core/simulation/ActionValidator.kt",
+      "loc": 133,
+      "nesting": 5,
+      "mccabe_approx": 17,
+      "cognitive_approx": 22,
+      "hotspot": 292.6
+    },
+    {
+      "path": "./desktopApp/src/jvmMain/kotlin/com/livingworld/game/desktop/InspectorMain.kt",
+      "loc": 86,
+      "nesting": 2,
+      "mccabe_approx": 28,
+      "cognitive_approx": 30,
+      "hotspot": 258.0
+    },
+    {
+      "path": "./game-core/src/commonMain/kotlin/org/livingworld/core/world/WorldState.kt",
+      "loc": 112,
+      "nesting": 3,
+      "mccabe_approx": 10,
+      "cognitive_approx": 13,
+      "hotspot": 145.6
+    },
+    {
+      "path": "./game-core/src/commonMain/kotlin/org/livingworld/core/inspector/SimulationInspector.kt",
+      "loc": 89,
+      "nesting": 4,
+      "mccabe_approx": 11,
+      "cognitive_approx": 15,
+      "hotspot": 133.5
+    },
+    {
+      "path": "./game-core/src/commonTest/kotlin/org/livingworld/core/SimulationKernelTest.kt",
+      "loc": 211,
+      "nesting": 4,
+      "mccabe_approx": 2,
+      "cognitive_approx": 6,
+      "hotspot": 126.6
+    },
+    {
+      "path": "./game-core/src/commonMain/kotlin/org/livingworld/core/memory/Memory.kt",
+      "loc": 100,
+      "nesting": 6,
+      "mccabe_approx": 6,
+      "cognitive_approx": 12,
+      "hotspot": 120.0
+    },
+    {
+      "path": "./game-core/src/commonMain/kotlin/org/livingworld/core/npc/Npc.kt",
+      "loc": 117,
+      "nesting": 3,
+      "mccabe_approx": 4,
+      "cognitive_approx": 7,
+      "hotspot": 81.9
+    },
+    {
+      "path": "./game-core/src/commonMain/kotlin/org/livingworld/core/relationships/Relationship.kt",
+      "loc": 85,
+      "nesting": 3,
+      "mccabe_approx": 6,
+      "cognitive_approx": 9,
+      "hotspot": 76.5
+    },
+    {
+      "path": "./game-core/src/commonMain/kotlin/org/livingworld/core/beliefs/Belief.kt",
+      "loc": 82,
+      "nesting": 4,
+      "mccabe_approx": 4,
+      "cognitive_approx": 8,
+      "hotspot": 65.6
+    }
+  ],
+  "all_files": [
+    {
+      "path": "./simulate_village.py",
+      "loc": 659,
+      "nesting": 1,
+      "mccabe_approx": 60,
+      "cognitive_approx": 61,
+      "hotspot": 4019.9
+    },
+    {
+      "path": "./game-core/src/commonMain/kotlin/org/livingworld/core/world/WorldReducer.kt",
+      "loc": 283,
+      "nesting": 7,
+      "mccabe_approx": 40,
+      "cognitive_approx": 47,
+      "hotspot": 1330.1
+    },
+    {
+      "path": "./game-core/src/commonMain/kotlin/org/livingworld/core/simulation/SimulationEngine.kt",
+      "loc": 218,
+      "nesting": 6,
+      "mccabe_approx": 24,
+      "cognitive_approx": 30,
+      "hotspot": 654.0
+    },
+    {
+      "path": "./game-core/src/commonMain/kotlin/org/livingworld/core/events/GameEvent.kt",
+      "loc": 171,
+      "nesting": 2,
+      "mccabe_approx": 31,
+      "cognitive_approx": 33,
+      "hotspot": 564.3
+    },
+    {
+      "path": "./game-core/src/commonTest/kotlin/org/livingworld/core/TestWorld.kt",
+      "loc": 243,
+      "nesting": 7,
+      "mccabe_approx": 12,
+      "cognitive_approx": 19,
+      "hotspot": 461.7
+    },
+    {
+      "path": "./game-core/src/commonMain/kotlin/org/livingworld/core/simulation/NpcDecisionEngine.kt",
+      "loc": 128,
+      "nesting": 6,
+      "mccabe_approx": 29,
+      "cognitive_approx": 35,
+      "hotspot": 448.0
+    },
+    {
+      "path": "./game-core/src/commonMain/kotlin/org/livingworld/core/simulation/ActionValidator.kt",
+      "loc": 133,
+      "nesting": 5,
+      "mccabe_approx": 17,
+      "cognitive_approx": 22,
+      "hotspot": 292.6
+    },
+    {
+      "path": "./desktopApp/src/jvmMain/kotlin/com/livingworld/game/desktop/InspectorMain.kt",
+      "loc": 86,
+      "nesting": 2,
+      "mccabe_approx": 28,
+      "cognitive_approx": 30,
+      "hotspot": 258.0
+    },
+    {
+      "path": "./game-core/src/commonMain/kotlin/org/livingworld/core/world/WorldState.kt",
+      "loc": 112,
+      "nesting": 3,
+      "mccabe_approx": 10,
+      "cognitive_approx": 13,
+      "hotspot": 145.6
+    },
+    {
+      "path": "./game-core/src/commonMain/kotlin/org/livingworld/core/inspector/SimulationInspector.kt",
+      "loc": 89,
+      "nesting": 4,
+      "mccabe_approx": 11,
+      "cognitive_approx": 15,
+      "hotspot": 133.5
+    },
+    {
+      "path": "./game-core/src/commonTest/kotlin/org/livingworld/core/SimulationKernelTest.kt",
+      "loc": 211,
+      "nesting": 4,
+      "mccabe_approx": 2,
+      "cognitive_approx": 6,
+      "hotspot": 126.6
+    },
+    {
+      "path": "./game-core/src/commonMain/kotlin/org/livingworld/core/memory/Memory.kt",
+      "loc": 100,
+      "nesting": 6,
+      "mccabe_approx": 6,
+      "cognitive_approx": 12,
+      "hotspot": 120.0
+    },
+    {
+      "path": "./game-core/src/commonMain/kotlin/org/livingworld/core/npc/Npc.kt",
+      "loc": 117,
+      "nesting": 3,
+      "mccabe_approx": 4,
+      "cognitive_approx": 7,
+      "hotspot": 81.9
+    },
+    {
+      "path": "./game-core/src/commonMain/kotlin/org/livingworld/core/relationships/Relationship.kt",
+      "loc": 85,
+      "nesting": 3,
+      "mccabe_approx": 6,
+      "cognitive_approx": 9,
+      "hotspot": 76.5
+    },
+    {
+      "path": "./game-core/src/commonMain/kotlin/org/livingworld/core/beliefs/Belief.kt",
+      "loc": 82,
+      "nesting": 4,
+      "mccabe_approx": 4,
+      "cognitive_approx": 8,
+      "hotspot": 65.6
+    },
+    {
+      "path": "./game-core/src/commonMain/kotlin/org/livingworld/core/events/EventLedger.kt",
+      "loc": 47,
+      "nesting": 3,
+      "mccabe_approx": 7,
+      "cognitive_approx": 10,
+      "hotspot": 47.0
+    },
+    {
+      "path": "./game-core/src/commonMain/kotlin/org/livingworld/core/factions/Faction.kt",
+      "loc": 63,
+      "nesting": 4,
+      "mccabe_approx": 3,
+      "cognitive_approx": 7,
+      "hotspot": 44.1
+    },
+    {
+      "path": "./game-core/src/commonMain/kotlin/org/livingworld/core/time/WorldTime.kt",
+      "loc": 65,
+      "nesting": 2,
+      "mccabe_approx": 2,
+      "cognitive_approx": 4,
+      "hotspot": 26.0
+    },
+    {
+      "path": "./game-persistence/src/commonMain/kotlin/org/livingworld/persistence/SaveManager.kt",
+      "loc": 35,
+      "nesting": 3,
+      "mccabe_approx": 2,
+      "cognitive_approx": 5,
+      "hotspot": 17.5
+    },
+    {
+      "path": "./game-core/src/commonMain/kotlin/org/livingworld/core/npc/Goal.kt",
+      "loc": 54,
+      "nesting": 2,
+      "mccabe_approx": 1,
+      "cognitive_approx": 3,
+      "hotspot": 16.2
+    }
+  ],
+  "notes": [
+    "Approximate metrics (Kotlin/Python heuristic). For production use TypeScript compiler API or cccc-core / tree-sitter.",
+    "Highest hotspot scores should be prioritized for review / micro-refactor under RefactoringMirror rules.",
+    "Invariants G1-G10 from open-questions.md remain mandatory."
+  ]
+}

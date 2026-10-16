@@ -1,0 +1,134 @@
+[
+  {
+    "id": "npc_herbalist_lyra_neutral",
+    "filename": "npc_herbalist_lyra_neutral.png",
+    "category": "NPC_PORTRAIT",
+    "prompt": "Dark gothic manuscript illustration, sumi-e ink wash on aged parchment, visible brush strokes, expressive brushwork, ink bleed edges, monochrome charcoal with restrained accent color, parchment grain texture, no clean lines, no text, no watermark, game asset sprite, isolated portrait, centered upper body, medieval fantasy Herbalist, Lyra Greenleaf, gentle compassionate expression, single candlelight from upper left, deep shadows, asymmetric composition, negative space dominant, monochrome charcoal with muted jade accent, transparent background"
+  },
+  {
+    "id": "npc_herbalist_lyra_token",
+    "filename": "npc_herbalist_lyra_token.png",
+    "category": "NPC_TOKEN",
+    "prompt": "Dark gothic manuscript illustration, sumi-e ink wash on aged parchment, visible brush strokes, expressive brushwork, ink bleed edges, monochrome charcoal with restrained accent color, parchment grain texture, no clean lines, no text, no watermark, game asset sprite, small overhead token, birds-eye view silhouette, Herbalist figure marker, even overhead lighting, centered, compact, monochrome charcoal with faint muted jade accent, transparent background"
+  },
+  {
+    "id": "npc_farmer_giles_neutral",
+    "filename": "npc_farmer_giles_neutral.png",
+    "category": "NPC_PORTRAIT",
+    "prompt": "Dark gothic manuscript illustration, sumi-e ink wash on aged parchment, visible brush strokes, expressive brushwork, ink bleed edges, monochrome charcoal with restrained accent color, parchment grain texture, no clean lines, no text, no watermark, game asset sprite, isolated portrait, centered upper body, medieval fantasy Farmer, Giles Oatfield, weathered weary expression, single candlelight from upper left, deep shadows, asymmetric composition, negative space dominant, monochrome charcoal with faded ochre accent, transparent background"
+  },
+  {
+    "id": "npc_farmer_giles_token",
+    "filename": "npc_farmer_giles_token.png",
+    "category": "NPC_TOKEN",
+    "prompt": "Dark gothic manuscript illustration, sumi-e ink wash on aged parchment, visible brush strokes, expressive brushwork, ink bleed edges, monochrome charcoal with restrained accent color, parchment grain texture, no clean lines, no text, no watermark, game asset sprite, small overhead token, birds-eye view silhouette, Farmer figure marker, even overhead lighting, centered, compact, monochrome charcoal with faint faded ochre accent, transparent background"
+  },
+  {
+    "id": "npc_farmer_elena_neutral",
+    "filename": "npc_farmer_elena_neutral.png",
+    "category": "NPC_PORTRAIT",
+    "prompt": "Dark gothic manuscript illustration, sumi-e ink wash on aged parchment, visible brush strokes, expressive brushwork, ink bleed edges, monochrome charcoal with restrained accent color, parchment grain texture, no clean lines, no text, no watermark, game asset sprite, isolated portrait, centered upper body, medieval fantasy Farmer, Elena Oatfield, resilient steady expression, single candlelight from upper left, deep shadows, asymmetric composition, negative space dominant, monochrome charcoal with earth brown accent, transparent background"
+  },
+  {
+    "id": "npc_farmer_elena_token",
+    "filename": "npc_farmer_elena_token.png",
+    "category": "NPC_TOKEN",
+    "prompt": "Dark gothic manuscript illustration, sumi-e ink wash on aged parchment, visible brush strokes, expressive brushwork, ink bleed edges, monochrome charcoal with restrained accent color, parchment grain texture, no clean lines, no text, no watermark, game asset sprite, small overhead token, birds-eye view silhouette, Farmer figure marker, even overhead lighting, centered, compact, monochrome charcoal with faint earth brown accent, transparent background"
+  },
+  {
+    "id": "npc_carpenter_jorin_neutral",
+    "filename": "npc_carpenter_jorin_neutral.png",
+    "category": "NPC_PORTRAIT",
+    "prompt": "Dark gothic manuscript illustration, sumi-e ink wash on aged parchment, visible brush strokes, expressive brushwork, ink bleed edges, monochrome charcoal with restrained accent color, parchment grain texture, no clean lines, no text, no watermark, game asset sprite, isolated portrait, centered upper body, medieval fantasy Carpenter, Jorin Woodshaper, thoughtful practical expression, single candlelight from upper left, deep shadows, asymmetric composition, negative space dominant, monochrome charcoal with timber umber accent, transparent background"
+  },
+  {
+    "id": "npc_carpenter_jorin_token",
+    "filename": "npc_carpenter_jorin_token.png",
+    "category": "NPC_TOKEN",
+    "prompt": "Dark gothic manuscript illustration, sumi-e ink wash on aged parchment, visible brush strokes, expressive brushwork, ink bleed edges, monochrome charcoal with restrained accent color, parchment grain texture, no clean lines, no text, no watermark, game asset sprite, small overhead token, birds-eye view silhouette, Carpenter figure marker, even overhead lighting, centered, compact, monochrome charcoal with faint timber umber accent, transparent background"
+  },
+  {
+    "id": "npc_weaver_sela_neutral",
+    "filename": "npc_weaver_sela_neutral.png",
+    "category": "NPC_PORTRAIT",
+    "prompt": "Dark gothic manuscript illustration, sumi-e ink wash on aged parchment, visible brush strokes, expressive brushwork, ink bleed edges, monochrome charcoal with restrained accent color, parchment grain texture, no clean lines, no text, no watermark, game asset sprite, isolated portrait, centered upper body, medieval fantasy Weaver, Sela Threadspinner, quiet meticulous expression, single candlelight from upper left, deep shadows, asymmetric composition, negative space dominant, monochrome charcoal with faded indigo accent, transparent background"
+  },
+  {
+    "id": "npc_weaver_sela_token",
+    "filename": "npc_weaver_sela_token.png",
+    "category": "NPC_TOKEN",
+    "prompt": "Dark gothic manuscript illustration, sumi-e ink wash on aged parchment, visible brush strokes, expressive brushwork, ink bleed edges, monochrome charcoal with restrained accent color, parchment grain texture, no clean lines, no text, no watermark, game asset sprite, small overhead token, birds-eye view silhouette, Weaver figure marker, even overhead lighting, centered, compact, monochrome charcoal with faint faded indigo accent, transparent background"
+  },
+  {
+    "id": "npc_priest_orion_neutral",
+    "filename": "npc_priest_orion_neutral.png",
+    "category": "NPC_PORTRAIT",
+    "prompt": "Dark gothic manuscript illustration, sumi-e ink wash on aged parchment, visible brush strokes, expressive brushwork, ink bleed edges, monochrome charcoal with restrained accent color, parchment grain texture, no clean lines, no text, no watermark, game asset sprite, isolated portrait, centered upper body, medieval fantasy Priest, Father Orion, pious solemn expression, single candlelight from upper left, deep shadows, asymmetric composition, negative space dominant, monochrome charcoal with pale silver accent, transparent background"
+  },
+  {
+    "id": "npc_priest_orion_token",
+    "filename": "npc_priest_orion_token.png",
+    "category": "NPC_TOKEN",
+    "prompt": "Dark gothic manuscript illustration, sumi-e ink wash on aged parchment, visible brush strokes, expressive brushwork, ink bleed edges, monochrome charcoal with restrained accent color, parchment grain texture, no clean lines, no text, no watermark, game asset sprite, small overhead token, birds-eye view silhouette, Priest figure marker, even overhead lighting, centered, compact, monochrome charcoal with faint pale silver accent, transparent background"
+  },
+  {
+    "id": "npc_watchman_cole_neutral",
+    "filename": "npc_watchman_cole_neutral.png",
+    "category": "NPC_PORTRAIT",
+    "prompt": "Dark gothic manuscript illustration, sumi-e ink wash on aged parchment, visible brush strokes, expressive brushwork, ink bleed edges, monochrome charcoal with restrained accent color, parchment grain texture, no clean lines, no text, no watermark, game asset sprite, isolated portrait, centered upper body, medieval fantasy Watchman, Cole Nightwatch, vigilant watchful expression, single candlelight from upper left, deep shadows, asymmetric composition, negative space dominant, monochrome charcoal with lantern bronze accent, transparent background"
+  },
+  {
+    "id": "npc_watchman_cole_token",
+    "filename": "npc_watchman_cole_token.png",
+    "category": "NPC_TOKEN",
+    "prompt": "Dark gothic manuscript illustration, sumi-e ink wash on aged parchment, visible brush strokes, expressive brushwork, ink bleed edges, monochrome charcoal with restrained accent color, parchment grain texture, no clean lines, no text, no watermark, game asset sprite, small overhead token, birds-eye view silhouette, Watchman figure marker, even overhead lighting, centered, compact, monochrome charcoal with faint lantern bronze accent, transparent background"
+  },
+  {
+    "id": "npc_baker_milo_neutral",
+    "filename": "npc_baker_milo_neutral.png",
+    "category": "NPC_PORTRAIT",
+    "prompt": "Dark gothic manuscript illustration, sumi-e ink wash on aged parchment, visible brush strokes, expressive brushwork, ink bleed edges, monochrome charcoal with restrained accent color, parchment grain texture, no clean lines, no text, no watermark, game asset sprite, isolated portrait, centered upper body, medieval fantasy Baker, Milo the Baker, generous cheerful expression, single candlelight from upper left, deep shadows, asymmetric composition, negative space dominant, monochrome charcoal with warm crust gold accent, transparent background"
+  },
+  {
+    "id": "npc_baker_milo_token",
+    "filename": "npc_baker_milo_token.png",
+    "category": "NPC_TOKEN",
+    "prompt": "Dark gothic manuscript illustration, sumi-e ink wash on aged parchment, visible brush strokes, expressive brushwork, ink bleed edges, monochrome charcoal with restrained accent color, parchment grain texture, no clean lines, no text, no watermark, game asset sprite, small overhead token, birds-eye view silhouette, Baker figure marker, even overhead lighting, centered, compact, monochrome charcoal with faint warm crust gold accent, transparent background"
+  },
+  {
+    "id": "npc_brewer_oscar_neutral",
+    "filename": "npc_brewer_oscar_neutral.png",
+    "category": "NPC_PORTRAIT",
+    "prompt": "Dark gothic manuscript illustration, sumi-e ink wash on aged parchment, visible brush strokes, expressive brushwork, ink bleed edges, monochrome charcoal with restrained accent color, parchment grain texture, no clean lines, no text, no watermark, game asset sprite, isolated portrait, centered upper body, medieval fantasy Brewer, Oscar Barleybrew, convivial hearty expression, single candlelight from upper left, deep shadows, asymmetric composition, negative space dominant, monochrome charcoal with cask amber accent, transparent background"
+  },
+  {
+    "id": "npc_brewer_oscar_token",
+    "filename": "npc_brewer_oscar_token.png",
+    "category": "NPC_TOKEN",
+    "prompt": "Dark gothic manuscript illustration, sumi-e ink wash on aged parchment, visible brush strokes, expressive brushwork, ink bleed edges, monochrome charcoal with restrained accent color, parchment grain texture, no clean lines, no text, no watermark, game asset sprite, small overhead token, birds-eye view silhouette, Brewer figure marker, even overhead lighting, centered, compact, monochrome charcoal with faint cask amber accent, transparent background"
+  },
+  {
+    "id": "npc_scholar_erik_neutral",
+    "filename": "npc_scholar_erik_neutral.png",
+    "category": "NPC_PORTRAIT",
+    "prompt": "Dark gothic manuscript illustration, sumi-e ink wash on aged parchment, visible brush strokes, expressive brushwork, ink bleed edges, monochrome charcoal with restrained accent color, parchment grain texture, no clean lines, no text, no watermark, game asset sprite, isolated portrait, centered upper body, medieval fantasy Scholar, Erik Chronicler, curious analytical expression, single candlelight from upper left, deep shadows, asymmetric composition, negative space dominant, monochrome charcoal with ink violet accent, transparent background"
+  },
+  {
+    "id": "npc_scholar_erik_token",
+    "filename": "npc_scholar_erik_token.png",
+    "category": "NPC_TOKEN",
+    "prompt": "Dark gothic manuscript illustration, sumi-e ink wash on aged parchment, visible brush strokes, expressive brushwork, ink bleed edges, monochrome charcoal with restrained accent color, parchment grain texture, no clean lines, no text, no watermark, game asset sprite, small overhead token, birds-eye view silhouette, Scholar figure marker, even overhead lighting, centered, compact, monochrome charcoal with faint ink violet accent, transparent background"
+  },
+  {
+    "id": "npc_tanner_garth_neutral",
+    "filename": "npc_tanner_garth_neutral.png",
+    "category": "NPC_PORTRAIT",
+    "prompt": "Dark gothic manuscript illustration, sumi-e ink wash on aged parchment, visible brush strokes, expressive brushwork, ink bleed edges, monochrome charcoal with restrained accent color, parchment grain texture, no clean lines, no text, no watermark, game asset sprite, isolated portrait, centered upper body, medieval fantasy Tanner, Garth Hidesman, practical stoic expression, single candlelight from upper left, deep shadows, asymmetric composition, negative space dominant, monochrome charcoal with dark leather accent, transparent background"
+  },
+  {
+    "id": "npc_tanner_garth_token",
+    "filename": "npc_tanner_garth_token.png",
+    "category": "NPC_TOKEN",
+    "prompt": "Dark gothic manuscript illustration, sumi-e ink wash on aged parchment, visible brush strokes, expressive brushwork, ink bleed edges, monochrome charcoal with restrained accent color, parchment grain texture, no clean lines, no text, no watermark, game asset sprite, small overhead token, birds-eye view silhouette, Tanner figure marker, even overhead lighting, centered, compact, monochrome charcoal with faint dark leather accent, transparent background"
+  }
+]
