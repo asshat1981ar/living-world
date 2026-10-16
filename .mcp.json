@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "lw-sim": {
+      "type": "stdio",
+      "command": "/root/.local/share/lw-mcp-venv/bin/python",
+      "args": ["-I", "${CLAUDE_PROJECT_DIR:-.}/tools/mcp/lw_sim_server.py"]
+    }
+  }
+}

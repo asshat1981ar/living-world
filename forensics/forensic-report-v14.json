@@ -1,0 +1,607 @@
+{
+  "project": "living-world-v14",
+  "timestamp": "2026-10-16T11:39:22Z",
+  "file_count": 59,
+  "total_loc": 9795,
+  "hotspots": [
+    {
+      "path": "./simulate_village.py",
+      "loc": 876,
+      "nesting": 10,
+      "mccabe_approx": 159,
+      "cognitive_approx": 169,
+      "hotspot": 14804.4
+    },
+    {
+      "path": "./game-core/src/commonMain/kotlin/org/livingworld/core/world/WorldReducer.kt",
+      "loc": 467,
+      "nesting": 4,
+      "mccabe_approx": 66,
+      "cognitive_approx": 70,
+      "hotspot": 3269.0
+    },
+    {
+      "path": "./simulate_soak_90d.py",
+      "loc": 338,
+      "nesting": 8,
+      "mccabe_approx": 71,
+      "cognitive_approx": 79,
+      "hotspot": 2670.2
+    },
+    {
+      "path": "./game-ui/src/commonMain/kotlin/org/livingworld/ui/adapters/VisualAdapters.kt",
+      "loc": 324,
+      "nesting": 6,
+      "mccabe_approx": 55,
+      "cognitive_approx": 61,
+      "hotspot": 1976.4
+    },
+    {
+      "path": "./scripts/generate_sprites.py",
+      "loc": 518,
+      "nesting": 5,
+      "mccabe_approx": 31,
+      "cognitive_approx": 36,
+      "hotspot": 1864.8
+    },
+    {
+      "path": "./game-core/src/commonMain/kotlin/org/livingworld/core/simulation/SimulationEngine.kt",
+      "loc": 282,
+      "nesting": 5,
+      "mccabe_approx": 46,
+      "cognitive_approx": 51,
+      "hotspot": 1438.2
+    },
+    {
+      "path": "./game-core/src/commonMain/kotlin/org/livingworld/core/world/WorldState.kt",
+      "loc": 370,
+      "nesting": 5,
+      "mccabe_approx": 29,
+      "cognitive_approx": 34,
+      "hotspot": 1258.0
+    },
+    {
+      "path": "./game-core/src/commonMain/kotlin/org/livingworld/core/events/GameEvent.kt",
+      "loc": 293,
+      "nesting": 3,
+      "mccabe_approx": 29,
+      "cognitive_approx": 32,
+      "hotspot": 937.6
+    },
+    {
+      "path": "./game-ui/src/commonMain/kotlin/org/livingworld/ui/sprites/SpriteManifest.kt",
+      "loc": 263,
+      "nesting": 5,
+      "mccabe_approx": 28,
+      "cognitive_approx": 33,
+      "hotspot": 867.9
+    },
+    {
+      "path": "./game-core/src/commonMain/kotlin/org/livingworld/core/simulation/ActionValidator.kt",
+      "loc": 182,
+      "nesting": 5,
+      "mccabe_approx": 41,
+      "cognitive_approx": 46,
+      "hotspot": 837.2
+    },
+    {
+      "path": "./test_huggingface_adapter.py",
+      "loc": 192,
+      "nesting": 5,
+      "mccabe_approx": 37,
+      "cognitive_approx": 42,
+      "hotspot": 806.4
+    },
+    {
+      "path": "./game-persistence/src/commonMain/kotlin/org/livingworld/persistence/SaveManager.kt",
+      "loc": 178,
+      "nesting": 6,
+      "mccabe_approx": 26,
+      "cognitive_approx": 32,
+      "hotspot": 569.6
+    },
+    {
+      "path": "./game-core/src/commonMain/kotlin/org/livingworld/core/simulation/NpcDecisionEngine.kt",
+      "loc": 153,
+      "nesting": 4,
+      "mccabe_approx": 33,
+      "cognitive_approx": 37,
+      "hotspot": 566.1
+    },
+    {
+      "path": "./game-ui/src/commonMain/kotlin/org/livingworld/ui/compose/ChimeraUiComponents.kt",
+      "loc": 231,
+      "nesting": 5,
+      "mccabe_approx": 19,
+      "cognitive_approx": 24,
+      "hotspot": 554.4
+    },
+    {
+      "path": "./game-ui/src/commonMain/kotlin/org/livingworld/ui/audio/AudioStateAdapter.kt",
+      "loc": 177,
+      "nesting": 4,
+      "mccabe_approx": 26,
+      "cognitive_approx": 30,
+      "hotspot": 531.0
+    }
+  ],
+  "all_files": [
+    {
+      "path": "./simulate_village.py",
+      "loc": 876,
+      "nesting": 10,
+      "mccabe_approx": 159,
+      "cognitive_approx": 169,
+      "hotspot": 14804.4
+    },
+    {
+      "path": "./game-core/src/commonMain/kotlin/org/livingworld/core/world/WorldReducer.kt",
+      "loc": 467,
+      "nesting": 4,
+      "mccabe_approx": 66,
+      "cognitive_approx": 70,
+      "hotspot": 3269.0
+    },
+    {
+      "path": "./simulate_soak_90d.py",
+      "loc": 338,
+      "nesting": 8,
+      "mccabe_approx": 71,
+      "cognitive_approx": 79,
+      "hotspot": 2670.2
+    },
+    {
+      "path": "./game-ui/src/commonMain/kotlin/org/livingworld/ui/adapters/VisualAdapters.kt",
+      "loc": 324,
+      "nesting": 6,
+      "mccabe_approx": 55,
+      "cognitive_approx": 61,
+      "hotspot": 1976.4
+    },
+    {
+      "path": "./scripts/generate_sprites.py",
+      "loc": 518,
+      "nesting": 5,
+      "mccabe_approx": 31,
+      "cognitive_approx": 36,
+      "hotspot": 1864.8
+    },
+    {
+      "path": "./game-core/src/commonMain/kotlin/org/livingworld/core/simulation/SimulationEngine.kt",
+      "loc": 282,
+      "nesting": 5,
+      "mccabe_approx": 46,
+      "cognitive_approx": 51,
+      "hotspot": 1438.2
+    },
+    {
+      "path": "./game-core/src/commonMain/kotlin/org/livingworld/core/world/WorldState.kt",
+      "loc": 370,
+      "nesting": 5,
+      "mccabe_approx": 29,
+      "cognitive_approx": 34,
+      "hotspot": 1258.0
+    },
+    {
+      "path": "./game-core/src/commonMain/kotlin/org/livingworld/core/events/GameEvent.kt",
+      "loc": 293,
+      "nesting": 3,
+      "mccabe_approx": 29,
+      "cognitive_approx": 32,
+      "hotspot": 937.6
+    },
+    {
+      "path": "./game-ui/src/commonMain/kotlin/org/livingworld/ui/sprites/SpriteManifest.kt",
+      "loc": 263,
+      "nesting": 5,
+      "mccabe_approx": 28,
+      "cognitive_approx": 33,
+      "hotspot": 867.9
+    },
+    {
+      "path": "./game-core/src/commonMain/kotlin/org/livingworld/core/simulation/ActionValidator.kt",
+      "loc": 182,
+      "nesting": 5,
+      "mccabe_approx": 41,
+      "cognitive_approx": 46,
+      "hotspot": 837.2
+    },
+    {
+      "path": "./test_huggingface_adapter.py",
+      "loc": 192,
+      "nesting": 5,
+      "mccabe_approx": 37,
+      "cognitive_approx": 42,
+      "hotspot": 806.4
+    },
+    {
+      "path": "./game-persistence/src/commonMain/kotlin/org/livingworld/persistence/SaveManager.kt",
+      "loc": 178,
+      "nesting": 6,
+      "mccabe_approx": 26,
+      "cognitive_approx": 32,
+      "hotspot": 569.6
+    },
+    {
+      "path": "./game-core/src/commonMain/kotlin/org/livingworld/core/simulation/NpcDecisionEngine.kt",
+      "loc": 153,
+      "nesting": 4,
+      "mccabe_approx": 33,
+      "cognitive_approx": 37,
+      "hotspot": 566.1
+    },
+    {
+      "path": "./game-ui/src/commonMain/kotlin/org/livingworld/ui/compose/ChimeraUiComponents.kt",
+      "loc": 231,
+      "nesting": 5,
+      "mccabe_approx": 19,
+      "cognitive_approx": 24,
+      "hotspot": 554.4
+    },
+    {
+      "path": "./game-ui/src/commonMain/kotlin/org/livingworld/ui/audio/AudioStateAdapter.kt",
+      "loc": 177,
+      "nesting": 4,
+      "mccabe_approx": 26,
+      "cognitive_approx": 30,
+      "hotspot": 531.0
+    },
+    {
+      "path": "./androidApp/src/main/kotlin/com/livingworld/game/android/MainActivity.kt",
+      "loc": 257,
+      "nesting": 7,
+      "mccabe_approx": 11,
+      "cognitive_approx": 18,
+      "hotspot": 462.6
+    },
+    {
+      "path": "./simulate_visual_inspector.py",
+      "loc": 128,
+      "nesting": 9,
+      "mccabe_approx": 23,
+      "cognitive_approx": 32,
+      "hotspot": 409.6
+    },
+    {
+      "path": "./game-core/src/commonTest/kotlin/org/livingworld/core/TestWorld.kt",
+      "loc": 243,
+      "nesting": 5,
+      "mccabe_approx": 11,
+      "cognitive_approx": 16,
+      "hotspot": 388.8
+    },
+    {
+      "path": "./androidApp/src/main/kotlin/com/livingworld/game/android/ui/components/ChimeraComposeComponents.kt",
+      "loc": 210,
+      "nesting": 5,
+      "mccabe_approx": 12,
+      "cognitive_approx": 17,
+      "hotspot": 357.0
+    },
+    {
+      "path": "./game-core/src/commonTest/kotlin/org/livingworld/core/SimulationKernelTest.kt",
+      "loc": 355,
+      "nesting": 3,
+      "mccabe_approx": 5,
+      "cognitive_approx": 8,
+      "hotspot": 284.0
+    },
+    {
+      "path": "./game-ai/src/commonMain/kotlin/org/livingworld/ai/ondevice/LocalOnDeviceInferencePort.kt",
+      "loc": 117,
+      "nesting": 5,
+      "mccabe_approx": 19,
+      "cognitive_approx": 24,
+      "hotspot": 280.8
+    },
+    {
+      "path": "./androidApp/src/main/kotlin/com/livingworld/game/android/ai/AndroidLlamaEngineBridge.kt",
+      "loc": 93,
+      "nesting": 5,
+      "mccabe_approx": 21,
+      "cognitive_approx": 26,
+      "hotspot": 241.8
+    },
+    {
+      "path": "./game-ai/src/commonMain/kotlin/org/livingworld/ai/reasoning/AiReasoningPort.kt",
+      "loc": 92,
+      "nesting": 7,
+      "mccabe_approx": 18,
+      "cognitive_approx": 25,
+      "hotspot": 230.0
+    },
+    {
+      "path": "./androidApp/src/main/kotlin/com/livingworld/game/android/ui/map/MapScreen.kt",
+      "loc": 135,
+      "nesting": 7,
+      "mccabe_approx": 10,
+      "cognitive_approx": 17,
+      "hotspot": 229.5
+    },
+    {
+      "path": "./game-ai/src/commonMain/kotlin/org/livingworld/ai/ondevice/LocalGgufInferencePort.kt",
+      "loc": 101,
+      "nesting": 3,
+      "mccabe_approx": 19,
+      "cognitive_approx": 22,
+      "hotspot": 222.2
+    },
+    {
+      "path": "./game-ai/src/commonMain/kotlin/org/livingworld/ai/huggingface/HuggingFaceReasoningAdapter.kt",
+      "loc": 110,
+      "nesting": 4,
+      "mccabe_approx": 14,
+      "cognitive_approx": 18,
+      "hotspot": 198.0
+    },
+    {
+      "path": "./game-core/src/commonMain/kotlin/org/livingworld/core/inspector/SimulationInspector.kt",
+      "loc": 108,
+      "nesting": 4,
+      "mccabe_approx": 13,
+      "cognitive_approx": 17,
+      "hotspot": 183.6
+    },
+    {
+      "path": "./desktopApp/src/jvmMain/kotlin/com/livingworld/game/desktop/InspectorMain.kt",
+      "loc": 93,
+      "nesting": 3,
+      "mccabe_approx": 15,
+      "cognitive_approx": 18,
+      "hotspot": 167.4
+    },
+    {
+      "path": "./game-ai/src/commonMain/kotlin/org/livingworld/ai/reasoning/OnDeviceQwenReasoningEngine.kt",
+      "loc": 96,
+      "nesting": 4,
+      "mccabe_approx": 12,
+      "cognitive_approx": 16,
+      "hotspot": 153.6
+    },
+    {
+      "path": "./game-core/src/commonMain/kotlin/org/livingworld/core/relationships/Relationship.kt",
+      "loc": 118,
+      "nesting": 3,
+      "mccabe_approx": 10,
+      "cognitive_approx": 13,
+      "hotspot": 153.4
+    },
+    {
+      "path": "./scripts/download_model.py",
+      "loc": 99,
+      "nesting": 6,
+      "mccabe_approx": 9,
+      "cognitive_approx": 15,
+      "hotspot": 148.5
+    },
+    {
+      "path": "./scripts/living_world_sprite_cron.py",
+      "loc": 104,
+      "nesting": 4,
+      "mccabe_approx": 10,
+      "cognitive_approx": 14,
+      "hotspot": 145.6
+    },
+    {
+      "path": "./game-core/src/commonMain/kotlin/org/livingworld/core/memory/Memory.kt",
+      "loc": 100,
+      "nesting": 6,
+      "mccabe_approx": 8,
+      "cognitive_approx": 14,
+      "hotspot": 140.0
+    },
+    {
+      "path": "./game-ai/src/commonMain/kotlin/org/livingworld/ai/huggingface/HuggingFaceModels.kt",
+      "loc": 159,
+      "nesting": 3,
+      "mccabe_approx": 5,
+      "cognitive_approx": 8,
+      "hotspot": 127.2
+    },
+    {
+      "path": "./game-ai/src/commonTest/kotlin/org/livingworld/ai/huggingface/HuggingFaceAdapterTest.kt",
+      "loc": 155,
+      "nesting": 5,
+      "mccabe_approx": 3,
+      "cognitive_approx": 8,
+      "hotspot": 124.0
+    },
+    {
+      "path": "./androidApp/src/main/kotlin/com/livingworld/game/android/ui/dialogue/DialogueScreen.kt",
+      "loc": 134,
+      "nesting": 5,
+      "mccabe_approx": 4,
+      "cognitive_approx": 9,
+      "hotspot": 120.6
+    },
+    {
+      "path": "./androidApp/src/main/kotlin/com/livingworld/game/android/ui/inventory/InventoryScreen.kt",
+      "loc": 127,
+      "nesting": 7,
+      "mccabe_approx": 2,
+      "cognitive_approx": 9,
+      "hotspot": 114.3
+    },
+    {
+      "path": "./androidApp/src/main/kotlin/com/livingworld/game/android/ui/dialogue/DialogueViewModel.kt",
+      "loc": 94,
+      "nesting": 3,
+      "mccabe_approx": 9,
+      "cognitive_approx": 12,
+      "hotspot": 112.8
+    },
+    {
+      "path": "./game-ai/src/commonMain/kotlin/org/livingworld/ai/huggingface/HuggingFaceDialogueAdapter.kt",
+      "loc": 84,
+      "nesting": 4,
+      "mccabe_approx": 8,
+      "cognitive_approx": 12,
+      "hotspot": 100.8
+    },
+    {
+      "path": "./game-ui/src/commonTest/kotlin/org/livingworld/ui/sprites/SpriteSystemTest.kt",
+      "loc": 252,
+      "nesting": 3,
+      "mccabe_approx": 1,
+      "cognitive_approx": 4,
+      "hotspot": 100.8
+    },
+    {
+      "path": "./test_ui_sprites.py",
+      "loc": 164,
+      "nesting": 3,
+      "mccabe_approx": 3,
+      "cognitive_approx": 6,
+      "hotspot": 98.4
+    },
+    {
+      "path": "./game-ui/src/commonMain/kotlin/org/livingworld/ui/sprites/SpriteModels.kt",
+      "loc": 88,
+      "nesting": 3,
+      "mccabe_approx": 8,
+      "cognitive_approx": 11,
+      "hotspot": 96.8
+    },
+    {
+      "path": "./game-core/src/commonMain/kotlin/org/livingworld/core/beliefs/Belief.kt",
+      "loc": 107,
+      "nesting": 3,
+      "mccabe_approx": 5,
+      "cognitive_approx": 8,
+      "hotspot": 85.6
+    },
+    {
+      "path": "./androidApp/src/test/kotlin/com/livingworld/game/android/ViewModelTests.kt",
+      "loc": 106,
+      "nesting": 3,
+      "mccabe_approx": 5,
+      "cognitive_approx": 8,
+      "hotspot": 84.8
+    },
+    {
+      "path": "./androidApp/src/main/kotlin/com/livingworld/game/android/ui/inventory/InventoryViewModel.kt",
+      "loc": 77,
+      "nesting": 3,
+      "mccabe_approx": 7,
+      "cognitive_approx": 10,
+      "hotspot": 77.0
+    },
+    {
+      "path": "./game-core/src/commonMain/kotlin/org/livingworld/core/npc/Npc.kt",
+      "loc": 117,
+      "nesting": 3,
+      "mccabe_approx": 3,
+      "cognitive_approx": 6,
+      "hotspot": 70.2
+    },
+    {
+      "path": "./androidApp/src/main/kotlin/com/livingworld/game/android/ui/map/MapViewModel.kt",
+      "loc": 67,
+      "nesting": 3,
+      "mccabe_approx": 6,
+      "cognitive_approx": 9,
+      "hotspot": 60.3
+    },
+    {
+      "path": "./game-core/src/commonMain/kotlin/org/livingworld/core/time/WorldTime.kt",
+      "loc": 65,
+      "nesting": 2,
+      "mccabe_approx": 7,
+      "cognitive_approx": 9,
+      "hotspot": 58.5
+    },
+    {
+      "path": "./game-core/src/commonMain/kotlin/org/livingworld/core/events/EventLedger.kt",
+      "loc": 57,
+      "nesting": 3,
+      "mccabe_approx": 7,
+      "cognitive_approx": 10,
+      "hotspot": 57.0
+    },
+    {
+      "path": "./game-ui/src/commonTest/kotlin/org/livingworld/ui/audio/AudioSystemTest.kt",
+      "loc": 88,
+      "nesting": 3,
+      "mccabe_approx": 2,
+      "cognitive_approx": 5,
+      "hotspot": 44.0
+    },
+    {
+      "path": "./game-core/src/commonMain/kotlin/org/livingworld/core/factions/Faction.kt",
+      "loc": 63,
+      "nesting": 3,
+      "mccabe_approx": 2,
+      "cognitive_approx": 5,
+      "hotspot": 31.5
+    },
+    {
+      "path": "./game-persistence/src/commonTest/kotlin/org/livingworld/persistence/SaveManagerTest.kt",
+      "loc": 69,
+      "nesting": 3,
+      "mccabe_approx": 1,
+      "cognitive_approx": 4,
+      "hotspot": 27.6
+    },
+    {
+      "path": "./game-core/src/commonMain/kotlin/org/livingworld/core/ids/EntityId.kt",
+      "loc": 62,
+      "nesting": 2,
+      "mccabe_approx": 1,
+      "cognitive_approx": 3,
+      "hotspot": 18.6
+    },
+    {
+      "path": "./game-core/src/commonMain/kotlin/org/livingworld/core/npc/Goal.kt",
+      "loc": 54,
+      "nesting": 2,
+      "mccabe_approx": 1,
+      "cognitive_approx": 3,
+      "hotspot": 16.2
+    },
+    {
+      "path": "./game-ai/src/commonMain/kotlin/org/livingworld/ai/ondevice/ModelAssetManager.kt",
+      "loc": 69,
+      "nesting": 1,
+      "mccabe_approx": 1,
+      "cognitive_approx": 2,
+      "hotspot": 13.8
+    },
+    {
+      "path": "./game-ui/src/commonMain/kotlin/org/livingworld/ui/theme/ChimeraSpritePalette.kt",
+      "loc": 34,
+      "nesting": 2,
+      "mccabe_approx": 1,
+      "cognitive_approx": 3,
+      "hotspot": 10.2
+    },
+    {
+      "path": "./game-ui/src/commonMain/kotlin/org/livingworld/ui/audio/AudioModels.kt",
+      "loc": 50,
+      "nesting": 1,
+      "mccabe_approx": 1,
+      "cognitive_approx": 2,
+      "hotspot": 10.0
+    },
+    {
+      "path": "./androidApp/src/main/kotlin/com/livingworld/game/android/ui/theme/ChimeraTheme.kt",
+      "loc": 26,
+      "nesting": 1,
+      "mccabe_approx": 2,
+      "cognitive_approx": 3,
+      "hotspot": 7.8
+    },
+    {
+      "path": "./game-ai/src/commonMain/kotlin/org/livingworld/ai/huggingface/HfTransport.kt",
+      "loc": 24,
+      "nesting": 1,
+      "mccabe_approx": 2,
+      "cognitive_approx": 3,
+      "hotspot": 7.2
+    }
+  ],
+  "notes": [
+    "Approximate metrics (Kotlin/Python heuristic, tools/forensic.py). hotspot = loc * (mccabe + nesting) / 10.",
+    "Highest hotspot scores should be prioritized for review / micro-refactor under RefactoringMirror rules.",
+    "Invariants G1-G10 (INSTRUCTIONS.md) remain mandatory."
+  ]
+}
