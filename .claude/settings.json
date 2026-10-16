@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -I \"${CLAUDE_PROJECT_DIR}/tools/hooks/invariant_guard.py\"",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}

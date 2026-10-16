@@ -1,0 +1,5 @@
+#!/usr/bin/env sh
+# Living-world pre-commit: hygiene + isolation gates (INSTRUCTIONS.md §3) on staged changes.
+# Enable once per clone: git config core.hooksPath .githooks
+# New Gradle dependency/plugin lines need an explicit LW_ALLOW_DEPS=1 (isolation gate).
+exec python3 -I "$(git rev-parse --show-toplevel)/tools/check_invariants.py" --staged
