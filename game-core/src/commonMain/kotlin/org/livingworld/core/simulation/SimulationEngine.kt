@@ -7,6 +7,7 @@ import org.livingworld.core.events.TacticalCombatResolver
 import org.livingworld.core.ids.LocationId
 import org.livingworld.core.npc.Npc
 import org.livingworld.core.npc.Trait
+import org.livingworld.core.relationships.RelationshipGraph
 import org.livingworld.core.time.WorldDuration
 import org.livingworld.core.time.WorldTime
 import org.livingworld.core.world.DefaultWorldReducer
@@ -179,7 +180,7 @@ class SimulationEngine(
                 val targetNpc = state.npcs[intent.target]
                 if (targetNpc == null || !targetNpc.isAlive) return state
 
-                val transmitted = transmitBelief(npc, targetNpc, intent.belief, time)
+                val transmitted = transmitBelief(npc, targetNpc, intent.belief, time, state.relationships)
                 val rumorEvent = GameEvent.RumorTransmitted(
                     id = eventId,
                     time = time,
@@ -298,9 +299,10 @@ class SimulationEngine(
         source: Npc,
         target: Npc,
         belief: Belief,
-        currentTime: WorldTime
+        currentTime: WorldTime,
+        relationships: RelationshipGraph
     ): Belief {
-        val relScore = (target.reputationToward(source.id.toEntityId()) + 1.0f) / 2.0f
+        val relScore = (target.reputationToward(source.id.toEntityId(), relationships) + 1.0f) / 2.0f
         val reliability = (relScore * belief.confidence * belief.reliability).coerceIn(0.1f, 0.95f)
         val distortionFactor = if (source.hasTrait(Trait.OPPORTUNISTIC)) 0.85f else 0.95f
         val newConfidence = (belief.confidence * reliability * distortionFactor).coerceIn(0.1f, 1.0f)

@@ -108,7 +108,6 @@ data class Npc(
     val values: List<Value> = emptyList(),
     val memories: MemoryStore = MemoryStore(),
     val beliefs: BeliefStore = BeliefStore(),
-    val relationships: RelationshipGraph = RelationshipGraph(),
     val factions: Set<FactionId> = emptySet(),
     val emotionalState: EmotionalState = EmotionalState.NEUTRAL,
     val resources: ResourceState = ResourceState(),
@@ -116,7 +115,7 @@ data class Npc(
 ) {
     val isAlive: Boolean get() = identity.isAlive && !resources.isDead
 
-    fun reputationToward(target: EntityId): Float {
+    fun reputationToward(target: EntityId, relationships: RelationshipGraph): Float {
         val rel = relationships.get(id.toEntityId(), target)
         var rep = rel.trust * 0.4f + rel.respect * 0.3f + rel.affection * 0.3f - rel.resentment * 0.4f
         if (traits.contains(Trait.SKEPTICAL)) {

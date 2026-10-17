@@ -9,7 +9,8 @@
   - G8 `hashCode()` warnings fixed (`stateHashOf`, `stableStringHash`); invariant checker now 0 warnings.
   - `simulate_village.py` mirror of the trade fix done (`complete_scarcity_trade` takes `buyer_id`), with a test in `test_ui_sprites.py`.
   - `BeliefStore` Float keys fixed (`stableFloatText` in `Belief.kt`, test `belief_keys_use_platform_independent_float_text`).
-  - Next: dual relationship graphs (needs a design decision). Qwen filename "mismatch" is intentional (download name vs on-device `targetFileName`); documented in CLAUDE.md.
+  - Dual relationship graphs resolved (option A): removed `Npc.relationships`; the world graph is authoritative. Test `test_legacy_save_with_per_npc_relationship_graph_still_loads` covers old saves.
+  - Next: v6 audit list is empty; pick new work. Qwen filename "mismatch" is intentional (download name vs on-device `targetFileName`); documented in CLAUDE.md.
 
 # Phase 9 state (2026-10-14)
 

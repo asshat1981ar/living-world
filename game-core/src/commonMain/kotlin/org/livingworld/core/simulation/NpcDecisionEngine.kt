@@ -115,14 +115,11 @@ class DefaultNpcDecisionEngine(
             }
         }
 
-        // 6. Hostility / Faction Defense (checks both world relationships and local NPC relationships)
+        // 6. Hostility / Faction Defense (reads the world relationship graph)
         for (other in coLocatedNpcs) {
-            val worldRel = world.relationships.get(npc.id.toEntityId(), other.id.toEntityId())
-            val localRel = npc.relationships.get(npc.id.toEntityId(), other.id.toEntityId())
-            val maxResentment = maxOf(worldRel.resentment, localRel.resentment)
-            val minTrust = minOf(worldRel.trust, localRel.trust)
+            val rel = world.relationships.get(npc.id.toEntityId(), other.id.toEntityId())
 
-            if (maxResentment > 0.7f || minTrust < -0.6f) {
+            if (rel.resentment > 0.7f || rel.trust < -0.6f) {
                 candidates.add(
                     ActionCandidate(
                         action = Intent.Attack(other.id, "Simmering resentment erupted into violence"),

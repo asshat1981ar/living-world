@@ -52,8 +52,8 @@ class DefaultWorldReducer : WorldReducer {
         }
     }
 
-    private fun modifyUnifiedRelationship(
-        npcs: Map<NpcId, Npc>,
+    /** The world graph is the single source of truth for relationships (NPCs hold no private copy). */
+    private fun modifyRelationship(
         relationships: RelationshipGraph,
         from: EntityId,
         to: EntityId,
@@ -63,31 +63,16 @@ class DefaultWorldReducer : WorldReducer {
         deltaFear: Float = 0f,
         deltaResentment: Float = 0f,
         eventId: EventId? = null
-    ): Pair<Map<NpcId, Npc>, RelationshipGraph> {
-        val nextGraph = relationships.modify(
-            from = from,
-            to = to,
-            deltaTrust = deltaTrust,
-            deltaAffection = deltaAffection,
-            deltaRespect = deltaRespect,
-            deltaFear = deltaFear,
-            deltaResentment = deltaResentment,
-            event = eventId
-        )
-        val sourceNpcId = (from as? EntityId.Npc)?.id ?: NpcId(from.identifier)
-        val sourceNpc = npcs[sourceNpcId] ?: return Pair(npcs, nextGraph)
-        val nextNpcGraph = sourceNpc.relationships.modify(
-            from = from,
-            to = to,
-            deltaTrust = deltaTrust,
-            deltaAffection = deltaAffection,
-            deltaRespect = deltaRespect,
-            deltaFear = deltaFear,
-            deltaResentment = deltaResentment,
-            event = eventId
-        )
-        return Pair(npcs + (sourceNpcId to sourceNpc.copy(relationships = nextNpcGraph)), nextGraph)
-    }
+    ): RelationshipGraph = relationships.modify(
+        from = from,
+        to = to,
+        deltaTrust = deltaTrust,
+        deltaAffection = deltaAffection,
+        deltaRespect = deltaRespect,
+        deltaFear = deltaFear,
+        deltaResentment = deltaResentment,
+        event = eventId
+    )
 
     private fun applyNpcDeath(state: WorldState, event: GameEvent.NpcKilled): WorldState {
         val victim = state.npcs[event.victim] ?: return state
@@ -106,7 +91,7 @@ class DefaultWorldReducer : WorldReducer {
         for (witnessId in event.witnesses) {
             val witness = nextNpcs[witnessId] ?: continue
             val affectionForVictim = nextRelationships.get(witnessId.toEntityId(), victim.id.toEntityId()).overallSentiment
-            val caresAboutVictim = affectionForVictim > 0.2f || witness.reputationToward(victim.id.toEntityId()) > 0.2f
+            val caresAboutVictim = affectionForVictim > 0.2f || witness.reputationToward(victim.id.toEntityId(), nextRelationships) > 0.2f
 
             var updatedMemories = witness.memories.add(
                 Memory.Episodic(eventId = event.id, importance = 1.0f, createdAt = event.time)
@@ -145,8 +130,7 @@ class DefaultWorldReducer : WorldReducer {
             nextNpcs = nextNpcs + (witnessId to updatedWitness)
 
             if (event.killer != null) {
-                val (syncedNpcs, syncedRels) = modifyUnifiedRelationship(
-                    npcs = nextNpcs,
+                nextRelationships = modifyRelationship(
                     relationships = nextRelationships,
                     from = witnessId.toEntityId(),
                     to = event.killer,
@@ -157,8 +141,6 @@ class DefaultWorldReducer : WorldReducer {
                     deltaResentment = if (caresAboutVictim) 0.9f else 0.4f,
                     eventId = event.id
                 )
-                nextNpcs = syncedNpcs
-                nextRelationships = syncedRels
             }
         }
 
@@ -206,8 +188,7 @@ class DefaultWorldReducer : WorldReducer {
             )
             nextNpcs = nextNpcs + (witnessId to updatedWitness)
 
-            val (syncedNpcs, syncedRels) = modifyUnifiedRelationship(
-                npcs = nextNpcs,
+            nextRelationships = modifyRelationship(
                 relationships = nextRelationships,
                 from = witnessId.toEntityId(),
                 to = event.thief,
@@ -216,8 +197,6 @@ class DefaultWorldReducer : WorldReducer {
                 deltaResentment = 0.6f,
                 eventId = event.id
             )
-            nextNpcs = syncedNpcs
-            nextRelationships = syncedRels
         }
 
         val ownerNpcId = (event.owner as? EntityId.Npc)?.id ?: event.owner?.identifier?.let { NpcId(it) }
@@ -250,8 +229,7 @@ class DefaultWorldReducer : WorldReducer {
         state: WorldState,
         event: GameEvent.RelationshipShifted
     ): WorldState {
-        val (syncedNpcs, updatedRels) = modifyUnifiedRelationship(
-            npcs = state.npcs,
+        val updatedRels = modifyRelationship(
             relationships = state.relationships,
             from = event.source,
             to = event.target,
@@ -264,7 +242,7 @@ class DefaultWorldReducer : WorldReducer {
         )
 
         val sourceNpcId = (event.source as? EntityId.Npc)?.id ?: NpcId(event.source.identifier)
-        val sourceNpc = syncedNpcs[sourceNpcId]
+        val sourceNpc = state.npcs[sourceNpcId]
         val finalNpcs = if (sourceNpc != null) {
             val experience = if (event.deltaTrust >= 0f && event.deltaResentment <= 0f) {
                 RelationshipExperience.COOPERATION
@@ -277,9 +255,9 @@ class DefaultWorldReducer : WorldReducer {
                 importance = 0.6f,
                 createdAt = event.time
             )
-            syncedNpcs + (sourceNpcId to sourceNpc.copy(memories = sourceNpc.memories.add(memory)))
+            state.npcs + (sourceNpcId to sourceNpc.copy(memories = sourceNpc.memories.add(memory)))
         } else {
-            syncedNpcs
+            state.npcs
         }
 
         return state.copy(relationships = updatedRels, npcs = finalNpcs)
@@ -455,8 +433,7 @@ class DefaultWorldReducer : WorldReducer {
             )
         )
 
-        val (syncedNpcs, updatedRels) = modifyUnifiedRelationship(
-            npcs = state.npcs + (target.id to updatedTarget),
+        val updatedRels = modifyRelationship(
             relationships = state.relationships,
             from = target.id.toEntityId(),
             to = event.attacker,
@@ -468,7 +445,7 @@ class DefaultWorldReducer : WorldReducer {
         )
 
         return state.copy(
-            npcs = syncedNpcs,
+            npcs = state.npcs + (target.id to updatedTarget),
             relationships = updatedRels
         )
     }

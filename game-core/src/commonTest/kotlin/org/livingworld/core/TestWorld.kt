@@ -108,7 +108,7 @@ class TestWorld(
         val eventId = EventId(state.events.size + 1L)
         val srcNpc = state.npc(source)
         val tgtNpc = state.npc(target)
-        val transmitted = simulationEngine.transmitBelief(srcNpc, tgtNpc, belief, state.time)
+        val transmitted = simulationEngine.transmitBelief(srcNpc, tgtNpc, belief, state.time, state.relationships)
         val event = GameEvent.RumorTransmitted(
             id = eventId,
             time = state.time,

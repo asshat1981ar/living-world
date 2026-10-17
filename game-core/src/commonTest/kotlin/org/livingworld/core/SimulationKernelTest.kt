@@ -71,8 +71,8 @@ class SimulationKernelTest {
             "Witnessed theft must form high-confidence belief in witness"
         )
         assertTrue(
-            witnessNpc.reputationToward(player) < 0f,
-            "RT-3: Witness local RelationshipGraph must synchronize with WorldState.relationships"
+            witnessNpc.reputationToward(player, world.relationships) < 0f,
+            "RT-3: Witness reputation must reflect the world relationship graph"
         )
     }
 

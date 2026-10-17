@@ -11,6 +11,9 @@ import org.livingworld.core.time.WorldDuration
 import org.livingworld.core.time.WorldTime
 import org.livingworld.core.world.DefaultVillageFactory
 import org.livingworld.core.world.DefaultWorldReducer
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonArray
 import kotlin.test.*
 
 class SaveManagerTest {
@@ -37,6 +40,28 @@ class SaveManagerTest {
         assertEquals(SaveManager.stateHashOf(envelope.deterministicDigestHex), envelope.stateHash)
         assertEquals(-0x1, SaveManager.stateHashOf("0000000000ffffffff".takeLast(16)))
         assertEquals(0x1234abcd, SaveManager.stateHashOf("00000000" + "1234abcd"))
+    }
+
+    @Test
+    fun test_legacy_save_with_per_npc_relationship_graph_still_loads() {
+        val world = DefaultVillageFactory.marketVillage()
+        val tree = SaveManager.jsonConfig.parseToJsonElement(SaveManager.serializeEnvelope(world))
+
+        // Older saves stored a private `relationships` graph on every NPC; it must be ignored, not rejected.
+        fun addLegacyField(e: JsonElement): JsonElement = when (e) {
+            is JsonObject -> {
+                val mapped = e.mapValues { addLegacyField(it.value) }
+                if ("identity" in e) JsonObject(mapped + ("relationships" to JsonObject(emptyMap()))) else JsonObject(mapped)
+            }
+            is JsonArray -> JsonArray(e.map { addLegacyField(it) })
+            else -> e
+        }
+        val legacyJson = addLegacyField(tree).toString()
+        assertTrue(legacyJson.contains("\"relationships\":{}"))
+
+        val loaded = SaveManager.deserializeEnvelope(legacyJson)
+        assertEquals(SaveManager.computeDeterministicFingerprint(world), loaded.deterministicDigestHex)
+        assertEquals(world.npcs.size, loaded.worldState.npcs.size)
     }
 
     @Test
