@@ -41,8 +41,11 @@ jobs:
           distribution: temurin
           java-version: "17"
       - uses: android-actions/setup-android@v3
+        with:
+          # Default is "tools platform-tools"; the "tools" package no longer exists and fails sdkmanager.
+          packages: ""
       - name: Install Android SDK 34
-        run: sdkmanager "platforms;android-34" "build-tools;34.0.0"
+        run: sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
       - uses: gradle/actions/setup-gradle@v4
       - name: Validate Gradle wrapper
         uses: gradle/actions/wrapper-validation@v4
