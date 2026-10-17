@@ -2,6 +2,7 @@ package org.livingworld.core
 
 import kotlinx.coroutines.test.runTest
 import org.livingworld.core.beliefs.Belief
+import org.livingworld.core.beliefs.BeliefStore
 import org.livingworld.core.beliefs.KnowledgeSource
 import org.livingworld.core.beliefs.Proposition
 import org.livingworld.core.events.DuelOutcome
@@ -309,6 +310,24 @@ class SimulationKernelTest {
         )
 
         assertEquals(seller.resources.coins, after.npc(seller.id).resources.coins)
+    }
+
+    @Test
+    fun belief_keys_use_platform_independent_float_text() {
+        fun key(price: Float) = Proposition.ItemPrice(ItemId("bread"), price).describe()
+        assertEquals("Price of bread is 14.0", key(14f))
+        assertEquals("Price of bread is 7.5", key(7.5f))
+        assertEquals("Price of bread is 0.1", key(0.1f))
+        assertEquals("Price of bread is 12.35", key(12.35f))
+        assertEquals("Price of bread is -3.0", key(-3f))
+        assertEquals(
+            "Price of bread changed from 5.0 to 14.0",
+            Proposition.PriceChanged(ItemId("bread"), 5f, 14f).describe()
+        )
+
+        val belief = Belief(Proposition.ItemPrice(ItemId("bread"), 14f), 0.8f, KnowledgeSource.DirectObservation, 0.9f, WorldTime(1L))
+        val store = BeliefStore().add(belief).add(belief)
+        assertEquals(1, store.all().size, "Same price proposition must map to one belief key")
     }
 
     @Test

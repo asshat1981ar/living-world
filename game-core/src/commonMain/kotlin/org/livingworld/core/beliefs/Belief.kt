@@ -5,6 +5,21 @@ import org.livingworld.core.ids.*
 import org.livingworld.core.npc.Trait
 import org.livingworld.core.time.WorldTime
 
+/**
+ * Platform-independent Float text (G8). Proposition text is the BeliefStore key, and Float.toString differs
+ * across Kotlin targets ("14.0" on JVM, "14" on JS). Rounds to 4 decimals, trims zeros, keeps one digit
+ * after the point, so realistic values match the old JVM output ("14.0", "7.5", "12.35").
+ */
+internal fun stableFloatText(value: Float): String {
+    if (value.isNaN()) return "NaN"
+    if (value.isInfinite()) return if (value > 0f) "Infinity" else "-Infinity"
+    if (kotlin.math.abs(value) >= 1.0e9f) return "bits:${value.toRawBits()}"
+    val scaled = kotlin.math.round(value.toDouble() * 10_000.0).toLong()
+    val magnitude = if (scaled < 0) -scaled else scaled
+    val fraction = (magnitude % 10_000).toString().padStart(4, '0').trimEnd('0').ifEmpty { "0" }
+    return (if (scaled < 0) "-" else "") + (magnitude / 10_000) + "." + fraction
+}
+
 @Serializable
 sealed interface Proposition {
     fun describe(): String
@@ -41,12 +56,13 @@ sealed interface Proposition {
 
     @Serializable
     data class ItemPrice(val item: ItemId, val price: Float) : Proposition {
-        override fun describe(): String = "Price of ${item.value} is $price"
+        override fun describe(): String = "Price of ${item.value} is ${stableFloatText(price)}"
     }
 
     @Serializable
     data class PriceChanged(val item: ItemId, val oldPrice: Float, val newPrice: Float) : Proposition {
-        override fun describe(): String = "Price of ${item.value} changed from $oldPrice to $newPrice"
+        override fun describe(): String =
+            "Price of ${item.value} changed from ${stableFloatText(oldPrice)} to ${stableFloatText(newPrice)}"
     }
 
     @Serializable
