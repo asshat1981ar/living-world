@@ -1,5 +1,33 @@
 {
   "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -I \"${CLAUDE_PROJECT_DIR}/tools/hooks/session_preflight.py\"",
+            "timeout": 60,
+            "statusMessage": "living-world preflight: AWS session + GPU box"
+          },
+          {
+            "type": "command",
+            "command": "python3 -I \"${CLAUDE_PROJECT_DIR}/tools/hooks/ci_watch.py\" report",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -I \"${CLAUDE_PROJECT_DIR}/tools/hooks/ci_watch.py\" report",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
     "PreToolUse": [
       {
         "matcher": "Edit|Write|MultiEdit",
@@ -8,6 +36,29 @@
             "type": "command",
             "command": "python3 -I \"${CLAUDE_PROJECT_DIR}/tools/hooks/invariant_guard.py\"",
             "timeout": 30
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -I \"${CLAUDE_PROJECT_DIR}/tools/hooks/bash_guard.py\"",
+            "timeout": 1800,
+            "statusMessage": "living-world bash guard: secrets + pre-push gate"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -I \"${CLAUDE_PROJECT_DIR}/tools/hooks/ci_watch.py\" post",
+            "timeout": 15
           }
         ]
       }

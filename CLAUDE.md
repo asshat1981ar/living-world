@@ -25,6 +25,14 @@ Deterministic, event-sourced Kotlin Multiplatform simulation kernel for an Andro
 - Gradle works (wrapper, plugin versions, `androidTarget`, `desktopApp:run` all fixed); `./gradlew check` is green as of 2026-10-17. There is still no JDK on the Termux device, so run Gradle on awsbox: `python3 -I tools/lw_remote.py --push --gradle check` (needs a live `aws login --remote` session).
 - CI: `.github/workflows/ci.yml` (invariants + Python tests, Gradle check). `tools/publish_github.sh` creates the GitHub repo (private by default) and pushes using `GITHUB_TOKEN` from `~/.env`.
 
+# Automation hooks (`.claude/settings.json`, scripts in `tools/hooks/`)
+- `invariant_guard.py` (before `.kt` edits): blocks newly introduced G1/G8/G9 violations.
+- `bash_guard.py` (before Bash): blocks `git add -A|.` / `git commit -a` when an untracked, non-ignored file looks like a secret; runs the stop gate before `git push` or `publish_github.sh` (`LW_SKIP_PREPUSH=1` skips it).
+- `session_preflight.py` (SessionStart): reports whether the AWS session is valid and whether the GPU box is running.
+- `ci_watch.py` (after a push, then at prompt/session start): polls GitHub Actions in the background and reports pass/fail once, with only the failing step's log tail. Needs `gh` logged in.
+- `stop_gate.py` (Stop): invariants, tool tests, and a Kotlin `check` on awsbox when Kotlin inputs changed.
+- Tests: `python3 -m unittest discover -s tools -p 'test_*.py'`.
+
 # Known issues (as of 2026-10-17, not yet fixed)
 - Model filenames are intentional, not a bug: `ModelAssetManager` and `scripts/download_model.py` fetch `qwen2.5-0.5b-instruct-q4_k_m.gguf` from Hugging Face and save it on-device as `qwen2.5-0.5b-q4_k_m.gguf` (`targetFileName`). The root-level `.gguf` is a gitignored downloaded copy. `expectedSizeBytes` (356,515,840) differs from that copy (377,105,247) but is not enforced anywhere. `assets/models/smollm2-*.gguf` are 303-byte header stubs.
 - Relationships: `WorldState.relationships` is the single source of truth (the per-NPC `Npc.relationships` graph was removed 2026-10-17; `reputationToward` and `transmitBelief` take the graph as a parameter; old saves still load because `ignoreUnknownKeys = true`).
