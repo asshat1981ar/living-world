@@ -13,8 +13,14 @@ for arg in "$@"; do
   esac
 done
 
-ENV_FILE="${LW_ENV_FILE:-$HOME/.env}"
-[ -r "$ENV_FILE" ] || { echo "missing $ENV_FILE" >&2; exit 1; }
+ENV_FILE="${LW_ENV_FILE:-}"
+if [ -z "$ENV_FILE" ]; then
+  # PRoot's $HOME (/root) differs from the Termux home that holds the token.
+  for f in "$HOME/.env" /data/data/com.termux/files/home/.env /root/termux-home/.env; do
+    [ -r "$f" ] && { ENV_FILE="$f"; break; }
+  done
+fi
+[ -r "${ENV_FILE:-}" ] || { echo "no readable .env with GITHUB_TOKEN (set LW_ENV_FILE)" >&2; exit 1; }
 GITHUB_TOKEN="$(sed -n 's/^GITHUB_TOKEN=//p' "$ENV_FILE" | head -1 | tr -d '"'"'"'\r')"
 [ -n "$GITHUB_TOKEN" ] || { echo "GITHUB_TOKEN not set in $ENV_FILE" >&2; exit 1; }
 
