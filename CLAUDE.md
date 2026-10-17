@@ -21,9 +21,11 @@ Deterministic, event-sourced Kotlin Multiplatform simulation kernel for an Andro
 - Event Sourcing: Every state-altering action must emit a corresponding `GameEvent`.
 - Invariants: Strict enforcement of G1–G10 rules at all times.
 
-# Known issues (as of 2026-10-16, not yet fixed)
-- The Gradle commands above do not run yet: no `gradlew` wrapper; no JDK/Gradle on the Termux device; root `build.gradle.kts` lacks `com.android.application` / `kotlin("android")` plugin versions; KMP modules call `androidTarget()` without the Android library plugin; `desktopApp` has no `application` plugin (so no `run` task).
-- `game-core/.../simulation/ActionValidator.kt` uses `@JvmInline` without `import kotlin.jvm.JvmInline`.
+# Build environment
+- Gradle works (wrapper, plugin versions, `androidTarget`, `desktopApp:run` all fixed); `./gradlew check` is green as of 2026-10-17. There is still no JDK on the Termux device, so run Gradle on awsbox: `python3 -I tools/lw_remote.py --push --gradle check` (needs a live `aws login --remote` session).
+- CI: `.github/workflows/ci.yml` (invariants + Python tests, Gradle check). `tools/publish_github.sh` creates the GitHub repo (private by default) and pushes using `GITHUB_TOKEN` from `~/.env`.
+
+# Known issues (as of 2026-10-17, not yet fixed)
 - `ModelAssetManager` expects `qwen2.5-0.5b-q4_k_m.gguf`; the file at root is `qwen2.5-0.5b-instruct-q4_k_m.gguf` (kept for AI infra). `assets/models/smollm2-*.gguf` are 303-byte header stubs.
 - To re-verify (found in v6 audit): dual relationship graphs (`Npc.relationships` vs `WorldState.relationships`); Rest/Work/Flee mutate state without events (replay gap, G5/G8); trades can create coins; `BeliefStore` keys embed Float `toString` (G8 risk).
 - `_archive/pdf-printouts/` holds Google-Docs PDF printouts of an older dump — not source; don't edit.

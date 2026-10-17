@@ -1,4 +1,12 @@
-# Handoff — 2026-10-14 (Phase 9 Complete: Sprints 1–6 & 3 Red-Team Rounds Verified)
+# Handoff — 2026-10-17 (Phase 9 Complete; build verified on awsbox)
+
+## Update 2026-10-17
+  - `./gradlew check` passes on awsbox (BUILD SUCCESSFUL, 334 tasks) after commit `f0c9eb6` (wrapper, plugin versions, `androidTarget`, CI).
+  - Added `tools/publish_github.sh` (create repo + push via `GITHUB_TOKEN`); `.gitignore` and `.github/workflows/ci.yml` already existed.
+  - Stale CLAUDE.md known issues removed (Gradle wrapper/plugins, `desktopApp:run`, `JvmInline` import).
+  - Next: v6 audit items — Rest/Work/Flee emit no events (G5/G8), trades can create coins, dual relationship graphs, Float `toString` in `BeliefStore` keys; qwen model filename mismatch.
+
+# Phase 9 state (2026-10-14)
 
 ## State
   - Phase: 9 (Procedural Crisis & Quest Engine + Interactive Compose Tactical Duel Screen + Red-Team Round 3)
