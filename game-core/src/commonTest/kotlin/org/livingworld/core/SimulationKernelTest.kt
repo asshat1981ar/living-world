@@ -264,6 +264,54 @@ class SimulationKernelTest {
     }
 
     @Test
+    fun trade_conserves_coins_when_buyer_cannot_afford_price() {
+        val reducer = DefaultWorldReducer()
+        val base = TestWorld.create().state
+        val buyer = base.npc(NpcId("apprentice"))
+        val seller = base.npc(NpcId("merchant"))
+        val broke = base.copy(
+            npcs = base.npcs + (buyer.id to buyer.copy(resources = buyer.resources.copy(coins = 4f)))
+        )
+        val coinsBefore = broke.npc(buyer.id).resources.coins + broke.npc(seller.id).resources.coins
+
+        val after = reducer.apply(
+            broke,
+            GameEvent.TradeCompleted(
+                id = broke.events.nextId(),
+                time = broke.time,
+                buyer = buyer.id.toEntityId(),
+                seller = seller.id.toEntityId(),
+                item = ItemId("bread"),
+                price = 9f
+            )
+        )
+
+        val coinsAfter = after.npc(buyer.id).resources.coins + after.npc(seller.id).resources.coins
+        assertEquals(coinsBefore, coinsAfter, "A trade must move coins, never create them")
+    }
+
+    @Test
+    fun trade_with_unknown_buyer_does_not_pay_seller() {
+        val reducer = DefaultWorldReducer()
+        val base = TestWorld.create().state
+        val seller = base.npc(NpcId("merchant"))
+
+        val after = reducer.apply(
+            base,
+            GameEvent.TradeCompleted(
+                id = base.events.nextId(),
+                time = base.time,
+                buyer = NpcId("ghost").toEntityId(),
+                seller = seller.id.toEntityId(),
+                item = ItemId("bread"),
+                price = 9f
+            )
+        )
+
+        assertEquals(seller.resources.coins, after.npc(seller.id).resources.coins)
+    }
+
+    @Test
     fun deterministic_event_replay_matches_live_simulation() = runTest {
         val initialWorld = TestWorld.create().state
         val engine = TestWorld.create().simulationEngine

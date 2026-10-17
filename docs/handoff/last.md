@@ -4,7 +4,9 @@
   - `./gradlew check` passes on awsbox (BUILD SUCCESSFUL, 334 tasks) after commit `f0c9eb6` (wrapper, plugin versions, `androidTarget`, CI).
   - Added `tools/publish_github.sh` (create repo + push via `GITHUB_TOKEN`); `.gitignore` and `.github/workflows/ci.yml` already existed.
   - Stale CLAUDE.md known issues removed (Gradle wrapper/plugins, `desktopApp:run`, `JvmInline` import).
-  - Next: v6 audit items — Rest/Work/Flee emit no events (G5/G8), trades can create coins, dual relationship graphs, Float `toString` in `BeliefStore` keys; qwen model filename mismatch.
+  - CI green on GitHub (`asshat1981ar/living-world`, private) after fixing `setup-android` (`packages: ""`).
+  - v6 audit: Rest/Work/Flee replay gap was already fixed (all emit `NpcRoutineCompleted`). Fixed trade coin creation in `WorldReducer.applyTrade` (seller credited `min(price, buyer coins)`; unknown buyer pays nothing) with tests `trade_conserves_coins_when_buyer_cannot_afford_price` and `trade_with_unknown_buyer_does_not_pay_seller`.
+  - Next: dual relationship graphs, Float `toString` in `BeliefStore` keys, 3 G8 `hashCode()` warnings, check `simulate_village.py` mirror for the trade bug, qwen model filename mismatch.
 
 # Phase 9 state (2026-10-14)
 

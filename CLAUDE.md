@@ -27,5 +27,7 @@ Deterministic, event-sourced Kotlin Multiplatform simulation kernel for an Andro
 
 # Known issues (as of 2026-10-17, not yet fixed)
 - `ModelAssetManager` expects `qwen2.5-0.5b-q4_k_m.gguf`; the file at root is `qwen2.5-0.5b-instruct-q4_k_m.gguf` (kept for AI infra). `assets/models/smollm2-*.gguf` are 303-byte header stubs.
-- To re-verify (found in v6 audit): dual relationship graphs (`Npc.relationships` vs `WorldState.relationships`); Rest/Work/Flee mutate state without events (replay gap, G5/G8); trades can create coins; `BeliefStore` keys embed Float `toString` (G8 risk).
+- To re-verify (found in v6 audit): dual relationship graphs (`Npc.relationships` vs `WorldState.relationships`); `BeliefStore` keys embed Float `toString` (G8 risk).
+- G8 warnings from `tools/check_invariants.py`: `hashCode()` used in `GameEvent.kt:67` and `SaveManager.kt:62,160` (not stable across platforms; use Fnv1a).
+- Verified 2026-10-17: Rest/Work/Flee already emit `NpcRoutineCompleted` (no replay gap). Trade coin creation fixed in `applyTrade` (seller is credited only what the buyer paid). `simulate_village.py` may mirror the old behavior — not yet checked.
 - `_archive/pdf-printouts/` holds Google-Docs PDF printouts of an older dump — not source; don't edit.

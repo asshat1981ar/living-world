@@ -321,29 +321,32 @@ class DefaultWorldReducer : WorldReducer {
         val buyerNpc = nextNpcs[buyerNpcId]
         val sellerNpc = nextNpcs[sellerNpcId]
 
+        // Coins are conserved: the seller is credited only what the buyer actually paid.
+        var paid = 0f
         if (buyerNpc != null) {
-            val nextCoins = (buyerNpc.resources.coins - event.price).coerceAtLeast(0f)
+            paid = minOf(event.price, buyerNpc.resources.coins)
             val nextItems = buyerNpc.resources.items + event.item
             nextNpcs = nextNpcs + (buyerNpc.id to buyerNpc.copy(
-                resources = buyerNpc.resources.copy(coins = nextCoins, items = nextItems)
+                resources = buyerNpc.resources.copy(coins = buyerNpc.resources.coins - paid, items = nextItems)
             ))
         } else if (event.buyer is EntityId.Player || event.buyer.identifier == state.player.id.identifier) {
+            paid = minOf(event.price, nextPlayer.coins)
             nextPlayer = nextPlayer.copy(
-                coins = (nextPlayer.coins - event.price).coerceAtLeast(0f),
+                coins = nextPlayer.coins - paid,
                 inventory = nextPlayer.inventory + event.item,
                 historicalActions = nextPlayer.historicalActions + event.id
             )
         }
 
         if (sellerNpc != null) {
-            val nextCoins = sellerNpc.resources.coins + event.price
+            val nextCoins = sellerNpc.resources.coins + paid
             val nextItems = sellerNpc.resources.items - event.item
             nextNpcs = nextNpcs + (sellerNpc.id to sellerNpc.copy(
                 resources = sellerNpc.resources.copy(coins = nextCoins, items = nextItems)
             ))
         } else if (event.seller is EntityId.Player || event.seller.identifier == state.player.id.identifier) {
             nextPlayer = nextPlayer.copy(
-                coins = nextPlayer.coins + event.price,
+                coins = nextPlayer.coins + paid,
                 inventory = nextPlayer.inventory - event.item,
                 historicalActions = nextPlayer.historicalActions + event.id
             )
@@ -364,7 +367,7 @@ class DefaultWorldReducer : WorldReducer {
         }
 
         val nextEconomy = state.economy.copy(
-            totalTradeVolume = state.economy.totalTradeVolume + event.price
+            totalTradeVolume = state.economy.totalTradeVolume + paid
         )
 
         return state.copy(
