@@ -178,6 +178,17 @@ class TestSpriteSystem(unittest.TestCase):
         bonus = ProceduralQuestEngine.complete_scarcity_trade(w_quest, "bread", 9.0)
         self.assertEqual(bonus, 45.0, "RT-16: Completing scarcity trade awards quest bounty")
 
+        # Trades conserve coins: a short buyer pays only what they have; an unknown buyer pays nothing
+        w_trade = init_village_world()
+        w_trade.npcs["apprentice"].coins = 4.0
+        player_before = w_trade.player_coins
+        ProceduralQuestEngine.complete_scarcity_trade(w_trade, "bread", 9.0)
+        self.assertEqual(w_trade.npcs["apprentice"].coins, 0.0)
+        self.assertEqual(w_trade.player_coins, player_before + 4.0)
+        player_before = w_trade.player_coins
+        ProceduralQuestEngine.complete_scarcity_trade(w_trade, "bread", 9.0, buyer_id="ghost")
+        self.assertEqual(w_trade.player_coins, player_before)
+
         # Sprint 6 & RT-17: Interactive Tactical Duel Simulator & dead-combatant guard
         w_duel = init_village_world()
         duel_sim = TacticalDuelSimulator(w_duel, "miner_derek")

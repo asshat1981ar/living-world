@@ -7,7 +7,8 @@
   - CI green on GitHub (`asshat1981ar/living-world`, private) after fixing `setup-android` (`packages: ""`).
   - v6 audit: Rest/Work/Flee replay gap was already fixed (all emit `NpcRoutineCompleted`). Fixed trade coin creation in `WorldReducer.applyTrade` (seller credited `min(price, buyer coins)`; unknown buyer pays nothing) with tests `trade_conserves_coins_when_buyer_cannot_afford_price` and `trade_with_unknown_buyer_does_not_pay_seller`.
   - G8 `hashCode()` warnings fixed (`stateHashOf`, `stableStringHash`); invariant checker now 0 warnings.
-  - Next: dual relationship graphs, Float `toString` in `BeliefStore` keys, check `simulate_village.py` mirror for the trade bug, qwen model filename mismatch.
+  - `simulate_village.py` mirror of the trade fix done (`complete_scarcity_trade` takes `buyer_id`), with a test in `test_ui_sprites.py`.
+  - Next: dual relationship graphs, Float `toString` in `BeliefStore` keys, qwen model filename mismatch.
 
 # Phase 9 state (2026-10-14)
 

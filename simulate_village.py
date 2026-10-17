@@ -403,13 +403,19 @@ class ProceduralQuestEngine:
         return dispatched
 
     @staticmethod
-    def complete_scarcity_trade(world: WorldState, item_id: str, trade_price: float) -> float:
+    def complete_scarcity_trade(world: WorldState, item_id: str, trade_price: float,
+                                buyer_id: str = "apprentice") -> float:
+        # Mirrors WorldReducer.applyTrade: coins move from buyer to player, never appear from nowhere.
+        buyer = world.npcs.get(buyer_id)
+        paid = min(trade_price, buyer.coins) if buyer is not None else 0.0
+        if buyer is not None:
+            buyer.coins = round(buyer.coins - paid, 2)
         bonus = 0.0
         for q in world.active_quests:
             if q["id"] == f"quest_scarcity_{item_id}" and q["status"] != "COMPLETED":
                 q["status"] = "COMPLETED"
                 bonus += q["reward"]
-        world.player_coins += trade_price + bonus
+        world.player_coins += paid + bonus
         return bonus
 
 class TacticalDuelSimulator:
