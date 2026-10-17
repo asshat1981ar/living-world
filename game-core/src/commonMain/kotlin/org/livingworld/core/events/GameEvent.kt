@@ -64,12 +64,19 @@ object TacticalCombatResolver {
         if (npc.hasTrait(Trait.COWARDLY) || npc.hasTrait(Trait.LOYAL)) {
             return TacticalStance.WARD
         }
-        val hash = ((npc.id.value.hashCode().toLong() and 0x7FFFFFFFL) + time.tick) % 3L
+        val hash = ((stableStringHash(npc.id.value) and 0x7FFFFFFFL) + time.tick) % 3L
         return when (hash) {
             0L -> TacticalStance.STRIKE
             1L -> TacticalStance.WARD
             else -> TacticalStance.FEINT
         }
+    }
+
+    /** The `31 * h + c` String hash with 32-bit wraparound, spelled out so it never depends on a platform hashCode(). */
+    private fun stableStringHash(value: String): Long {
+        var h = 0
+        for (ch in value) h = 31 * h + ch.code
+        return h.toLong()
     }
 
     /**

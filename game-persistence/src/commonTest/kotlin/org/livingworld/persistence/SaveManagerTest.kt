@@ -31,6 +31,15 @@ class SaveManagerTest {
     }
 
     @Test
+    fun test_state_hash_is_derived_from_digest_not_platform_hashcode() {
+        val world = DefaultVillageFactory.marketVillage()
+        val envelope = SaveManager.deserializeEnvelope(SaveManager.serializeEnvelope(world))
+        assertEquals(SaveManager.stateHashOf(envelope.deterministicDigestHex), envelope.stateHash)
+        assertEquals(-0x1, SaveManager.stateHashOf("0000000000ffffffff".takeLast(16)))
+        assertEquals(0x1234abcd, SaveManager.stateHashOf("00000000" + "1234abcd"))
+    }
+
+    @Test
     fun test_v1_legacy_raw_worldstate_migration_to_v3() {
         val world = DefaultVillageFactory.marketVillage()
         val rawV1Json = SaveManager.serializeWorld(world)

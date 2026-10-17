@@ -59,7 +59,7 @@ object SaveSchemaMigrator {
                     schemaVersion = SaveEnvelope.CURRENT_SCHEMA_VERSION,
                     savedAtTick = legacyState.time.tick,
                     eventCount = legacyState.events.size,
-                    stateHash = legacyState.hashCode(),
+                    stateHash = SaveManager.stateHashOf(digest),
                     deterministicDigestHex = digest,
                     worldState = legacyState,
                     migrationHistory = listOf("v1->v2: wrapped raw WorldState", "v2->v3: added deterministicDigestHex")
@@ -104,6 +104,9 @@ object SaveManager {
      * Computes a platform-independent, deterministic FNV-1a 64-bit hex fingerprint of the complete
      * authoritative WorldState covering NPCs, beliefs, factions, relationships, and economy (RT-12 hardened).
      */
+    /** Platform-independent 32-bit state hash: the low 32 bits of the FNV-1a digest (data-class hashCode() is not stable). */
+    fun stateHashOf(digestHex: String): Int = digestHex.takeLast(8).toLong(16).toInt()
+
     fun computeDeterministicFingerprint(state: WorldState): String {
         val canonicalBuilder = StringBuilder()
         canonicalBuilder.append("seed=").append(state.seed)
@@ -157,7 +160,7 @@ object SaveManager {
             schemaVersion = SaveEnvelope.CURRENT_SCHEMA_VERSION,
             savedAtTick = state.time.tick,
             eventCount = state.events.size,
-            stateHash = state.hashCode(),
+            stateHash = stateHashOf(digest),
             deterministicDigestHex = digest,
             worldState = state
         )
