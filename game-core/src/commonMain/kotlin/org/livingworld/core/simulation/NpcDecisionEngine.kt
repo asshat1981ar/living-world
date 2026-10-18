@@ -143,11 +143,14 @@ class DefaultNpcDecisionEngine(
         return candidates
     }
 
+    /** Rule-tier survival response that no advisor may override. */
+    fun isSurvivalOverride(npc: Npc): Boolean = npc.resources.health < 25f && npc.emotionalState.fear > 0.6f
+
     override suspend fun decide(
         npc: Npc,
         world: WorldState
     ): ValidatedAction {
-        if (npc.resources.health < 25f && npc.emotionalState.fear > 0.6f) {
+        if (isSurvivalOverride(npc)) {
             val fleeProposal = AiProposal(Intent.Flee(EntityId.Player("threat")), 1.0f, "Survival rule: health critical")
             val validated = validator.validate(fleeProposal, npc, world)
             if (validated.isSuccess) return validated.getOrThrow()
