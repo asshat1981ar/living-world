@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import org.livingworld.core.dialogue.DialogueGrounding
 import org.livingworld.core.events.GameEvent
 import org.livingworld.core.ids.EntityId
 import org.livingworld.core.ids.NpcId
@@ -41,8 +42,12 @@ class DialogueViewModel(
 
     val currentWorldState: WorldState get() = world
 
+    /** How many things this NPC has already told the player this conversation. */
+    private var told = 0
+
     fun loadNpc(npcId: NpcId) {
         val npc = world.npcs[npcId] ?: return
+        told = 0
         val rel = world.relationships.get(npcId.toEntityId(), EntityId.Player("player"))
         val card = ChimeraUiLayoutEngine.createPortraitCardState(npc, manifest, rel)
 
@@ -57,11 +62,7 @@ class DialogueViewModel(
                     isPlayer = false
                 )
             ),
-            availableOptions = listOf(
-                "Ask about rumors regarding the Iron Guild",
-                "Offer assistance with local trade shipments",
-                "Inquire about recent strange events"
-            )
+            availableOptions = OPTIONS
         )
     }
 
@@ -73,7 +74,7 @@ class DialogueViewModel(
         val newHistory = current.dialogueHistory + DialogueLine("Player", chosenText, isPlayer = true)
 
         // Social simulation feedback: record canonical RelationshipShifted event via WorldReducer (Invariant G5)
-        val deltaTrust = if (optionIndex == 1) 0.15f else 0.05f
+        val deltaTrust = if (optionIndex == OFFER_ASSISTANCE) 0.15f else 0.05f
         val shiftEvent = GameEvent.RelationshipShifted(
             id = world.events.nextId(),
             time = world.time,
@@ -92,10 +93,15 @@ class DialogueViewModel(
         val updatedRel = world.relationships.get(npc.id.toEntityId(), EntityId.Player("player"))
         val updatedCard = ChimeraUiLayoutEngine.createPortraitCardState(updatedNpc, manifest, updatedRel)
 
+        // G3: an NPC only asserts what it believes; everything else is a non-claim.
         val npcReply = when (optionIndex) {
-            0 -> "The Iron Guild grows bolder each passing night. Be cautious in the mines."
-            1 -> "Your aid is welcome. Our supply caravans have been harassed of late."
-            else -> "The ancient ruins to the east have begun to glow with an eerie light."
+            ASK_WHAT_THEY_KNOW -> {
+                val facts = DialogueGrounding.speakableFacts(updatedNpc)
+                facts.getOrNull(told++)?.line
+                    ?: if (facts.isEmpty()) DialogueGrounding.NOTHING_TO_TELL else "That is all I know."
+            }
+            OFFER_ASSISTANCE -> "Your aid is welcome."
+            else -> "Farewell, traveler."
         }
 
         _uiState.value = current.copy(
@@ -103,7 +109,13 @@ class DialogueViewModel(
             portraitCard = updatedCard,
             relationship = updatedRel,
             dialogueHistory = newHistory + DialogueLine(updatedNpc.identity.name, npcReply, isPlayer = false),
-            availableOptions = listOf("I understand.", "Tell me more.", "Farewell.")
+            availableOptions = OPTIONS
         )
+    }
+
+    private companion object {
+        const val ASK_WHAT_THEY_KNOW = 0
+        const val OFFER_ASSISTANCE = 1
+        val OPTIONS = listOf("Ask what they have heard", "Offer assistance with local trade", "Farewell.")
     }
 }

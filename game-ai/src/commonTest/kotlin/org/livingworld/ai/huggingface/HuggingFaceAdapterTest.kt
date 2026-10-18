@@ -141,7 +141,7 @@ class HuggingFaceAdapterTest {
 
         val reply = dialogueAdapter.generateDialogueLine(npc, "Have you seen my sword?", loc.id, listOf(belief), Relationship.NEUTRAL)
         assertNotNull(reply)
-        assertTrue(reply.contains("whispered") || reply.contains("PlayerStole"))
+        assertTrue(reply.contains("guard_captain told me") && reply.contains("PlayerStole"))
     }
 
     @Test
@@ -174,5 +174,49 @@ class HuggingFaceAdapterTest {
         val midMemoryModels = OnDeviceModelCatalog.findForMemoryBudget(800)
         assertEquals(4, midMemoryModels.size)
         assertTrue(midMemoryModels.any { it.modelId.contains("Llama-3.2-1B") })
+    }
+
+    private fun chat(content: String) = """{"choices":[{"message":{"role":"assistant","content":"$content"}}]}"""
+
+    private fun dialogueFixture(): Triple<Npc, Location, Belief> {
+        val loc = Location(LocationId("village_square"), "Village Square")
+        val npc = Npc(id = NpcId("elara"), identity = Identity("Elara", "Herbalist", loc.id, loc.id))
+        val belief = Belief(
+            proposition = Proposition.PlayerStole(ItemId("iron_sword")),
+            confidence = 0.85f,
+            source = KnowledgeSource.Rumor(NpcId("guard_captain")),
+            reliability = 0.8f,
+            acquiredAt = WorldTime(1440L)
+        )
+        return Triple(npc, loc, belief)
+    }
+
+    @Test
+    fun dialogue_reply_that_invents_a_fact_is_replaced_by_the_kernel_line() = runTest {
+        val (npc, loc, belief) = dialogueFixture()
+        val adapter = HuggingFaceDialogueAdapter(
+            transport = MockHfTransport { _, _ -> Result.success(chat("The Iron Guild grows bolder each night.")) }
+        )
+        val reply = adapter.generateDialogueLine(npc, "Any news?", loc.id, listOf(belief), Relationship.NEUTRAL)
+        assertFalse("Iron Guild" in reply)
+        assertTrue(reply.contains("guard_captain told me"))
+    }
+
+    @Test
+    fun grounded_dialogue_reply_passes_through_unchanged() = runTest {
+        val (npc, loc, belief) = dialogueFixture()
+        val line = "Aye, guard_captain told me that PlayerStole(iron_sword)."
+        val adapter = HuggingFaceDialogueAdapter(transport = MockHfTransport { _, _ -> Result.success(chat(line)) })
+        assertEquals(line, adapter.generateDialogueLine(npc, "Any news?", loc.id, listOf(belief), Relationship.NEUTRAL))
+    }
+
+    @Test
+    fun npc_without_beliefs_says_it_has_nothing_to_tell_when_the_model_is_unreachable() = runTest {
+        val (npc, loc, _) = dialogueFixture()
+        val adapter = HuggingFaceDialogueAdapter(transport = MockHfTransport { _, _ -> Result.failure(RuntimeException("offline")) })
+        assertEquals(
+            org.livingworld.core.dialogue.DialogueGrounding.NOTHING_TO_TELL,
+            adapter.generateDialogueLine(npc, "Any news?", loc.id, emptyList(), Relationship.NEUTRAL)
+        )
     }
 }

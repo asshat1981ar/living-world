@@ -2,6 +2,8 @@ package org.livingworld.ai.huggingface
 
 import kotlinx.serialization.json.Json
 import org.livingworld.core.beliefs.Belief
+import org.livingworld.core.dialogue.DialogueGrounding
+import org.livingworld.core.dialogue.GroundingCheck
 import org.livingworld.core.ids.LocationId
 import org.livingworld.core.inspector.formatFloat2
 import org.livingworld.core.npc.Npc
@@ -58,7 +60,8 @@ class HuggingFaceDialogueAdapter(
         return try {
             val chatResp = json.decodeFromString<HfChatResponse>(result.getOrNull() ?: "")
             val content = chatResp.choices.firstOrNull()?.message?.content?.trim()
-            if (!content.isNullOrBlank()) content else generateDeterministicFallback(npc, playerTopic, beliefs)
+            if (!content.isNullOrBlank() && isGrounded(content, npc, playerTopic, locationId, beliefs)) content
+            else generateDeterministicFallback(npc, playerTopic, beliefs)
         } catch (_: Exception) {
             generateDeterministicFallback(npc, playerTopic, beliefs)
         }
@@ -87,12 +90,14 @@ class HuggingFaceDialogueAdapter(
         return sb.toString()
     }
 
-    private fun generateDeterministicFallback(npc: Npc, playerTopic: String, beliefs: List<Belief>): String {
-        val topBelief = beliefs.maxByOrNull { it.confidence * it.reliability }
-        return if (topBelief != null) {
-            "I have heard it whispered that ${topBelief.proposition.describe()}."
-        } else {
-            "These are grim times in ${npc.identity.currentLocation.value}. Speak carefully."
-        }
-    }
+    /** G3: a model reply may only name what the NPC believes, plus the speaker, the place and the player's own words. */
+    private fun isGrounded(reply: String, npc: Npc, playerTopic: String, locationId: LocationId, beliefs: List<Belief>): Boolean =
+        GroundingCheck.isGrounded(
+            line = reply,
+            facts = DialogueGrounding.speakableFacts(beliefs),
+            extraAllowed = listOf(npc.identity.name, npc.id.value, locationId.value, playerTopic)
+        )
+
+    private fun generateDeterministicFallback(npc: Npc, playerTopic: String, beliefs: List<Belief>): String =
+        DialogueGrounding.speakableFacts(beliefs).firstOrNull()?.line ?: DialogueGrounding.NOTHING_TO_TELL
 }

@@ -41,6 +41,13 @@ class ViewModelTests {
         assertEquals(3, updated.dialogueHistory.size)
         assertTrue(updated.relationship.trust > 0f)
         assertEquals(1, vm.currentWorldState.events.size)
+        assertFalse(updated.dialogueHistory.last().text.contains("Iron Guild"))
+
+        // G3: with no beliefs the NPC claims nothing; once it believes something it can say exactly that.
+        val vmAsk = DialogueViewModel(world, manifest)
+        vmAsk.loadNpc(NpcId("merchant"))
+        vmAsk.chooseOption(0)
+        assertEquals(org.livingworld.core.dialogue.DialogueGrounding.NOTHING_TO_TELL, vmAsk.uiState.value.dialogueHistory.last().text)
 
         val emptyManifest = SpriteManifest()
         val vmFallback = DialogueViewModel(world, emptyManifest)
