@@ -1,0 +1,348 @@
+from dataclasses import replace
+
+from . import beliefs as bf
+from . import events as ev
+from . import memory as mem
+from .f32 import f32, coerce_in, coerce_at_least
+from .relationships import NEUTRAL
+from .world import QuestOpportunity
+
+F = f32
+
+
+def _belief(prop, conf, source, rel, at):
+    return bf.Belief(prop, conf, source, rel, at)
+
+
+def apply(state, event):
+    """DefaultWorldReducer.apply"""
+    ledger = state.events.record(event) if state.events.find(event.id) is None else state.events
+    next_time = event.time if event.time > state.time else state.time
+    base = replace(state, time=next_time, events=ledger)
+    handler = _HANDLERS[type(event)]
+    return handler(base, event)
+
+
+def _modify(rels, frm, to, dt=0.0, da=0.0, dr=0.0, dfear=0.0, dres=0.0, event_id=None):
+    return rels.modify(frm, to, dt, da, dr, dfear, dres, event_id)
+
+
+def _with(d, key, value):
+    nd = dict(d)
+    nd[key] = value
+    return nd
+
+
+def _witness_of_death(witness, victim_id, event, cares):
+    memories = witness.memories.add(mem.Episodic(event.id, F(1.0), event.time))
+    beliefs = witness.beliefs
+    if event.killer is None:
+        beliefs = beliefs.add_or_update(_belief(bf.NpcDied(victim_id), 1.0, bf.DirectObservation(), 1.0, event.time))
+    else:
+        beliefs = beliefs.add_or_update(_belief(bf.EntityKilledNpc(event.killer, victim_id), 1.0, bf.DirectObservation(), 1.0, event.time))
+        memories = memories.add(mem.RelationshipMemory(event.killer, "ASSAULT", F(0.95), event.time))
+    return replace(
+        witness, memories=memories, beliefs=beliefs,
+        emotionalState=witness.emotionalState.shifted(
+            deltaFear=F(0.35),
+            deltaGrief=F(0.6) if cares else F(0.15),
+            deltaAnger=F(0.45) if cares else F(0.1)))
+
+
+def _hear_of_death(listener, victim_id, event, source, cares):
+    prop = bf.EntityKilledNpc(event.killer, victim_id) if event.killer is not None else bf.NpcDied(victim_id)
+    return replace(
+        listener,
+        beliefs=listener.beliefs.add_or_update(_belief(prop, F(0.85), source, F(0.8), event.time)),
+        memories=listener.memories.add(mem.Episodic(event.id, F(0.7), event.time)),
+        emotionalState=listener.emotionalState.shifted(deltaGrief=F(0.4) if cares else F(0.1)))
+
+
+def _npc_death(state, event):
+    victim = state.npcs.get(event.victim)
+    if victim is None:
+        return state
+    updated_victim = replace(victim, identity=replace(victim.identity, isAlive=False),
+                             resources=replace(victim.resources, health=0.0))
+    next_npcs = _with(state.npcs, victim.id, updated_victim)
+    rels = state.relationships
+    next_factions = {k: (f.remove_member(victim.id) if f.has_member(victim.id) else f) for k, f in state.factions.items()}
+
+    for wid in event.witnesses:
+        witness = next_npcs.get(wid)
+        if witness is None:
+            continue
+        affection = rels.get(("npc", wid), ("npc", victim.id)).overall_sentiment
+        cares = affection > F(0.2) or witness.reputation_toward(("npc", victim.id), rels) > F(0.2)
+        next_npcs = _with(next_npcs, wid, _witness_of_death(witness, victim.id, event, cares))
+        if event.killer is not None:
+            rels = _modify(rels, ("npc", wid), event.killer,
+                           dt=F(-0.8) if cares else F(-0.4),
+                           da=F(-0.8) if cares else F(-0.3),
+                           dr=F(-0.3), dfear=F(0.45),
+                           dres=F(0.9) if cares else F(0.4),
+                           event_id=event.id)
+
+    first_witness = event.witnesses[0] if event.witnesses else None
+    for listener in sorted(next_npcs.values(), key=lambda n: n.id):
+        if (not listener.is_alive) or listener.id == victim.id or listener.id in event.witnesses:
+            continue
+        sentiment = rels.get(("npc", listener.id), ("npc", victim.id)).overall_sentiment
+        shared = [f for f in victim.factions if f in listener.factions]
+        shared_faction = min(shared) if shared else None
+        if sentiment <= F(0.2) and shared_faction is None:
+            continue
+        if first_witness is not None:
+            source = bf.Hearsay(first_witness)
+        elif shared_faction is not None:
+            source = bf.FactionReport(shared_faction)
+        else:
+            source = bf.Observation(event.id)
+        next_npcs = _with(next_npcs, listener.id, _hear_of_death(listener, victim.id, event, source, sentiment > F(0.2)))
+
+    victim_entity = ("npc", victim.id)
+    quests = tuple(
+        replace(q, status="FAILED") if (q.issuer == victim_entity and q.status in ("AVAILABLE", "ACTIVE")) else q
+        for q in state.activeQuests)
+    return replace(state, npcs=next_npcs, factions=next_factions, relationships=rels, activeQuests=quests)
+
+
+def _theft(state, event):
+    next_npcs = state.npcs
+    rels = state.relationships
+    if event.thief[0] == "player":
+        prop = bf.PlayerStole(event.item)
+    else:
+        prop = bf.EntityStoleItem(event.thief, event.item)
+    for wid in event.witnesses:
+        witness = next_npcs.get(wid)
+        if witness is None:
+            continue
+        belief = _belief(prop, F(0.95), bf.DirectObservation(), F(0.95), event.time)
+        opp = _belief(bf.HasTrait(event.thief, "OPPORTUNISTIC"), F(0.9), bf.Observation(event.id), F(0.95), event.time)
+        memories = (witness.memories
+                    .add(mem.Episodic(event.id, F(0.8), event.time))
+                    .add(mem.RelationshipMemory(event.thief, "THEFT", F(0.85), event.time)))
+        updated = replace(
+            witness,
+            beliefs=witness.beliefs.add_or_update(belief).add_or_update(opp),
+            memories=memories,
+            emotionalState=witness.emotionalState.shifted(deltaAnger=F(0.25), deltaSuspicion=F(0.3)))
+        next_npcs = _with(next_npcs, wid, updated)
+        rels = _modify(rels, ("npc", wid), event.thief, dt=F(-0.5), da=F(-0.3), dres=F(0.6), event_id=event.id)
+
+    owner_id = None
+    if event.owner is not None:
+        owner_id = event.owner[1] if event.owner[0] == "npc" else event.owner[1]
+    owner = next_npcs.get(owner_id) if owner_id is not None else None
+    if owner is not None:
+        items = list(owner.resources.items)
+        if event.item in items:
+            items.remove(event.item)
+        was_witness = owner.id in event.witnesses
+        updated_owner = replace(
+            owner, resources=replace(owner.resources, items=tuple(items)),
+            emotionalState=owner.emotionalState if was_witness else owner.emotionalState.shifted(deltaSuspicion=F(0.2)))
+        next_npcs = _with(next_npcs, owner.id, updated_owner)
+    return replace(state, npcs=next_npcs, relationships=rels)
+
+
+def _rumor(state, event):
+    target = state.npcs.get(event.target)
+    if target is None:
+        return state
+    tb = event.transmittedBelief
+    updated_target = replace(
+        target,
+        beliefs=target.beliefs.add_or_update(tb),
+        memories=(target.memories.add(mem.Episodic(event.id, F(0.5), event.time))
+                  .add(mem.Semantic(tb.proposition, tb.confidence, event.time))))
+    src = state.npcs.get(event.source)
+    source = None
+    if src is not None:
+        source = replace(src, memories=src.memories.add(mem.Told(event.target, tb.proposition, F(0.3), event.time)))
+    with_target = _with(state.npcs, target.id, updated_target)
+    return replace(state, npcs=_with(with_target, source.id, source) if source is not None else with_target)
+
+
+def _rel_shift(state, event):
+    rels = _modify(state.relationships, event.source, event.target, event.deltaTrust, event.deltaAffection,
+                   event.deltaRespect, event.deltaFear, event.deltaResentment, event.id)
+    src_id = event.source[1]
+    src = state.npcs.get(src_id)
+    if src is not None:
+        exp = "COOPERATION" if (event.deltaTrust >= 0.0 and event.deltaResentment <= 0.0) else "BETRAYAL"
+        m = mem.RelationshipMemory(event.target, exp, F(0.6), event.time)
+        final = _with(state.npcs, src_id, replace(src, memories=src.memories.add(m)))
+    else:
+        final = state.npcs
+    return replace(state, relationships=rels, npcs=final)
+
+
+def _allegiance(state, event):
+    npc = state.npcs.get(event.npc)
+    if npc is None:
+        return state
+    fs = tuple(f for f in npc.factions if f != event.oldFaction if event.oldFaction is not None) \
+        if event.oldFaction is not None else npc.factions
+    if event.newFaction not in fs:
+        fs = fs + (event.newFaction,)
+    updated = replace(npc, factions=fs)
+    nf = state.factions
+    if event.oldFaction is not None:
+        old = nf.get(event.oldFaction)
+        if old is not None:
+            nf = _with(nf, old.id, old.remove_member(npc.id))
+    new = nf.get(event.newFaction)
+    if new is not None:
+        nf = _with(nf, new.id, new.add_member(npc.id))
+    return replace(state, npcs=_with(state.npcs, npc.id, updated), factions=nf)
+
+
+def _remove_first(items, x):
+    items = list(items)
+    if x in items:
+        items.remove(x)
+    return tuple(items)
+
+
+def _trade(state, event):
+    next_npcs = state.npcs
+    player = state.player
+    buyer_id = event.buyer[1]
+    seller_id = event.seller[1]
+    buyer = next_npcs.get(buyer_id)
+    seller = next_npcs.get(seller_id)
+    paid = 0.0
+    if buyer is not None:
+        paid = min(event.price, buyer.resources.coins)
+        next_npcs = _with(next_npcs, buyer.id, replace(buyer, resources=replace(
+            buyer.resources, coins=F(buyer.resources.coins - paid), items=buyer.resources.items + (event.item,))))
+    elif event.buyer[0] == "player" or event.buyer[1] == state.player.id[1]:
+        paid = min(event.price, player.coins)
+        player = replace(player, coins=F(player.coins - paid), inventory=player.inventory + (event.item,),
+                         historicalActions=player.historicalActions + (event.id,))
+    if seller is not None:
+        next_npcs = _with(next_npcs, seller.id, replace(seller, resources=replace(
+            seller.resources, coins=F(seller.resources.coins + paid), items=_remove_first(seller.resources.items, event.item))))
+    elif event.seller[0] == "player" or event.seller[1] == state.player.id[1]:
+        player = replace(player, coins=F(player.coins + paid), inventory=_remove_first(player.inventory, event.item),
+                         historicalActions=player.historicalActions + (event.id,))
+
+    player_involved = (event.buyer[0] == "player" or event.seller[0] == "player"
+                       or event.buyer[1] == state.player.id[1] or event.seller[1] == state.player.id[1])
+    bonus = 0.0
+    quests = []
+    for q in state.activeQuests:
+        if player_involved and q.status != "COMPLETED" and q.status != "FAILED" and q.id == f"quest_scarcity_{event.item}":
+            bonus = F(bonus + q.reward)
+            quests.append(replace(q, status="COMPLETED"))
+        else:
+            quests.append(q)
+    if bonus > 0.0:
+        player = replace(player, coins=F(player.coins + bonus))
+    economy = replace(state.economy, totalTradeVolume=F(state.economy.totalTradeVolume + paid))
+    return replace(state, npcs=next_npcs, player=player, economy=economy, activeQuests=tuple(quests))
+
+
+def _price(state, event):
+    price = coerce_at_least(event.newPrice, F(0.5))
+    return replace(state, economy=state.economy.with_price(event.item, price))
+
+
+def _shop_inherited(state, event):
+    heir = state.npcs.get(event.heir)
+    if heir is None:
+        return state
+    belief = _belief(bf.ShopInheritedProp(event.heir, event.shopName), 1.0, bf.DirectObservation(), 1.0, event.time)
+    updated = replace(
+        heir, identity=replace(heir.identity, occupation=f"Shopkeeper ({event.shopName})"),
+        resources=replace(heir.resources, coins=F(heir.resources.coins + 25.0)),
+        beliefs=heir.beliefs.add_or_update(belief))
+    return replace(state, npcs=_with(state.npcs, heir.id, updated))
+
+
+def _hostility(state, event):
+    decl = state.factions.get(event.declaringFaction)
+    if decl is None:
+        return state
+    target = state.factions.get(event.targetFaction)
+    if target is None:
+        return state
+    nf = _with(state.factions, decl.id, decl.declare_hostility(event.targetFaction))
+    nf = _with(nf, target.id, target.declare_hostility(event.declaringFaction))
+    return replace(state, factions=nf)
+
+
+def _met(state, event):
+    cur = state.relationships.get(event.entityA, event.entityB)
+    rels = state.relationships
+    if cur.trust == 0.0 and cur.affection == 0.0:
+        rels = rels.set(event.entityA, event.entityB, NEUTRAL)
+    return replace(state, relationships=rels)
+
+
+def _attacked(state, event):
+    target = state.npcs.get(event.target)
+    if target is None:
+        return state
+    dmg = coerce_at_least(event.damage, 0.0)
+    remaining = coerce_at_least(F(target.resources.health - dmg), 0.0)
+    updated = replace(
+        target, resources=replace(target.resources, health=remaining),
+        emotionalState=target.emotionalState.shifted(deltaFear=F(0.2), deltaAnger=F(0.3)),
+        memories=target.memories.add(mem.RelationshipMemory(event.attacker, "ASSAULT", F(0.9), event.time)))
+    rels = _modify(state.relationships, ("npc", target.id), event.attacker,
+                   dt=F(-0.4), da=F(-0.4), dfear=F(0.25), dres=F(0.5), event_id=event.id)
+    return replace(state, npcs=_with(state.npcs, target.id, updated), relationships=rels)
+
+
+def _routine(state, event):
+    npc = state.npcs.get(event.npc)
+    if npc is None:
+        return state
+    health = coerce_in(F(npc.resources.health + event.deltaHealth), 0.0, 100.0)
+    coins = coerce_at_least(F(npc.resources.coins + event.deltaCoins), 0.0)
+    food = coerce_in(F(npc.resources.food + event.deltaFood), F(0.5), 100.0)
+    updated = replace(npc, resources=replace(npc.resources, health=health, coins=coins, food=food),
+                      emotionalState=npc.emotionalState.shifted(deltaFear=event.deltaFear))
+    next_npcs = _with(state.npcs, npc.id, updated)
+    living = [n for n in next_npcs.values() if n.is_alive]
+    if living:
+        total = 0.0
+        for n in living:  # sumOf { it.toDouble() }: sequential double sum (not math.fsum / sum())
+            total += n.resources.food
+        avg = F(F(total) / F(len(living)))
+    else:
+        avg = 15.0
+    bread = coerce_in(F(15.0 / coerce_at_least(avg, 3.0)), F(0.75), F(2.5))
+    economy = replace(state.economy, scarcityFactors=_with(state.economy.scarcityFactors, "bread", bread))
+    return replace(state, npcs=next_npcs, economy=economy)
+
+
+def _opportunity(state, event):
+    if any(q.id == event.opportunityId for q in state.activeQuests):
+        return state
+    issuer = event.actors[0] if event.actors else ("npc", "elder_rowan")
+    quest = QuestOpportunity(
+        id=event.opportunityId, title=event.title, description=event.narrativeHook, issuer=issuer,
+        target=("location", event.location),
+        reward=coerce_in(F(event.urgency * 100.0), 25.0, 150.0), status="AVAILABLE")
+    return replace(state, activeQuests=state.activeQuests + (quest,))
+
+
+_HANDLERS = {
+    ev.NpcKilled: _npc_death,
+    ev.ItemStolen: _theft,
+    ev.RumorTransmitted: _rumor,
+    ev.RelationshipShifted: _rel_shift,
+    ev.AllegianceChanged: _allegiance,
+    ev.TradeCompleted: _trade,
+    ev.PriceAdjusted: _price,
+    ev.ShopInherited: _shop_inherited,
+    ev.FactionHostilityDeclared: _hostility,
+    ev.EntitiesMet: _met,
+    ev.NpcAttacked: _attacked,
+    ev.NpcRoutineCompleted: _routine,
+    ev.OpportunityDispatched: _opportunity,
+}

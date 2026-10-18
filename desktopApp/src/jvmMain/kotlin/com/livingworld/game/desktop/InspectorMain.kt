@@ -15,6 +15,7 @@ fun main(args: Array<String>) = runBlocking {
     // Usage: <days> <tail> [--save=<path>]   (positional args keep INSTRUCTIONS.md's `--args="30 10"` working)
     val savePath = args.firstOrNull { it.startsWith("--save=") }?.removePrefix("--save=")
     val positional = args.filterNot { it.startsWith("--") }
+    val goldenPath = args.firstOrNull { it.startsWith("--golden=") }?.removePrefix("--golden=")
     val dumpPath = args.firstOrNull { it.startsWith("--dump=") }?.removePrefix("--dump=")
     val scenario = args.firstOrNull { it.startsWith("--scenario=") }?.removePrefix("--scenario=") ?: "default"
     val days = positional.getOrNull(0)?.toIntOrNull() ?: 30
@@ -27,8 +28,11 @@ fun main(args: Array<String>) = runBlocking {
     val engine = SimulationEngine()
     var world = DefaultVillageFactory.marketVillage()
     // The default run has no deaths, rumors or thefts, so its fingerprint says nothing about those paths (G8 blind spot).
-    if (scenario == "turmoil") world = TurmoilScenario.seed(world)
-    else require(scenario == "default") { "unknown scenario '$scenario' (default, turmoil)" }
+    when (scenario) {
+        "turmoil" -> world = TurmoilScenario.seed(world)
+        "feud" -> world = TurmoilScenario.seedFeud(world)
+        else -> require(scenario == "default") { "unknown scenario '$scenario' (default, turmoil, feud)" }
+    }
 
     val startNanos = System.nanoTime()
     world = engine.advance(world, WorldDuration.days(days.toLong()))
@@ -39,6 +43,7 @@ fun main(args: Array<String>) = runBlocking {
     println("Alive NPCs      : ${world.npcs.values.count { it.isAlive }} / ${world.npcs.size}")
     println("Wall time       : ${elapsedMs}ms")
     println("Fingerprint     : ${SaveManager.computeDeterministicFingerprint(world)}")
+    if (goldenPath != null) println("Golden          : ${GoldenCheck.compare(goldenPath, CanonicalDump.dump(world))}")
     if (dumpPath != null) {
         File(dumpPath).apply { parentFile?.mkdirs() }.writeText(CanonicalDump.dump(world).joinToString("\n") + "\n")
         println("Canonical dump  : $dumpPath")

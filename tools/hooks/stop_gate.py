@@ -151,6 +151,27 @@ def determinism_digest(digests: dict[str, str]) -> str:
 DETERMINISM_SCENARIOS = (("default", "{days} 0"), ("turmoil", "15 0 --scenario=turmoil"))
 
 
+# (label, runner args): the Kotlin run must reproduce its checked-in golden dump, which the Python mirror is also held to.
+GOLDEN_RUNS = (
+    ("golden default", "10 0 --golden=tests/golden/default-10d.txt.gz"),
+    ("golden turmoil", "10 0 --scenario=turmoil --golden=tests/golden/turmoil-10d.txt.gz"),
+    ("golden feud", "10 0 --scenario=feud --golden=tests/golden/feud-10d.txt.gz"),
+)
+
+
+def golden_check() -> Outcome:
+    """Each golden run must print `Golden : OK`; a mismatch means Kotlin behaviour changed without re-recording tests/golden."""
+    for label, args in GOLDEN_RUNS:
+        o = _run([sys.executable, "-I", "tools/lw_remote.py", "--gradle", f":desktopApp:run --args='{args}'", "--tail", "200"], 900)
+        m = re.search(r"^Golden\s*:\s*(.+)$", o.output, re.M)
+        if not m:
+            return Outcome(False, o.output, infra="GRADLE_EXIT" not in o.output)
+        if not m.group(1).startswith("OK"):
+            return Outcome(False, f"{label}: Kotlin output no longer matches tests/golden ({m.group(1)[:300]}). "
+                                  "If the behaviour change is intended, regenerate the goldens (see tools/mirror_parity.py) and update lw_mirror until `python3 tools/mirror_parity.py` passes.")
+    return Outcome(True, "goldens match")
+
+
 def determinism_check(runs: int | None = None, days: int = DETERMINISM_DAYS) -> Outcome:
     """G8: run each scenario `runs` times on awsbox; every FNV-1a fingerprint of a scenario must be identical."""
     runs = runs or int(os.environ.get("LW_DETERMINISM_RUNS", "2"))
@@ -170,7 +191,10 @@ def determinism_check(runs: int | None = None, days: int = DETERMINISM_DAYS) -> 
         if len(set(prints)) != 1:
             return Outcome(False, f"G8 violation: {label} scenario gave different fingerprints across {runs} runs: {prints}")
         summary.append(f"{label} {prints[0]}")
-    return Outcome(True, f"{runs} runs each, fingerprints: " + ", ".join(summary))
+    golden = golden_check()
+    if not golden.ok:
+        return golden
+    return Outcome(True, f"{runs} runs each, fingerprints: " + ", ".join(summary) + "; goldens match")
 
 
 def _load_quick(path: Path) -> dict:

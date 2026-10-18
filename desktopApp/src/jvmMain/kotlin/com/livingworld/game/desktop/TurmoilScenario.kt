@@ -38,4 +38,15 @@ object TurmoilScenario {
         )
         return reducer.apply(world, theft)
     }
+
+    /** A grudge between a vengeful miner and the blacksmith: drives the attack, duel, flee, kill and witness paths. */
+    fun seedFeud(start: WorldState): WorldState {
+        val grudge = GameEvent.RelationshipShifted(
+            id = start.events.nextId(), time = start.time,
+            source = NpcId("miner_derek").toEntityId(), target = NpcId("blacksmith_krag").toEntityId(),
+            deltaTrust = -0.5f, deltaAffection = -0.4f, deltaRespect = 0f, deltaFear = 0f, deltaResentment = 0.9f,
+            reason = "Scenario: old feud over a stolen blade"
+        )
+        return DefaultWorldReducer().apply(start, grudge)
+    }
 }

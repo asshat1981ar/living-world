@@ -173,11 +173,18 @@ class QuickTierTests(unittest.TestCase):
         self.assertIsNone(self.run_gate())
         self.assertEqual(self.det_calls, 2)
 
+    golden = "OK (4832 lines)"
+
     def _det_with(self, fingerprints):
         """Run determinism_check with _run faked; returns (outcome, argv list seen)."""
         seen, it = [], iter(fingerprints)
         orig = sg._run
-        sg._run = lambda argv, timeout: (seen.append(argv), sg.Outcome(True, f"Fingerprint     : {next(it)}\nGRADLE_EXIT 0"))[1]
+        def fake(argv, timeout):
+            seen.append(argv)
+            if any("--golden=" in a for a in argv):
+                return sg.Outcome(True, "Golden          : " + self.golden + "\nGRADLE_EXIT 0")
+            return sg.Outcome(True, f"Fingerprint     : {next(it)}\nGRADLE_EXIT 0")
+        sg._run = fake
         try:
             return sg.determinism_check(runs=2), seen
         finally:
@@ -188,9 +195,16 @@ class QuickTierTests(unittest.TestCase):
         self.assertTrue(out.ok)
         self.assertIn("default aa", out.output)
         self.assertIn("turmoil bb", out.output)
-        self.assertEqual(len(seen), 4)
+        self.assertEqual(len(seen), 4 + len(sg.GOLDEN_RUNS))
         self.assertTrue(any("--scenario=turmoil" in " ".join(a) for a in seen[2:]))
         self.assertEqual(sum("--push" in a for a in seen), 1)
+
+    def test_a_kotlin_golden_mismatch_blocks_with_regeneration_advice(self):
+        self.golden = "MISMATCH at line 12: expected [a] actual [b]"
+        out, _ = self._det_with(["aa", "aa", "bb", "bb"])
+        self.assertFalse(out.ok)
+        self.assertIn("no longer matches tests/golden", out.output)
+        self.golden = "OK (4832 lines)"
 
     def test_determinism_blocks_when_only_the_turmoil_scenario_differs(self):
         out, _ = self._det_with(["aa", "aa", "bb", "cc"])
