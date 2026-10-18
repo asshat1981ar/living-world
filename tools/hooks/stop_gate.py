@@ -146,21 +146,31 @@ def determinism_digest(digests: dict[str, str]) -> str:
     return hashlib.sha256("|".join(digests.get(m, "") for m in DETERMINISM_MODULES).encode()).hexdigest()
 
 
+# (label, runner args). The default run is quiet (no deaths, rumors or thefts), so the turmoil scenario
+# is what actually exercises the death cascade, belief and rumor paths.
+DETERMINISM_SCENARIOS = (("default", "{days} 0"), ("turmoil", "15 0 --scenario=turmoil"))
+
+
 def determinism_check(runs: int | None = None, days: int = DETERMINISM_DAYS) -> Outcome:
-    """G8: run the same simulation `runs` times on awsbox; every FNV-1a fingerprint must be identical."""
+    """G8: run each scenario `runs` times on awsbox; every FNV-1a fingerprint of a scenario must be identical."""
     runs = runs or int(os.environ.get("LW_DETERMINISM_RUNS", "2"))
-    prints: list[str] = []
-    for i in range(runs):
-        argv = [sys.executable, "-I", "tools/lw_remote.py"] + (["--push"] if i == 0 else []) + [
-            "--gradle", f":desktopApp:run --args='{days} 0'", "--tail", "200"]
-        o = _run(argv, 900)
-        fp = re.search(r"Fingerprint\s*:\s*(\S+)", o.output)
-        if not fp:
-            return Outcome(False, o.output, infra="GRADLE_EXIT" not in o.output)
-        prints.append(fp.group(1))
-    if len(set(prints)) != 1:
-        return Outcome(False, f"G8 violation: {days}-day simulation gave different fingerprints across {runs} runs: {prints}")
-    return Outcome(True, f"{runs} runs, fingerprint {prints[0]}")
+    summary: list[str] = []
+    pushed = False
+    for label, args in DETERMINISM_SCENARIOS:
+        prints: list[str] = []
+        for _ in range(runs):
+            argv = [sys.executable, "-I", "tools/lw_remote.py"] + ([] if pushed else ["--push"]) + [
+                "--gradle", f":desktopApp:run --args='{args.format(days=days)}'", "--tail", "200"]
+            pushed = True
+            o = _run(argv, 900)
+            fp = re.search(r"Fingerprint\s*:\s*(\S+)", o.output)
+            if not fp:
+                return Outcome(False, o.output, infra="GRADLE_EXIT" not in o.output)
+            prints.append(fp.group(1))
+        if len(set(prints)) != 1:
+            return Outcome(False, f"G8 violation: {label} scenario gave different fingerprints across {runs} runs: {prints}")
+        summary.append(f"{label} {prints[0]}")
+    return Outcome(True, f"{runs} runs each, fingerprints: " + ", ".join(summary))
 
 
 def _load_quick(path: Path) -> dict:

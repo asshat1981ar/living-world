@@ -15,15 +15,19 @@ fun main(args: Array<String>) = runBlocking {
     // Usage: <days> <tail> [--save=<path>]   (positional args keep INSTRUCTIONS.md's `--args="30 10"` working)
     val savePath = args.firstOrNull { it.startsWith("--save=") }?.removePrefix("--save=")
     val positional = args.filterNot { it.startsWith("--") }
+    val scenario = args.firstOrNull { it.startsWith("--scenario=") }?.removePrefix("--scenario=") ?: "default"
     val days = positional.getOrNull(0)?.toIntOrNull() ?: 30
     val tail = positional.getOrNull(1)?.toIntOrNull() ?: 10
 
     println("=== Living-World Inspector (Milestone quest-procedural-005 & compose-combat-006) ===")
-    println("world=marketVillage  duration=${days}d  tail=$tail")
+    println("world=marketVillage  scenario=$scenario  duration=${days}d  tail=$tail")
     println()
 
     val engine = SimulationEngine()
     var world = DefaultVillageFactory.marketVillage()
+    // The default run has no deaths, rumors or thefts, so its fingerprint says nothing about those paths (G8 blind spot).
+    if (scenario == "turmoil") world = TurmoilScenario.seed(world)
+    else require(scenario == "default") { "unknown scenario '$scenario' (default, turmoil)" }
 
     val startNanos = System.nanoTime()
     world = engine.advance(world, WorldDuration.days(days.toLong()))

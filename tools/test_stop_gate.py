@@ -173,6 +173,30 @@ class QuickTierTests(unittest.TestCase):
         self.assertIsNone(self.run_gate())
         self.assertEqual(self.det_calls, 2)
 
+    def _det_with(self, fingerprints):
+        """Run determinism_check with _run faked; returns (outcome, argv list seen)."""
+        seen, it = [], iter(fingerprints)
+        orig = sg._run
+        sg._run = lambda argv, timeout: (seen.append(argv), sg.Outcome(True, f"Fingerprint     : {next(it)}\nGRADLE_EXIT 0"))[1]
+        try:
+            return sg.determinism_check(runs=2), seen
+        finally:
+            sg._run = orig
+
+    def test_determinism_runs_the_turmoil_scenario_too(self):
+        out, seen = self._det_with(["aa", "aa", "bb", "bb"])
+        self.assertTrue(out.ok)
+        self.assertIn("default aa", out.output)
+        self.assertIn("turmoil bb", out.output)
+        self.assertEqual(len(seen), 4)
+        self.assertTrue(any("--scenario=turmoil" in " ".join(a) for a in seen[2:]))
+        self.assertEqual(sum("--push" in a for a in seen), 1)
+
+    def test_determinism_blocks_when_only_the_turmoil_scenario_differs(self):
+        out, _ = self._det_with(["aa", "aa", "bb", "cc"])
+        self.assertFalse(out.ok)
+        self.assertIn("turmoil", out.output)
+
     def test_determinism_digest_only_tracks_kernel_and_desktop(self):
         base = sg.determinism_digest(self.ALL)
         self.assertEqual(base, sg.determinism_digest({**self.ALL, "game-ai": "x", "game-ui": "y", "build": "z"}))
