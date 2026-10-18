@@ -76,7 +76,7 @@ object ProceduralQuestEngine {
         val problems = mutableListOf<WorldProblem>()
 
         // 1. Unsolved or unavenged villager deaths
-        val deaths = state.events.ofType<GameEvent.NpcKilled>()
+        val deaths = state.events.deaths()
         for (death in deaths) {
             problems.add(
                 WorldProblem(

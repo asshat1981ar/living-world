@@ -39,7 +39,14 @@ class DefaultNpcDecisionEngine(
      * contact more attractive, assault, theft and betrayal make it less so and a violent act more so (a grudge).
      * Only the memories the retriever surfaces for this entity (most important, most recent) count, capped at +-0.6.
      */
-    fun memoryBias(npc: Npc, action: Intent, world: WorldState): Float {
+    fun memoryBias(npc: Npc, action: Intent, world: WorldState): Float =
+        memoryBias(npc, action, world, entitiesWithRelationshipMemory(npc))
+
+    /** One pass over the NPC's memories, so a decision with many candidates does not rescan them for each one. */
+    private fun entitiesWithRelationshipMemory(npc: Npc): Set<EntityId> =
+        npc.memories.all().filterIsInstance<Memory.Relationship>().map { it.entity }.toSet()
+
+    private fun memoryBias(npc: Npc, action: Intent, world: WorldState, remembered: Set<EntityId>): Float {
         val target: EntityId = when (action) {
             is Intent.Socialize -> action.target.toEntityId()
             is Intent.ShareRumor -> action.target.toEntityId()
@@ -47,6 +54,9 @@ class DefaultNpcDecisionEngine(
             is Intent.Trade -> action.partner
             else -> return 0f
         }
+        // No relationship memory about this party means nothing can survive the filter below, so skip ranking every memory.
+        // Otherwise rank the whole store as before: unrelated memories can still crowd a weak one about the target out of the top N.
+        if (target !in remembered) return 0f
         val recalled = retriever.retrieve(npc.memories, MemoryContext(world.time, focalEntities = setOf(target)), MEMORY_RECALL_LIMIT)
             .filterIsInstance<Memory.Relationship>()
             .filter { it.entity == target }
@@ -194,6 +204,7 @@ class DefaultNpcDecisionEngine(
         }
 
         val candidates = generateCandidates(npc, world)
+        val remembered = entitiesWithRelationshipMemory(npc)
         val scored = candidates.map { candidate ->
             var score = candidate.estimatedUtility()
 
@@ -213,7 +224,7 @@ class DefaultNpcDecisionEngine(
                 score += 0.3f
             }
 
-            score += memoryBias(npc, candidate.action, world)
+            score += memoryBias(npc, candidate.action, world, remembered)
 
             Pair(candidate, score)
         }.sortedByDescending { it.second }
