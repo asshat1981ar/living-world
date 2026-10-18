@@ -2,6 +2,7 @@ package org.livingworld.core.simulation
 
 import org.livingworld.core.beliefs.Belief
 import org.livingworld.core.beliefs.KnowledgeSource
+import org.livingworld.core.events.CausalLinks
 import org.livingworld.core.events.GameEvent
 import org.livingworld.core.events.TacticalCombatResolver
 import org.livingworld.core.ids.LocationId
@@ -66,7 +67,8 @@ class SimulationEngine(
                 location = targetLoc,
                 urgency = (opp.reward / 100f).coerceIn(0.25f, 1.0f),
                 narrativeHook = opp.description,
-                actors = listOf(opp.issuer)
+                actors = listOf(opp.issuer),
+                causalEventId = CausalLinks.originOfQuest(current.events, opp.id)
             )
             current = reducer.apply(current, dispatchEvent)
         }
@@ -187,7 +189,8 @@ class SimulationEngine(
                     source = npc.id,
                     target = intent.target,
                     transmittedBelief = transmitted,
-                    distortion = 0.1f
+                    distortion = 0.1f,
+                    causalEventId = CausalLinks.originOf(state.events, intent.belief.proposition)
                 )
                 reducer.apply(state, rumorEvent)
             }
@@ -277,7 +280,8 @@ class SimulationEngine(
                     time = time,
                     heir = npc.id,
                     predecessor = intent.deceased,
-                    shopName = intent.shopName
+                    shopName = intent.shopName,
+                    causalEventId = CausalLinks.deathOf(state.events, intent.deceased)
                 )
                 reducer.apply(state, inheritEvent)
             }
