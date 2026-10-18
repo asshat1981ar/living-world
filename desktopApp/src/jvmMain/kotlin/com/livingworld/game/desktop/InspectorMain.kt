@@ -15,6 +15,7 @@ fun main(args: Array<String>) = runBlocking {
     // Usage: <days> <tail> [--save=<path>]   (positional args keep INSTRUCTIONS.md's `--args="30 10"` working)
     val savePath = args.firstOrNull { it.startsWith("--save=") }?.removePrefix("--save=")
     val positional = args.filterNot { it.startsWith("--") }
+    val dumpPath = args.firstOrNull { it.startsWith("--dump=") }?.removePrefix("--dump=")
     val scenario = args.firstOrNull { it.startsWith("--scenario=") }?.removePrefix("--scenario=") ?: "default"
     val days = positional.getOrNull(0)?.toIntOrNull() ?: 30
     val tail = positional.getOrNull(1)?.toIntOrNull() ?: 10
@@ -38,6 +39,10 @@ fun main(args: Array<String>) = runBlocking {
     println("Alive NPCs      : ${world.npcs.values.count { it.isAlive }} / ${world.npcs.size}")
     println("Wall time       : ${elapsedMs}ms")
     println("Fingerprint     : ${SaveManager.computeDeterministicFingerprint(world)}")
+    if (dumpPath != null) {
+        File(dumpPath).apply { parentFile?.mkdirs() }.writeText(CanonicalDump.dump(world).joinToString("\n") + "\n")
+        println("Canonical dump  : $dumpPath")
+    }
     if (savePath != null) {
         File(savePath).apply { parentFile?.mkdirs() }.writeText(SaveManager.serializeEnvelope(world))
         println("Saved envelope  : $savePath")
