@@ -4,6 +4,11 @@ import org.livingworld.core.beliefs.KnowledgeSource
 import org.livingworld.core.beliefs.Proposition
 import org.livingworld.core.ids.EntityId
 import org.livingworld.core.ids.ItemId
+import org.livingworld.core.memory.DefaultMemoryRetriever
+import org.livingworld.core.memory.Memory
+import org.livingworld.core.memory.MemoryContext
+import org.livingworld.core.memory.MemoryRetriever
+import org.livingworld.core.memory.RelationshipExperience
 import org.livingworld.core.npc.ExpectedEffect
 import org.livingworld.core.npc.Npc
 import org.livingworld.core.npc.Risk
@@ -25,8 +30,39 @@ interface NpcDecisionEngine {
 }
 
 class DefaultNpcDecisionEngine(
-    private val validator: ActionValidator = DefaultActionValidator()
+    private val validator: ActionValidator = DefaultActionValidator(),
+    private val retriever: MemoryRetriever = DefaultMemoryRetriever()
 ) : NpcDecisionEngine {
+
+    /**
+     * What the NPC remembers about the other party nudges how it treats them: kindness and cooperation make
+     * contact more attractive, assault, theft and betrayal make it less so and a violent act more so (a grudge).
+     * Only the memories the retriever surfaces for this entity (most important, most recent) count, capped at +-0.6.
+     */
+    fun memoryBias(npc: Npc, action: Intent, world: WorldState): Float {
+        val target: EntityId = when (action) {
+            is Intent.Socialize -> action.target.toEntityId()
+            is Intent.ShareRumor -> action.target.toEntityId()
+            is Intent.Attack -> action.target.toEntityId()
+            is Intent.Trade -> action.partner
+            else -> return 0f
+        }
+        val recalled = retriever.retrieve(npc.memories, MemoryContext(world.time, focalEntities = setOf(target)), MEMORY_RECALL_LIMIT)
+            .filterIsInstance<Memory.Relationship>()
+            .filter { it.entity == target }
+        var bias = 0f
+        for (m in recalled) {
+            val warmth = when (m.experience) {
+                RelationshipExperience.KINDNESS, RelationshipExperience.COOPERATION -> 0.15f
+                RelationshipExperience.SHARED_DANGER -> 0.1f
+                RelationshipExperience.TRADE -> 0.05f
+                RelationshipExperience.BETRAYAL, RelationshipExperience.ASSAULT -> -0.3f
+                RelationshipExperience.THEFT -> -0.25f
+            }
+            bias += (if (action is Intent.Attack) -warmth * 0.7f else warmth) * m.importance
+        }
+        return bias.coerceIn(-0.6f, 0.6f)
+    }
 
     fun generateCandidates(
         npc: Npc,
@@ -176,6 +212,8 @@ class DefaultNpcDecisionEngine(
                 score += 0.3f
             }
 
+            score += memoryBias(npc, candidate.action, world)
+
             Pair(candidate, score)
         }.sortedByDescending { it.second }
 
@@ -188,5 +226,9 @@ class DefaultNpcDecisionEngine(
         }
 
         return ValidatedAction(Intent.Rest)
+    }
+
+    private companion object {
+        const val MEMORY_RECALL_LIMIT = 8
     }
 }
