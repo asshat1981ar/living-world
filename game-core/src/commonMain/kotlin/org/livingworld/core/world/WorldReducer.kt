@@ -111,10 +111,47 @@ class DefaultWorldReducer : WorldReducer {
             }
         }
 
+        // G4: people who were not there still hear of it, if the victim mattered to them.
+        val firstWitness = event.witnesses.firstOrNull()
+        for (listener in nextNpcs.values.sortedBy { it.id.value }) {
+            if (!listener.isAlive || listener.id == victim.id || listener.id in event.witnesses) continue
+            val sentiment = nextRelationships.get(listener.id.toEntityId(), victim.id.toEntityId()).overallSentiment
+            val sharedFaction = victim.factions.filter { it in listener.factions }.minByOrNull { it.value }
+            if (sentiment <= 0.2f && sharedFaction == null) continue
+            val source = when {
+                firstWitness != null -> KnowledgeSource.Hearsay(firstWitness)
+                sharedFaction != null -> KnowledgeSource.FactionReport(sharedFaction)
+                else -> KnowledgeSource.Observation(event.id)
+            }
+            nextNpcs = nextNpcs + (listener.id to hearOfDeath(listener, victim.id, event, source, sentiment > 0.2f))
+        }
+
+        // G4: quests the dead issued can no longer be completed.
+        val victimEntity = victim.id.toEntityId()
+        val nextQuests = state.activeQuests.map { q ->
+            if (q.issuer == victimEntity && (q.status == QuestStatus.AVAILABLE || q.status == QuestStatus.ACTIVE))
+                q.copy(status = QuestStatus.FAILED) else q
+        }
+
         return state.copy(
             npcs = nextNpcs,
             factions = nextFactions,
-            relationships = nextRelationships
+            relationships = nextRelationships,
+            activeQuests = nextQuests
+        )
+    }
+
+    private fun hearOfDeath(listener: Npc, victimId: NpcId, event: GameEvent.NpcKilled, source: KnowledgeSource, cares: Boolean): Npc {
+        val proposition = if (event.killer != null) Proposition.EntityKilledNpc(event.killer, victimId)
+        else Proposition.NpcDied(victimId)
+        return listener.copy(
+            beliefs = listener.beliefs.addOrUpdate(
+                Belief(proposition, confidence = 0.85f, source = source, reliability = 0.8f, acquiredAt = event.time)
+            ),
+            memories = listener.memories.add(
+                Memory.Episodic(eventId = event.id, importance = 0.7f, createdAt = event.time)
+            ),
+            emotionalState = listener.emotionalState.shifted(deltaGrief = if (cares) 0.4f else 0.1f)
         )
     }
 
@@ -124,7 +161,17 @@ class DefaultWorldReducer : WorldReducer {
         )
         var updatedBeliefs = witness.beliefs
 
-        if (event.killer != null) {
+        if (event.killer == null) {
+            updatedBeliefs = updatedBeliefs.addOrUpdate(
+                Belief(
+                    proposition = Proposition.NpcDied(victimId),
+                    confidence = 1.0f,
+                    source = KnowledgeSource.DirectObservation,
+                    reliability = 1.0f,
+                    acquiredAt = event.time
+                )
+            )
+        } else {
             updatedBeliefs = updatedBeliefs.addOrUpdate(
                 Belief(
                     proposition = Proposition.EntityKilledNpc(event.killer, victimId),

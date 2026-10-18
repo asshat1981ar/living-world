@@ -40,6 +40,11 @@ sealed interface Proposition {
     }
 
     @Serializable
+    data class NpcDied(val victim: NpcId) : Proposition {
+        override fun describe(): String = "${victim.value} died"
+    }
+
+    @Serializable
     data class EntityIsHostile(val entity: EntityId) : Proposition {
         override fun describe(): String = "${entity.identifier} is hostile"
     }

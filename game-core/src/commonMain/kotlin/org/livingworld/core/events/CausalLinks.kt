@@ -17,6 +17,7 @@ object CausalLinks {
     /** The event that created what a belief is about, when the ledger holds one. */
     fun originOf(ledger: EventLedger, proposition: Proposition): EventId? = when (proposition) {
         is Proposition.EntityKilledNpc -> deathOf(ledger, proposition.victim)
+        is Proposition.NpcDied -> deathOf(ledger, proposition.victim)
         is Proposition.PlayerStole ->
             ledger.all().lastOrNull { it is GameEvent.ItemStolen && it.item == proposition.item }?.id
         is Proposition.EntityStoleItem ->

@@ -84,7 +84,13 @@ class DefaultNpcDecisionEngine(
         if (npc.identity.occupation.contains("Apprentice", ignoreCase = true)) {
             // G2: the apprentice must know of the death (a belief), not read it off the world.
             val deceasedMerchant = npc.beliefs.all()
-                .mapNotNull { (it.proposition as? Proposition.EntityKilledNpc)?.victim }
+                .mapNotNull {
+                    when (val p = it.proposition) {
+                        is Proposition.EntityKilledNpc -> p.victim
+                        is Proposition.NpcDied -> p.victim
+                        else -> null
+                    }
+                }
                 .sortedBy { it.value }
                 .mapNotNull { world.npcs[it] }
                 .firstOrNull { !it.isAlive && it.identity.occupation.contains("Merchant", ignoreCase = true) }

@@ -20,11 +20,16 @@ class BeliefDrivenDecisionTest {
         proposition = p, confidence = 0.9f, source = KnowledgeSource.DirectObservation, reliability = 1f, acquiredAt = world.state.time
     )
 
+    /** The default fixture has the apprentice revering the merchant, so news of the death would reach them anyway. */
+    private fun TestWorld.estrangeApprentice() {
+        state = state.copy(relationships = org.livingworld.core.relationships.RelationshipGraph())
+    }
+
     private fun intents(world: TestWorld, who: NpcId) = engine.generateCandidates(world.npc(who), world.state).map { it.action }
 
     @Test
     fun apprentice_inherits_only_after_learning_of_the_death() {
-        val unwitnessed = TestWorld.create()
+        val unwitnessed = TestWorld.create().also { it.estrangeApprentice() }
         unwitnessed.kill(merchant, killer = player)
         assertTrue(intents(unwitnessed, apprentice).none { it is Intent.InheritShop }, "death is not known to the apprentice")
 
@@ -35,7 +40,7 @@ class BeliefDrivenDecisionTest {
 
     @Test
     fun apprentice_learning_by_rumor_also_unlocks_inheritance() {
-        val world = TestWorld.create()
+        val world = TestWorld.create().also { it.estrangeApprentice() }
         world.kill(merchant, killer = player, witnesses = listOf(NpcId("guard_captain")))
         val killing = fact(Proposition.EntityKilledNpc(player, merchant), world)
         world.state = world.state.copy(
