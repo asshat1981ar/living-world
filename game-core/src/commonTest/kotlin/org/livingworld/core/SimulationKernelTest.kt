@@ -82,7 +82,8 @@ class SimulationKernelTest {
         val merchantId = NpcId("merchant")
         val apprenticeId = NpcId("apprentice")
 
-        world.kill(merchantId)
+        // G2: the apprentice only considers the inheritance once it knows of the death (here: it witnessed it).
+        world.kill(merchantId, killer = NpcId("miner_derek").toEntityId(), witnesses = listOf(apprenticeId))
 
         assertTrue(
             world.isDead(merchantId),

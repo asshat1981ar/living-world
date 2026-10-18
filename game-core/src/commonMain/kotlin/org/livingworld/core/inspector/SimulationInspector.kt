@@ -69,6 +69,7 @@ class SimulationInspector(
             when (m) {
                 is org.livingworld.core.memory.Memory.Episodic -> appendLine(" • Episodic: Event #${m.eventId.value} (Imp: ${m.importance}, Day ${m.createdAt.day})")
                 is org.livingworld.core.memory.Memory.Relationship -> appendLine(" • Relationship: ${m.entity.identifier} [${m.experience}] (Imp: ${m.importance})")
+                is org.livingworld.core.memory.Memory.Told -> appendLine(" • Told ${m.target.value}: \"${m.proposition.describe()}\" (Imp: ${m.importance})")
                 is org.livingworld.core.memory.Memory.Semantic -> appendLine(" • Semantic: \"${m.proposition.describe()}\" (Imp: ${m.importance})")
             }
         }

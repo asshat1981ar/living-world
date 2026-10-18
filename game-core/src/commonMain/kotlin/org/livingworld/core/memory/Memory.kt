@@ -4,6 +4,7 @@ import kotlinx.serialization.Serializable
 import org.livingworld.core.beliefs.Proposition
 import org.livingworld.core.ids.EntityId
 import org.livingworld.core.ids.EventId
+import org.livingworld.core.ids.NpcId
 import org.livingworld.core.time.WorldDuration
 import org.livingworld.core.time.WorldTime
 
@@ -38,6 +39,15 @@ sealed interface Memory {
         override val createdAt: WorldTime
     ) : Memory
 
+    /** The NPC told [target] about [proposition]; lets it avoid repeating itself without reading the listener's mind. */
+    @Serializable
+    data class Told(
+        val target: NpcId,
+        val proposition: Proposition,
+        override val importance: Float,
+        override val createdAt: WorldTime
+    ) : Memory
+
     @Serializable
     data class Semantic(
         val proposition: Proposition,
@@ -59,6 +69,9 @@ data class MemoryStore(
 
     fun hasEpisodicMemory(eventId: EventId): Boolean =
         entries.any { it is Memory.Episodic && it.eventId == eventId }
+
+    fun hasTold(target: NpcId, proposition: Proposition): Boolean =
+        entries.any { it is Memory.Told && it.target == target && it.proposition == proposition }
 
     fun memoriesOf(entity: EntityId): List<Memory> =
         entries.filter { it is Memory.Relationship && it.entity == entity }
@@ -102,6 +115,9 @@ class DefaultMemoryRetriever : MemoryRetriever {
                         if (context.focalPropositions.contains(memory.proposition)) {
                             relevanceScore += 2.0f
                         }
+                    }
+                    is Memory.Told -> {
+                        // Told importance
                     }
                     is Memory.Episodic -> {
                         // Episodic importance

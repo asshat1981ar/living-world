@@ -226,7 +226,15 @@ class DefaultWorldReducer : WorldReducer {
                 .add(Memory.Episodic(eventId = event.id, importance = 0.5f, createdAt = event.time))
                 .add(Memory.Semantic(proposition = event.transmittedBelief.proposition, importance = event.transmittedBelief.confidence, createdAt = event.time))
         )
-        return state.copy(npcs = state.npcs + (target.id to updatedTarget))
+        val source = state.npcs[event.source]?.let {
+            it.copy(
+                memories = it.memories.add(
+                    Memory.Told(target = event.target, proposition = event.transmittedBelief.proposition, importance = 0.3f, createdAt = event.time)
+                )
+            )
+        }
+        val withTarget = state.npcs + (target.id to updatedTarget)
+        return state.copy(npcs = if (source != null) withTarget + (source.id to source) else withTarget)
     }
 
     private fun applyRelationshipShift(

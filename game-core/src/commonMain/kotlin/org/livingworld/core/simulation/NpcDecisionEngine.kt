@@ -2,7 +2,6 @@ package org.livingworld.core.simulation
 
 import org.livingworld.core.beliefs.KnowledgeSource
 import org.livingworld.core.beliefs.Proposition
-import org.livingworld.core.events.GameEvent
 import org.livingworld.core.ids.EntityId
 import org.livingworld.core.ids.ItemId
 import org.livingworld.core.npc.ExpectedEffect
@@ -64,12 +63,14 @@ class DefaultNpcDecisionEngine(
                 )
             )
 
-            // RT-4 Fix: Do not echo a hearsay rumor back to the original sourceNpc who told us
+            // RT-4 Fix: Do not echo a hearsay rumor back to the original sourceNpc who told us.
+            // G2: an NPC cannot read the listener's beliefs; it only remembers what it already told them.
             val shareableBelief = npc.beliefs.all()
                 .filter { b -> (b.source as? KnowledgeSource.Hearsay)?.sourceNpc != other.id }
+                .filter { b -> !npc.memories.hasTold(other.id, b.proposition) }
                 .maxByOrNull { it.confidence * it.reliability }
 
-            if (shareableBelief != null && !other.beliefs.knows(shareableBelief.proposition, minConfidence = 0.4f)) {
+            if (shareableBelief != null) {
                 candidates.add(
                     ActionCandidate(
                         action = Intent.ShareRumor(other.id, shareableBelief),
@@ -81,11 +82,13 @@ class DefaultNpcDecisionEngine(
 
         // 4. RT-5 Fix: Apprentice shop succession if merchant predecessor died and shop not yet inherited
         if (npc.identity.occupation.contains("Apprentice", ignoreCase = true)) {
-            val deceasedMerchant = world.npcs.values
-                .sortedBy { it.id.value }
+            // G2: the apprentice must know of the death (a belief), not read it off the world.
+            val deceasedMerchant = npc.beliefs.all()
+                .mapNotNull { (it.proposition as? Proposition.EntityKilledNpc)?.victim }
+                .sortedBy { it.value }
+                .mapNotNull { world.npcs[it] }
                 .firstOrNull { !it.isAlive && it.identity.occupation.contains("Merchant", ignoreCase = true) }
-            val alreadyInherited = world.events.ofType<GameEvent.ShopInherited>()
-                .any { it.predecessor == deceasedMerchant?.id }
+            val alreadyInherited = npc.beliefs.all().any { (it.proposition as? Proposition.ShopInherited)?.heir == npc.id }
             if (deceasedMerchant != null && !alreadyInherited) {
                 candidates.add(
                     ActionCandidate(
@@ -105,7 +108,8 @@ class DefaultNpcDecisionEngine(
                     expectedEffects = listOf(ExpectedEffect("Higher margins", 0.6f))
                 )
             )
-            if (world.player.currentLocation == npc.identity.currentLocation && world.player.coins >= 15f) {
+            // The player's purse is hidden; the validator rejects an unaffordable offer and the next candidate is used.
+            if (world.player.currentLocation == npc.identity.currentLocation) {
                 candidates.add(
                     ActionCandidate(
                         action = Intent.Trade(world.player.id, ItemId("goods"), 15f),
