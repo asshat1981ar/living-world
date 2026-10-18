@@ -390,9 +390,12 @@ class DefaultWorldReducer : WorldReducer {
         }
 
         // RT-16: Complete matching scarcity quest when trade of that commodity occurs
+        // Only a trade the player took part in earns the player the reward; failed quests stay failed.
+        val playerInvolved = event.buyer is EntityId.Player || event.seller is EntityId.Player ||
+            event.buyer.identifier == state.player.id.identifier || event.seller.identifier == state.player.id.identifier
         var bonusReward = 0f
         val nextQuests = state.activeQuests.map { q ->
-            if (q.status != QuestStatus.COMPLETED && q.id == "quest_scarcity_${event.item.value}") {
+            if (playerInvolved && q.status != QuestStatus.COMPLETED && q.status != QuestStatus.FAILED && q.id == "quest_scarcity_${event.item.value}") {
                 bonusReward += q.reward
                 q.copy(status = QuestStatus.COMPLETED)
             } else {

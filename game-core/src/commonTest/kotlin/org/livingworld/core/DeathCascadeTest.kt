@@ -75,4 +75,33 @@ class DeathCascadeTest {
         assertEquals(a.state, b.state)
         assertEquals(a.state.events.size, b.state.events.size)
     }
+
+    private fun tradeWorld(buyer: EntityId, seller: EntityId): TestWorld {
+        val world = TestWorld.create()
+        val quest = QuestOpportunity(
+            id = "quest_scarcity_bread", title = "t", description = "d", issuer = apprentice.toEntityId(),
+            target = LocationId("market").toEntityId(), reward = 45f, status = QuestStatus.AVAILABLE
+        )
+        world.state = world.state.copy(activeQuests = listOf(quest))
+        val event = org.livingworld.core.events.GameEvent.TradeCompleted(
+            id = EventId(world.state.events.size + 1L), time = world.state.time,
+            buyer = buyer, seller = seller, item = ItemId("bread"), price = 5f
+        )
+        world.state = org.livingworld.core.world.DefaultWorldReducer().apply(world.state, event)
+        return world
+    }
+
+    @Test
+    fun npc_to_npc_trade_does_not_pay_the_player() {
+        val world = tradeWorld(NpcId("guard_captain").toEntityId(), merchant.toEntityId())
+        assertEquals(100f, world.state.player.coins)
+        assertEquals(QuestStatus.AVAILABLE, world.state.activeQuests.first().status)
+    }
+
+    @Test
+    fun player_trade_still_pays_the_reward() {
+        val world = tradeWorld(player, merchant.toEntityId())
+        assertEquals(QuestStatus.COMPLETED, world.state.activeQuests.first().status)
+        assertEquals(100f - 5f + 45f, world.state.player.coins)
+    }
 }
