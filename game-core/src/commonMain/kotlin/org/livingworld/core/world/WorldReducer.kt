@@ -93,40 +93,7 @@ class DefaultWorldReducer : WorldReducer {
             val affectionForVictim = nextRelationships.get(witnessId.toEntityId(), victim.id.toEntityId()).overallSentiment
             val caresAboutVictim = affectionForVictim > 0.2f || witness.reputationToward(victim.id.toEntityId(), nextRelationships) > 0.2f
 
-            var updatedMemories = witness.memories.add(
-                Memory.Episodic(eventId = event.id, importance = 1.0f, createdAt = event.time)
-            )
-            var updatedBeliefs = witness.beliefs
-
-            if (event.killer != null) {
-                updatedBeliefs = updatedBeliefs.addOrUpdate(
-                    Belief(
-                        proposition = Proposition.EntityKilledNpc(event.killer, victim.id),
-                        confidence = 1.0f,
-                        source = KnowledgeSource.DirectObservation,
-                        reliability = 1.0f,
-                        acquiredAt = event.time
-                    )
-                )
-                updatedMemories = updatedMemories.add(
-                    Memory.Relationship(
-                        entity = event.killer,
-                        experience = RelationshipExperience.ASSAULT,
-                        importance = 0.95f,
-                        createdAt = event.time
-                    )
-                )
-            }
-
-            val updatedWitness = witness.copy(
-                memories = updatedMemories,
-                beliefs = updatedBeliefs,
-                emotionalState = witness.emotionalState.shifted(
-                    deltaFear = 0.35f,
-                    deltaGrief = if (caresAboutVictim) 0.6f else 0.15f,
-                    deltaAnger = if (caresAboutVictim) 0.45f else 0.1f
-                )
-            )
+            val updatedWitness = witnessOfDeath(witness, victim.id, event, caresAboutVictim)
             nextNpcs = nextNpcs + (witnessId to updatedWitness)
 
             if (event.killer != null) {
@@ -148,6 +115,43 @@ class DefaultWorldReducer : WorldReducer {
             npcs = nextNpcs,
             factions = nextFactions,
             relationships = nextRelationships
+        )
+    }
+
+    private fun witnessOfDeath(witness: Npc, victimId: NpcId, event: GameEvent.NpcKilled, caresAboutVictim: Boolean): Npc {
+        var updatedMemories = witness.memories.add(
+            Memory.Episodic(eventId = event.id, importance = 1.0f, createdAt = event.time)
+        )
+        var updatedBeliefs = witness.beliefs
+
+        if (event.killer != null) {
+            updatedBeliefs = updatedBeliefs.addOrUpdate(
+                Belief(
+                    proposition = Proposition.EntityKilledNpc(event.killer, victimId),
+                    confidence = 1.0f,
+                    source = KnowledgeSource.DirectObservation,
+                    reliability = 1.0f,
+                    acquiredAt = event.time
+                )
+            )
+            updatedMemories = updatedMemories.add(
+                Memory.Relationship(
+                    entity = event.killer,
+                    experience = RelationshipExperience.ASSAULT,
+                    importance = 0.95f,
+                    createdAt = event.time
+                )
+            )
+        }
+
+        return witness.copy(
+            memories = updatedMemories,
+            beliefs = updatedBeliefs,
+            emotionalState = witness.emotionalState.shifted(
+                deltaFear = 0.35f,
+                deltaGrief = if (caresAboutVictim) 0.6f else 0.15f,
+                deltaAnger = if (caresAboutVictim) 0.45f else 0.1f
+            )
         )
     }
 
