@@ -56,9 +56,9 @@ object ModelAssetCatalog {
         spec = OnDeviceModelCatalog.QWEN_2_5_0_5B,
         downloadUrl = "https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct-GGUF/resolve/main/qwen2.5-0.5b-instruct-q4_k_m.gguf",
         targetFileName = "qwen2.5-0.5b-q4_k_m.gguf",
-        // Size and checksum measured from the downloaded file (2026-10-18); the other entries are unverified.
-        expectedSizeBytes = 377_105_247L,
-        sha256Checksum = "52164eb8e6129893c31149763d68ea47e32b300b827cfbea5c569788ba4e1361"
+        // Size and sha256 are Hugging Face's published values (x-linked-size / x-linked-etag, 2026-10-18); the other entries are unverified.
+        expectedSizeBytes = 491_400_032L,
+        sha256Checksum = "74a4da8c9fdbcd15bd1f6d01d621410d31c6fc00986f5eb687824e7b93d7a9db"
     )
 
     val QWEN_2_5_CODER_1_5B_GGUF = ModelAssetDescriptor(
