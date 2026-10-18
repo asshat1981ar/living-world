@@ -10,7 +10,7 @@
   - `simulate_village.py` mirror of the trade fix done (`complete_scarcity_trade` takes `buyer_id`), with a test in `test_ui_sprites.py`.
   - `BeliefStore` Float keys fixed (`stableFloatText` in `Belief.kt`, test `belief_keys_use_platform_independent_float_text`).
   - Dual relationship graphs resolved (option A): removed `Npc.relationships`; the world graph is authoritative. Test `test_legacy_save_with_per_npc_relationship_graph_still_loads` covers old saves.
-  - Automation Phase 0 added (see CLAUDE.md "Automation hooks"): `bash_guard`, `session_preflight`, `ci_watch`; tests in `tools/test_phase0_hooks.py`. Phases 1-3 (tiered gate + determinism tier, conductor mod/status line, learning loop) are designed but not built.
+  - Automation Phase 0 added (see CLAUDE.md "Automation hooks"): `bash_guard`, `session_preflight`, `ci_watch`; tests in `tools/test_phase0_hooks.py`. Phase 1 done: stop gate is tiered per module and adds a G8 determinism tier (`decide_quick`, tests in `tools/test_stop_gate.py`). Phases 2-3 (conductor mod/status line, learning loop) are designed but not built. Hook settings load at session start, so the new hooks first run live in the next session.
   - Next: v6 audit list is empty; pick new work. Qwen filename "mismatch" is intentional (download name vs on-device `targetFileName`); documented in CLAUDE.md.
 
 # Phase 9 state (2026-10-14)

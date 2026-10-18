@@ -87,5 +87,102 @@ class StopGateTests(unittest.TestCase):
         self.assertEqual((0, ""), (p.returncode, p.stdout))
 
 
+class QuickTierTests(unittest.TestCase):
+    ALL = {m: "d-" + m for m in ("game-core", "game-persistence", "game-ai", "game-ui", "androidApp", "desktopApp", "build")}
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.state = Path(self.tmp.name, "quick.json")
+        self.kotlin_calls: list[str] = []
+        self.det_calls = 0
+        self.digests = dict(self.ALL)
+        self.kotlin_result = OK
+        self.det_result = OK
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def checks(self):
+        def kotlin(tasks):
+            self.kotlin_calls.append(tasks)
+            return self.kotlin_result
+
+        def det():
+            self.det_calls += 1
+            return self.det_result
+        return {"invariants": lambda: OK, "tool tests": lambda: OK, "kotlin": kotlin,
+                "digests": lambda: dict(self.digests), "determinism": det}
+
+    def run_gate(self, remote=True):
+        return sg.decide_quick({}, remote, checks=self.checks(), state=self.state)
+
+    def test_module_mapping_and_task_selection(self):
+        self.assertEqual(sg.module_of("game-core/src/x.kt"), "game-core")
+        self.assertEqual(sg.module_of("build.gradle.kts"), "build")
+        self.assertEqual(sg.module_of("gradle/wrapper/gradle-wrapper.properties"), "build")
+        self.assertIsNone(sg.quick_tasks(set()))
+        self.assertEqual(sg.quick_tasks({"game-persistence"}), ":game-persistence:jvmTest")
+        self.assertEqual(sg.quick_tasks({"game-ai", "game-ui"}), ":game-ai:jvmTest :game-ui:jvmTest")
+        self.assertEqual(sg.quick_tasks({"game-core"}).count("jvmTest"), 4)
+        for m in ("build", "androidApp", "desktopApp"):
+            self.assertEqual(sg.quick_tasks({m, "game-ai"}), "check")
+
+    def test_first_run_checks_everything_then_unchanged_run_is_free(self):
+        self.assertIsNone(self.run_gate())
+        self.assertEqual(self.kotlin_calls, ["check"])
+        self.assertEqual(self.det_calls, 1)
+        self.assertIsNone(self.run_gate())
+        self.assertEqual((len(self.kotlin_calls), self.det_calls), (1, 1))
+
+    def test_single_module_change_runs_only_its_tests_and_skips_determinism(self):
+        self.run_gate()
+        self.digests["game-persistence"] = "changed"
+        self.assertIsNone(self.run_gate())
+        self.assertEqual(self.kotlin_calls[-1], ":game-persistence:jvmTest")
+        self.assertEqual(self.det_calls, 1)
+
+    def test_kernel_change_runs_all_jvm_tests_and_determinism(self):
+        self.run_gate()
+        self.digests["game-core"] = "changed"
+        self.assertIsNone(self.run_gate())
+        self.assertEqual(self.kotlin_calls[-1].count("jvmTest"), 4)
+        self.assertEqual(self.det_calls, 2)
+
+    def test_failing_tests_block_and_are_retried_next_time(self):
+        self.kotlin_result = FAIL
+        answer = self.run_gate()
+        self.assertEqual(answer["decision"], "block")
+        self.assertEqual(self.det_calls, 0)
+        self.kotlin_result = OK
+        self.assertIsNone(self.run_gate())
+        self.assertEqual(len(self.kotlin_calls), 2)
+
+    def test_infra_failure_warns_and_skips_determinism(self):
+        self.kotlin_result = INFRA
+        answer = self.run_gate()
+        self.assertNotIn("decision", answer)
+        self.assertIn("could not run", answer["systemMessage"])
+        self.assertEqual(self.det_calls, 0)
+
+    def test_nondeterminism_blocks_and_is_retried(self):
+        self.det_result = sg.Outcome(False, "G8 violation: fingerprints differ")
+        answer = self.run_gate()
+        self.assertEqual(answer["decision"], "block")
+        self.assertIn("G8", answer["reason"])
+        self.det_result = OK
+        self.assertIsNone(self.run_gate())
+        self.assertEqual(self.det_calls, 2)
+
+    def test_determinism_digest_only_tracks_kernel_and_desktop(self):
+        base = sg.determinism_digest(self.ALL)
+        self.assertEqual(base, sg.determinism_digest({**self.ALL, "game-ai": "x", "game-ui": "y", "build": "z"}))
+        self.assertNotEqual(base, sg.determinism_digest({**self.ALL, "game-core": "x"}))
+        self.assertNotEqual(base, sg.determinism_digest({**self.ALL, "desktopApp": "x"}))
+
+    def test_remote_disabled_runs_only_local_tiers(self):
+        self.assertIsNone(self.run_gate(remote=False))
+        self.assertEqual((self.kotlin_calls, self.det_calls), ([], 0))
+
+
 if __name__ == "__main__":
     unittest.main()
