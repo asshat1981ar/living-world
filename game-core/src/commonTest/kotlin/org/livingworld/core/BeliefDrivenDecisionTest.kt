@@ -106,4 +106,35 @@ class BeliefDrivenDecisionTest {
         assertTrue(first.any { it.contains("inherited") }, "scenario must exercise the changed paths")
         assertEquals(first, run())
     }
+
+    private fun withBelief(world: TestWorld, who: NpcId, p: Proposition, confidence: Float = 1f, learnedAt: Long = 0L) {
+        val b = Belief(p, confidence, KnowledgeSource.DirectObservation, 1f, org.livingworld.core.time.WorldTime(learnedAt))
+        world.state = world.state.copy(npcs = world.state.npcs + (who to world.npc(who).let { it.copy(beliefs = it.beliefs.addOrUpdate(b)) }))
+    }
+
+    private fun rumorUtility(world: TestWorld, who: NpcId): Float? =
+        engine.generateCandidates(world.npc(who), world.state)
+            .filter { it.action is Intent.ShareRumor }.maxOfOrNull { it.estimatedUtility() }
+
+    @Test
+    fun fresh_certain_news_beats_routine_work_and_is_told() = runTest {
+        val world = TestWorld.create()
+        val guard = NpcId("guard_captain")
+        withBelief(world, guard, Proposition.NpcDied(merchant))
+        assertTrue(rumorUtility(world, guard)!! > 0.5f, "fresh news outranks Work (0.5)")
+        assertTrue(engine.decide(world.npc(guard), world.state).intent is Intent.ShareRumor)
+    }
+
+    @Test
+    fun stale_or_doubtful_beliefs_lose_to_work() = runTest {
+        val stale = TestWorld.create()
+        val guard = NpcId("guard_captain")
+        withBelief(stale, guard, Proposition.NpcDied(merchant), learnedAt = 0L)
+        stale.state = stale.state.copy(time = stale.state.time + org.livingworld.core.time.WorldDuration.days(5))
+        assertTrue(rumorUtility(stale, guard)!! < 0.5f, "five-day-old news no longer outranks Work")
+
+        val doubtful = TestWorld.create()
+        withBelief(doubtful, guard, Proposition.NpcDied(merchant), confidence = 0.4f)
+        assertTrue(rumorUtility(doubtful, guard)!! < 0.5f)
+    }
 }

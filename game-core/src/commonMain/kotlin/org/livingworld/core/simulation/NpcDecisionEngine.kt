@@ -101,16 +101,17 @@ class DefaultNpcDecisionEngine(
 
             // RT-4 Fix: Do not echo a hearsay rumor back to the original sourceNpc who told us.
             // G2: an NPC cannot read the listener's beliefs; it only remembers what it already told them.
-            val shareableBelief = npc.beliefs.all()
+            val shareable = npc.beliefs.all()
                 .filter { b -> (b.source as? KnowledgeSource.Hearsay)?.sourceNpc != other.id }
                 .filter { b -> !npc.memories.hasTold(other.id, b.proposition) }
-                .maxByOrNull { it.confidence * it.reliability }
+                .maxWithOrNull(compareBy<org.livingworld.core.beliefs.Belief> { newsworthiness(it, world) }
+                    .thenByDescending { it.proposition.describe() })
 
-            if (shareableBelief != null) {
+            if (shareable != null) {
                 candidates.add(
                     ActionCandidate(
-                        action = Intent.ShareRumor(other.id, shareableBelief),
-                        expectedEffects = listOf(ExpectedEffect("Spread information", 0.45f))
+                        action = Intent.ShareRumor(other.id, shareable),
+                        expectedEffects = listOf(ExpectedEffect("Spread information", RUMOR_BASE_UTILITY + RUMOR_NEWS_WEIGHT * newsworthiness(shareable, world)))
                     )
                 )
             }
@@ -228,7 +229,21 @@ class DefaultNpcDecisionEngine(
         return ValidatedAction(Intent.Rest)
     }
 
+    /**
+     * How worth telling a belief is right now: how sure and reliable it is, fading as it ages. Fresh, certain news
+     * outranks routine work for about two days; stale or doubtful beliefs do not (otherwise the village would
+     * gossip forever instead of working).
+     */
+    private fun newsworthiness(belief: org.livingworld.core.beliefs.Belief, world: WorldState): Float {
+        val ageTicks = (world.time.tick - belief.acquiredAt.tick).coerceAtLeast(0L)
+        val daysOld = ageTicks / org.livingworld.core.time.WorldTime.TICKS_PER_DAY.toFloat()
+        return belief.confidence * belief.reliability / (1f + RUMOR_FADE_PER_DAY * daysOld)
+    }
+
     private companion object {
+        const val RUMOR_BASE_UTILITY = 0.3f
+        const val RUMOR_NEWS_WEIGHT = 0.4f
+        const val RUMOR_FADE_PER_DAY = 0.25f
         const val MEMORY_RECALL_LIMIT = 8
     }
 }
