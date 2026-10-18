@@ -6,6 +6,7 @@ import org.livingworld.ai.ondevice.GgufBinaryHeaderParser
 import org.livingworld.ai.ondevice.GgufMetadata
 import org.livingworld.ai.ondevice.ModelAssetDescriptor
 import org.livingworld.ai.ondevice.ModelAssetManager
+import org.livingworld.ai.ondevice.ModelIntegrity
 import org.livingworld.ai.ondevice.ModelAssetStatus
 import org.livingworld.ai.reasoning.LlamaEngineBridge
 import java.io.File
@@ -25,16 +26,15 @@ class AndroidModelAssetManager(
         if (length < GgufBinaryHeaderParser.MIN_HEADER_BYTES) {
             return ModelAssetStatus.Error("Model file ${descriptor.targetFileName} is truncated ($length bytes)")
         }
+        // A file is only Ready when the descriptor is pinned and the size matches; the digest is checked by verifyChecksum.
+        ModelIntegrity.sizeProblem(descriptor, length)?.let { return ModelAssetStatus.Error(it) }
         return ModelAssetStatus.Ready(localPath = targetFile.absolutePath, fileSizeBytes = length)
     }
 
     override fun verifyChecksum(descriptor: ModelAssetDescriptor, filePath: String): Boolean {
         val file = File(filePath)
         if (!file.exists() || !file.isFile) return false
-        val expected = descriptor.sha256Checksum
-        if (expected.isNullOrBlank() || expected.endsWith("verified")) {
-            return file.length() >= GgufBinaryHeaderParser.MIN_HEADER_BYTES
-        }
+        if (ModelIntegrity.sizeProblem(descriptor, file.length()) != null) return false
         return try {
             val digest = MessageDigest.getInstance("SHA-256")
             FileInputStream(file).use { fis ->
@@ -46,7 +46,7 @@ class AndroidModelAssetManager(
                 }
             }
             val hex = digest.digest().joinToString("") { "%02x".format(it) }
-            hex.equals(expected, ignoreCase = true)
+            ModelIntegrity.digestMatches(descriptor, hex)
         } catch (_: Exception) {
             false
         }
@@ -95,8 +95,8 @@ class AndroidLlamaEngineBridge(
             if (nativeJniCompleter != null) {
                 return@withContext nativeJniCompleter.invoke(prompt, maxTokens, temperature)
             }
-            val modelName = loadedMetadata?.modelName ?: "qwen2.5-0.5b-instruct"
-            """{"action_index": 0, "confidence": 0.89, "explanation": "Selected by AndroidLlamaEngineBridge ($modelName)"}"""
+            // No native runtime attached: say so instead of inventing an answer, so callers fall back deterministically (G7).
+            throw IllegalStateException("No native llama runtime is attached to AndroidLlamaEngineBridge")
         }
 
     override fun unload() {

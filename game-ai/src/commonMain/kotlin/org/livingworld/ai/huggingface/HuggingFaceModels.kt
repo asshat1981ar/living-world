@@ -1,6 +1,7 @@
 package org.livingworld.ai.huggingface
 
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import kotlinx.serialization.json.Json
 
 /**
@@ -10,13 +11,28 @@ import kotlinx.serialization.json.Json
 data class HuggingFaceEndpointConfig(
     val endpointUrl: String = "https://router.huggingface.co/hf-inference/models/",
     val modelId: String = "Qwen/Qwen2.5-7B-Instruct",
-    val apiToken: String? = null,
+    /** Never serialized and never printed: the token is supplied at runtime and only ever sent to an allow-listed host. */
+    @Transient val apiToken: String? = null,
     val temperature: Float = 0.3f,
     val maxTokens: Int = 256,
     val useOpenAiChatFormat: Boolean = true,
     val isFreeSpace: Boolean = false,
-    val customSpaceUrl: String? = null
+    val customSpaceUrl: String? = null,
+    /** Upper bound for one request; a slow or hung endpoint falls back to the deterministic path instead of stalling a tick. */
+    val timeoutMillis: Long = 20_000L
 ) {
+    init {
+        require(timeoutMillis > 0L) { "timeoutMillis must be positive" }
+        require(isAllowedHost(endpointUrl)) { "endpointUrl must be https on a Hugging Face host" }
+        if (!customSpaceUrl.isNullOrBlank()) {
+            require(isAllowedHost(customSpaceUrl)) { "customSpaceUrl must be https on a Hugging Face host (huggingface.co, *.huggingface.co or *.hf.space)" }
+        }
+    }
+
+    override fun toString(): String =
+        "HuggingFaceEndpointConfig(modelId=$modelId, endpointUrl=$endpointUrl, apiToken=${if (apiToken.isNullOrBlank()) "none" else "***"}, " +
+            "isFreeSpace=$isFreeSpace, customSpaceUrl=$customSpaceUrl, timeoutMillis=$timeoutMillis)"
+
     /**
      * Resolves the target URL based on whether connecting to a Free Space, Serverless Router, or Inference API.
      */
@@ -28,6 +44,16 @@ data class HuggingFaceEndpointConfig(
         }
 
     companion object {
+        /** True only for https URLs whose host is Hugging Face's own; rejects userinfo tricks like https://huggingface.co@evil.example. */
+        fun isAllowedHost(url: String): Boolean {
+            if (!url.startsWith("https://", ignoreCase = true)) return false
+            val authority = url.substring("https://".length).takeWhile { it != '/' && it != '?' && it != '#' }
+            if (authority.isEmpty() || authority.contains('@') || authority.contains('\\')) return false
+            val host = authority.substringBefore(':').lowercase()
+            if (authority.contains(':') && authority.substringAfter(':').any { !it.isDigit() }) return false
+            return host == "huggingface.co" || host.endsWith(".huggingface.co") || host.endsWith(".hf.space")
+        }
+
         // Recommended free and low-cost open-weight models on Hugging Face
         const val MODEL_QWEN_2_5_7B = "Qwen/Qwen2.5-7B-Instruct"
         const val MODEL_LLAMA_3_2_3B = "meta-llama/Llama-3.2-3B-Instruct"

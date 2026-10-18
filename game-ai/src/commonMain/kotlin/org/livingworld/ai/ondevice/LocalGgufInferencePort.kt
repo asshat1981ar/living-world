@@ -118,14 +118,7 @@ class LocalGgufInferencePort(
             return rawInferenceRunner.invoke(prompt, maxTokens, temperature)
         }
 
-        val simulatedJson = """
-            |{
-            |  "selected_index": 0,
-            |  "confidence": 0.88,
-            |  "explanation": "Evaluated by local GGUF engine (${modelDescriptor.targetFileName}) based on NPC traits and goals"
-            |}
-        """.trimMargin()
-
-        return Result.success(simulatedJson)
+        // No inference runtime attached: report that instead of inventing an answer (callers fall back, G7).
+        return Result.failure(IllegalStateException("No inference runtime attached for ${modelDescriptor.targetFileName}"))
     }
 }

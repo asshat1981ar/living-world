@@ -145,6 +145,8 @@ class TieredResilientReasoningEngine(
                 if (!DeterministicAiFallback.isFallbackProposal(proposal)) {
                     return proposal
                 }
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
             } catch (_: Exception) {
                 // Network unavailable or rate limited, move to deterministic
             }

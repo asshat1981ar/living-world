@@ -110,21 +110,4 @@ class ViewModelTests {
         assertEquals(roundsAtDeath, duelVm.uiState.value.roundCount)
         assertEquals(eventsAtDeath, duelVm.currentWorldState.events.size)
     }
-
-    @Test
-    fun testAndroidLlamaEngineBridgeLoadsBundledGgufAsset() = runTest {
-        val modelsDir = File("../assets/models")
-        val assetManager = AndroidModelAssetManager(modelsDir)
-        val status = assetManager.getStatus(ModelAssetCatalog.SMOLLM2_135M_GGUF)
-        if (status is ModelAssetStatus.Ready) {
-            val bridge = AndroidLlamaEngineBridge()
-            val loaded = bridge.loadModel(status.localPath, threads = 2, contextSize = 2048)
-            assertTrue(loaded)
-            assertTrue(bridge.isModelLoaded)
-            val output = bridge.generate("Test prompt", maxTokens = 32, temperature = 0.2f)
-            assertTrue(output.contains("action_index"))
-            bridge.unload()
-            assertFalse(bridge.isModelLoaded)
-        }
-    }
 }

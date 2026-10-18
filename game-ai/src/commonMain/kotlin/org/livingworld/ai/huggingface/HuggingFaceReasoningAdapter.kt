@@ -62,7 +62,7 @@ class HuggingFaceReasoningAdapter(
             headers["Authorization"] = "Bearer ${config.apiToken}"
         }
 
-        val responseResult = transport.executePost(config.effectiveUrl, requestJson, headers)
+        val responseResult = transport.postBounded(config, requestJson, headers)
         if (responseResult.isFailure) {
             return fallbackPort.reason(context)
         }
@@ -79,6 +79,8 @@ class HuggingFaceReasoningAdapter(
             }
 
             parseProposalFromResponse(contentText, context)
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
         } catch (_: Exception) {
             fallbackPort.reason(context)
         }

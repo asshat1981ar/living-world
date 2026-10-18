@@ -54,6 +54,8 @@ class OnDeviceQwenReasoningEngine(
                 val prompt = buildQwenPrompt(context)
                 val rawResponse = llamaBridge.generate(prompt, maxTokens = 128, temperature = 0.2f)
                 parseAndValidateResponse(rawResponse, context) ?: fallback.reason(context)
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
             } catch (_: Exception) {
                 fallback.reason(context)
             }

@@ -52,7 +52,7 @@ class HuggingFaceDialogueAdapter(
             headers["Authorization"] = "Bearer ${config.apiToken}"
         }
 
-        val result = transport.executePost(config.effectiveUrl, requestJson, headers)
+        val result = transport.postBounded(config, requestJson, headers)
         if (result.isFailure) {
             return generateDeterministicFallback(npc, playerTopic, beliefs)
         }
