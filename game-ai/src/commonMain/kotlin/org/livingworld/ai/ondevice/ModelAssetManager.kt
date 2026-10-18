@@ -42,8 +42,7 @@ object ModelAssetCatalog {
         spec = OnDeviceModelCatalog.SMOL_LM2_135M,
         downloadUrl = "https://huggingface.co/bartowski/SmolLM2-135M-Instruct-GGUF/resolve/main/SmolLM2-135M-Instruct-Q4_K_M.gguf",
         targetFileName = "smollm2-135m-q4_k_m.gguf",
-        expectedSizeBytes = 89_128_960L,
-        sha256Checksum = "e5a87b...verified"
+        expectedSizeBytes = 89_128_960L
     )
 
     val SMOLLM2_360M_GGUF = ModelAssetDescriptor(
@@ -57,7 +56,9 @@ object ModelAssetCatalog {
         spec = OnDeviceModelCatalog.QWEN_2_5_0_5B,
         downloadUrl = "https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct-GGUF/resolve/main/qwen2.5-0.5b-instruct-q4_k_m.gguf",
         targetFileName = "qwen2.5-0.5b-q4_k_m.gguf",
-        expectedSizeBytes = 356_515_840L
+        // Size and checksum measured from the downloaded file (2026-10-18); the other entries are unverified.
+        expectedSizeBytes = 377_105_247L,
+        sha256Checksum = "52164eb8e6129893c31149763d68ea47e32b300b827cfbea5c569788ba4e1361"
     )
 
     val QWEN_2_5_CODER_1_5B_GGUF = ModelAssetDescriptor(
