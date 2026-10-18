@@ -37,3 +37,5 @@
     - Added `TacticalDuelViewModel`, `TacticalDuelScreen`, and a 4th navigation tab (`"Combat Duel"`) in `androidApp/MainActivity.kt` with unit tests in `ViewModelTests.kt`.
     - **Red-Team Fix `RT-17`**: Guarded `TacticalDuelViewModel.executeDuelRound` and `TacticalDuelSimulator.execute_round` so a defeated (`!isAlive` or `health <= 0f`) opponent cannot fight additional rounds or emit duplicate `NpcKilled` events (`Invariant G4`).
     - **Red-Team Fix `RT-18`**: Extracted `_step_npc_routine` and `_apply_npc_snapshot` helpers in `simulate_village.py` to flatten nesting depth.
+
+2026-10-18: automation phase 2 (conductor mod, session-local) and phase 3 (tools/hooks/telemetry.py, hook outcome log + advice report) done. Review `python3 tools/hooks/telemetry.py` after a few sessions and demote hooks it flags.

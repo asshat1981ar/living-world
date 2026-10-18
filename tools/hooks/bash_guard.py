@@ -20,7 +20,11 @@ import re
 import shlex
 import subprocess
 import sys
+import time
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import telemetry  # noqa: E402
 
 REPO = Path(os.environ.get("CLAUDE_PROJECT_DIR") or Path(__file__).resolve().parents[2])
 SEPARATORS = {";", "&&", "||", "|", "&"}
@@ -46,6 +50,13 @@ def segments(command: str) -> list[list[str]]:
         else:
             segs[-1].append(tok)
     return [s for s in segs if s]
+
+
+def _safe_segments(command: str) -> list[list[str]]:
+    try:
+        return segments(command)
+    except ValueError:
+        return []
 
 
 def git_sub(seg: list[str]) -> tuple[str, list[str]] | None:
@@ -139,7 +150,13 @@ def main() -> int:
     if data.get("tool_name") != "Bash":
         return 0
     command = (data.get("tool_input") or {}).get("command", "")
+    started = time.monotonic()
     code, message = evaluate(command)
+    relevant = any(is_broad_stage(g) or is_push(g) for g in _safe_segments(command))
+    if relevant:
+        telemetry.record("bash_guard", "block" if code else "warn" if message else "pass", started)
+    elif "LW_SKIP_PREPUSH=" in command and "push" in command:
+        telemetry.record("bash_guard", "skip")
     if message:
         print(message, file=sys.stderr)
     return code

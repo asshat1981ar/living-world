@@ -16,6 +16,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from check_invariants import introduced  # noqa: E402
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import telemetry  # noqa: E402
+
 
 def _after(tool: str, ti: dict, old: str) -> str | None:
     if tool == "Write":
@@ -51,6 +54,7 @@ def main() -> int:
     if new is None:
         return 0
     errors = [f for f in introduced(rel, old, new) if f.severity == "error"]
+    telemetry.record("invariant_guard", "block" if errors else "pass")
     if not errors:
         return 0
     print("Blocked by living-world invariant guard (INSTRUCTIONS.md G1/G8/G9):", file=sys.stderr)

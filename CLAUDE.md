@@ -31,6 +31,8 @@ Deterministic, event-sourced Kotlin Multiplatform simulation kernel for an Andro
 - `session_preflight.py` (SessionStart): reports whether the AWS session is valid and whether the GPU box is running.
 - `ci_watch.py` (after a push, then at prompt/session start): polls GitHub Actions in the background and reports pass/fail once, with only the failing step's log tail. Needs `gh` logged in.
 - `stop_gate.py` (Stop, tiered): invariants, tool tests, then only the Gradle tasks the changed modules need (game-core -> all four `jvmTest`; one other module -> its `jvmTest`; build files/androidApp/desktopApp -> full `check`), then a G8 determinism tier (30-day `:desktopApp:run` twice, fingerprints must match; `LW_DETERMINISM_RUNS` sets the count) when game-core or desktopApp changed. Per-module digests in `.git/lw-stop-gate/quick.json`. The pre-push gate (`bash_guard`) still runs the full `check`. Measured: unchanged 10 s, one module ~1m50s, first run ~4m50s.
+- `telemetry.py`: every guard logs pass/warn/block/skip + seconds to `.git/lw-telemetry/events.jsonl`; `python3 tools/hooks/telemetry.py` prints per-hook counts and flags hooks to demote (never blocked and slow) or tune (bypassed >=25%) once a hook has 20+ runs.
+- Conductor mod (outside the repo, `~/.claude/dev-mods/<session>/lw-conductor`): CI status line/toasts from `ci_watch` state, and a login-code `state=` annotation on pasted codes.
 - Tests: `python3 -m unittest discover -s tools -p 'test_*.py'`.
 
 # Known issues (as of 2026-10-17, not yet fixed)

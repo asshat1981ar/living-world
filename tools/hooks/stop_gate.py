@@ -27,8 +27,12 @@ import os
 import re
 import subprocess
 import sys
+import time
 from dataclasses import dataclass
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import telemetry  # noqa: E402
 
 REPO = Path(os.environ.get("CLAUDE_PROJECT_DIR") or Path(__file__).resolve().parents[2])
 STATE = REPO / ".git" / "lw-stop-gate" / "last-green"
@@ -228,7 +232,10 @@ def main() -> int:
         return 0
     if data.get("hook_event_name", "Stop") != "Stop":
         return 0
+    started = time.monotonic()
     answer = decide_quick(data, run_remote=os.environ.get("LW_STOP_GATE_REMOTE", "1") != "0")
+    outcome = "block" if answer and answer.get("decision") == "block" else "warn" if answer else "pass"
+    telemetry.record("stop_gate", outcome, started)
     if answer:
         print(json.dumps(answer))
     return 0
