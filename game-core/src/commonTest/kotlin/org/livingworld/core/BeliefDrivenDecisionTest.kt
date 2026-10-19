@@ -53,6 +53,18 @@ class BeliefDrivenDecisionTest {
     }
 
     @Test
+    fun apprentice_acts_on_a_false_death_rumor_and_the_validator_refuses_it() = runTest {
+        val world = TestWorld.create()
+        val falseNews = fact(Proposition.NpcDied(merchant), world)
+        world.state = world.state.copy(
+            npcs = world.state.npcs + (apprentice to world.npc(apprentice).let { it.copy(beliefs = it.beliefs.addOrUpdate(falseNews)) })
+        )
+        assertTrue(world.npc(merchant).isAlive)
+        assertTrue(intents(world, apprentice).any { it is Intent.InheritShop }, "the candidate comes from the belief, not from world truth")
+        assertFalse(engine.decide(world.npc(apprentice), world.state).intent is Intent.InheritShop, "the world's rules refuse it")
+    }
+
+    @Test
     fun rumor_candidates_do_not_depend_on_what_the_listener_knows() {
         val world = TestWorld.create()
         val belief = fact(Proposition.GeneralFact("harvest", "good"), world)

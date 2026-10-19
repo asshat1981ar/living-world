@@ -103,7 +103,8 @@ def generate_candidates(npc, world):
         deceased = None
         for v in victims:
             n = world.npcs.get(v)
-            if n is not None and not n.is_alive and "merchant" in n.identity.occupation.lower():
+            # Truth of the death is the validator's call (Kotlin generateCandidates, P8).
+            if n is not None and "merchant" in n.identity.occupation.lower():
                 deceased = n
                 break
         already = any(isinstance(b.proposition, bf.ShopInheritedProp) and b.proposition.heir == npc.id

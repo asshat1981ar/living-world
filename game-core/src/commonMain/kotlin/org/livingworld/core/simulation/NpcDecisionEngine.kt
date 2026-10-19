@@ -114,14 +114,14 @@ class DefaultNpcDecisionEngine(
             val shareable = npc.beliefs.all()
                 .filter { b -> (b.source as? KnowledgeSource.Hearsay)?.sourceNpc != other.id }
                 .filter { b -> !npc.memories.hasTold(other.id, b.proposition) }
-                .maxWithOrNull(compareBy<org.livingworld.core.beliefs.Belief> { newsworthiness(it, world) }
+                .maxWithOrNull(compareBy<org.livingworld.core.beliefs.Belief> { newsworthiness(it, world.time) }
                     .thenByDescending { it.proposition.describe() })
 
             if (shareable != null) {
                 candidates.add(
                     ActionCandidate(
                         action = Intent.ShareRumor(other.id, shareable),
-                        expectedEffects = listOf(ExpectedEffect("Spread information", RUMOR_BASE_UTILITY + RUMOR_NEWS_WEIGHT * newsworthiness(shareable, world)))
+                        expectedEffects = listOf(ExpectedEffect("Spread information", RUMOR_BASE_UTILITY + RUMOR_NEWS_WEIGHT * newsworthiness(shareable, world.time)))
                     )
                 )
             }
@@ -140,7 +140,9 @@ class DefaultNpcDecisionEngine(
                 }
                 .sortedBy { it.value }
                 .mapNotNull { world.npcs[it] }
-                .firstOrNull { !it.isAlive && it.identity.occupation.contains("Merchant", ignoreCase = true) }
+                // Whether the death really happened is the validator's call (a false rumor is refused there); an
+                // occupation is public knowledge in the village.
+                .firstOrNull { it.identity.occupation.contains("Merchant", ignoreCase = true) }
             val alreadyInherited = npc.beliefs.all().any { (it.proposition as? Proposition.ShopInherited)?.heir == npc.id }
             if (deceasedMerchant != null && !alreadyInherited) {
                 candidates.add(
@@ -245,8 +247,8 @@ class DefaultNpcDecisionEngine(
      * outranks routine work for about two days; stale or doubtful beliefs do not (otherwise the village would
      * gossip forever instead of working).
      */
-    private fun newsworthiness(belief: org.livingworld.core.beliefs.Belief, world: WorldState): Float {
-        val ageTicks = (world.time.tick - belief.acquiredAt.tick).coerceAtLeast(0L)
+    private fun newsworthiness(belief: org.livingworld.core.beliefs.Belief, now: org.livingworld.core.time.WorldTime): Float {
+        val ageTicks = (now.tick - belief.acquiredAt.tick).coerceAtLeast(0L)
         val daysOld = ageTicks / org.livingworld.core.time.WorldTime.TICKS_PER_DAY.toFloat()
         return belief.confidence * belief.reliability / (1f + RUMOR_FADE_PER_DAY * daysOld)
     }
