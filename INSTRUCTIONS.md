@@ -50,7 +50,7 @@ Before executing any refactoring micro-op or code generation:
 
 ### Continuous Reflection & Self-Learning Loop
 
-* **Pre-Execution Reflection**: Analyze proposed code changes against the 20 passing test suites (`SimulationKernelTest`, `TestWorld`, etc.).
+* **Pre-Execution Reflection**: Analyze proposed code changes against the 20 passing test suites (`WorldReducerTest`, `SimulationEngineTest`, `TestWorld`, etc.).
 * **Post-Execution Evaluation**: After making code or build changes, inspect diffs to ensure no violation of invariants G1–G10.
 * **Proactive Optimization**: Actively identify technical debt, cognitive complexity hotspots (e.g., `WorldReducer.kt`, `SimulationEngine.kt`), or missing test coverage. When proactive steps eliminate redundancies or prevent regressions, document the optimization pattern in workspace logs.
 

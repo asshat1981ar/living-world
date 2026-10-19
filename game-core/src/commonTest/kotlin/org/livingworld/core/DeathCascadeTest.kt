@@ -104,4 +104,70 @@ class DeathCascadeTest {
         assertEquals(QuestStatus.COMPLETED, world.state.activeQuests.first().status)
         assertEquals(100f - 5f + 45f, world.state.player.coins)
     }
+
+    @Test
+    fun npc_death_is_persistent_and_triggers_apprentice_shop_inheritance_candidate() {
+        val world = TestWorld.create()
+        val merchantId = NpcId("merchant")
+        val apprenticeId = NpcId("apprentice")
+
+        // G2: the apprentice only considers the inheritance once it knows of the death (here: it witnessed it).
+        world.kill(merchantId, killer = NpcId("miner_derek").toEntityId(), witnesses = listOf(apprenticeId))
+
+        assertTrue(
+            world.isDead(merchantId),
+            "Killed NPC must be persistently marked dead (Invariant 4)"
+        )
+        assertFalse(
+            world.npc(merchantId).isAlive,
+            "NPC isAlive property must reflect death"
+        )
+
+        val decisionEngine = DefaultNpcDecisionEngine()
+        val candidates = decisionEngine.generateCandidates(world.npc(apprenticeId), world.state)
+        assertTrue(
+            candidates.any { it.action is Intent.InheritShop },
+            "RT-5: Apprentice must generate InheritShop candidate when master merchant dies"
+        )
+    }
+
+    @Test
+    fun death_creates_social_consequences_and_hostility_candidates() {
+        val world = TestWorld.create()
+        val merchantId = NpcId("merchant")
+        val apprenticeId = NpcId("apprentice")
+        val killer = NpcId("miner_derek").toEntityId()
+
+        world.kill(
+            victim = merchantId,
+            killer = killer,
+            witnesses = listOf(apprenticeId)
+        )
+
+        assertTrue(
+            world.eventLedger.containsDeath(merchantId),
+            "Event ledger must record death event"
+        )
+        assertTrue(
+            world.relationships.containsChangedRelationships(),
+            "Relationships must change upon death of an associate"
+        )
+
+        val apprenticeRelToKiller = world.relationships.get(apprenticeId.toEntityId(), killer)
+        assertTrue(
+            apprenticeRelToKiller.resentment > 0.5f,
+            "Apprentice must resent the killer of their master"
+        )
+        assertTrue(
+            apprenticeRelToKiller.trust < 0f,
+            "Apprentice trust in killer must plummet"
+        )
+
+        val decisionEngine = DefaultNpcDecisionEngine()
+        val candidates = decisionEngine.generateCandidates(world.npc(apprenticeId), world.state)
+        assertTrue(
+            candidates.any { it.action is Intent.Attack && it.action.target == NpcId("miner_derek") },
+            "RT-3: Apprentice must generate Attack candidate against master's killer"
+        )
+    }
 }
