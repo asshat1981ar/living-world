@@ -27,6 +27,7 @@ object CanonicalDump {
             is GameEvent.RelationshipShifted -> listOf(e.source.identifier, e.target.identifier, f4(e.deltaTrust), f4(e.deltaAffection), f4(e.deltaRespect), f4(e.deltaFear), f4(e.deltaResentment), e.reason)
             is GameEvent.RumorTransmitted -> listOf(e.source.value, e.target.value, e.transmittedBelief.proposition.describe(), f4(e.transmittedBelief.confidence), f4(e.distortion))
             is GameEvent.TradeCompleted -> listOf(e.buyer.identifier, e.seller.identifier, e.item.value, f4(e.price))
+            is GameEvent.RationPurchased -> listOf(e.buyer.value, e.seller.value, f4(e.food), f4(e.price), f4(e.tax))
             is GameEvent.AllegianceChanged -> listOf(e.npc.value, e.oldFaction?.value ?: "-", e.newFaction.value, e.reason)
             is GameEvent.NpcAttacked -> listOf(e.attacker.identifier, e.target.value, f4(e.damage), e.location.value, e.attackerStance.name, e.defenderStance.name, e.duelOutcome.name)
             is GameEvent.PriceAdjusted -> listOf(e.merchant.value, e.item.value, f4(e.oldPrice), f4(e.newPrice), e.reason)
@@ -56,6 +57,7 @@ object CanonicalDump {
         for ((k, v) in world.economy.itemPrices.entries.sortedBy { it.key }) out += "P|$k|${f4(v)}"
         for ((k, v) in world.economy.scarcityFactors.entries.sortedBy { it.key }) out += "S|$k|${f4(v)}"
         out += "V|${f4(world.economy.totalTradeVolume)}"
+        out += "TR|${f4(world.economy.treasury)}"
         for (q in world.activeQuests.sortedBy { it.id }) out += "Q|${q.id}|${q.status.name}|${f4(q.reward)}"
         out += "PL|${f4(world.player.coins)}"
         for ((k, r) in world.relationships.allEdges().entries.sortedBy { it.key })

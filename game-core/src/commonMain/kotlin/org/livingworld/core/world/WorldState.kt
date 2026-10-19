@@ -24,8 +24,14 @@ data class Location(
 data class EconomyState(
     val itemPrices: Map<String, Float> = emptyMap(),
     val scarcityFactors: Map<String, Float> = emptyMap(),
-    val totalTradeVolume: Float = 0f
+    val totalTradeVolume: Float = 0f,
+    /** The village purse: wages are paid from it, upkeep and ration tax go into it. Coins are never minted. */
+    val treasury: Float = STARTING_TREASURY
 ) {
+    companion object {
+        const val STARTING_TREASURY = 200f
+    }
+
     fun getPrice(item: ItemId, basePrice: Float = 10f): Float {
         val currentPrice = itemPrices[item.value] ?: basePrice
         val scarcity = scarcityFactors[item.value] ?: 1.0f

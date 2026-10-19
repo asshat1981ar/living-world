@@ -27,6 +27,8 @@ def line(e):
         body = [e.source, e.target, b.proposition.describe(), f4(b.confidence), f4(e.distortion)]
     elif t is ev.TradeCompleted:
         body = [e.buyer[1], e.seller[1], e.item, f4(e.price)]
+    elif t is ev.RationPurchased:
+        body = [e.buyer, e.seller, f4(e.food), f4(e.price), f4(e.tax)]
     elif t is ev.AllegianceChanged:
         body = [e.npc, _opt(e.oldFaction), e.newFaction, e.reason]
     elif t is ev.NpcAttacked:
@@ -64,6 +66,7 @@ def dump(world):
     for k, v in sorted(world.economy.scarcityFactors.items()):
         out.append(f"S|{k}|{f4(v)}")
     out.append(f"V|{f4(world.economy.totalTradeVolume)}")
+    out.append(f"TR|{f4(world.economy.treasury)}")
     for q in sorted(world.activeQuests, key=lambda q: q.id):
         out.append(f"Q|{q.id}|{q.status}|{f4(q.reward)}")
     out.append(f"PL|{f4(world.player.coins)}")

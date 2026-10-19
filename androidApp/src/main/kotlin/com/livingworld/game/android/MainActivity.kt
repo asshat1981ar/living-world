@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import org.livingworld.core.events.GameEvent
+import org.livingworld.core.simulation.AttackEvents
 import org.livingworld.core.events.TacticalCombatResolver
 import org.livingworld.core.events.TacticalStance
 import org.livingworld.core.ids.NpcId
@@ -112,22 +113,7 @@ class TacticalDuelViewModel(
             defenderStance = resolution.defenderStance,
             duelOutcome = resolution.outcome
         )
-        world = reducer.apply(world, attackEvent)
-
-        val updatedOpponent = world.npcs[opponentId]
-        if (updatedOpponent != null && updatedOpponent.resources.health <= 0f && updatedOpponent.isAlive) {
-            val killEvent = GameEvent.NpcKilled(
-                id = world.events.nextId(),
-                time = world.time,
-                victim = opponentId,
-                killer = world.player.id,
-                witnesses = emptyList(),
-                causalEventId = attackEventId,
-                location = world.player.currentLocation,
-                motive = "Defeated in tactical duel (${resolution.outcome.description})"
-            )
-            world = reducer.apply(world, killEvent)
-        }
+        world = AttackEvents.apply(reducer, world, attackEvent, motive = "Defeated in tactical duel (${resolution.outcome.description})")
 
         val nextRound = _uiState.value.roundCount + 1
         val summary = "Round $nextRound: Player [${playerStance.name}] vs ${opponent.identity.name} [${oppStance.name}] -> ${resolution.outcome.description} (${resolution.finalDamage} dmg)"

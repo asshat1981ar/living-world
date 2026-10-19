@@ -14,6 +14,15 @@ from .world import generate_opportunities
 F = f32
 _ACTIVE_PHASES = ("MORNING", "MIDDAY", "AFTERNOON")
 
+# SimulationEngine companion constants
+WORK_WAGE = 0.25
+DAILY_UPKEEP = 3.0
+RATION_FOOD = 8.0
+RATION_PRICE = 3.0
+RATION_TAX = 1.0
+RATION_HUNGER_THRESHOLD = 5.0
+RATION_SELLER_RESERVE = 5.0
+
 
 def advance(state, duration_ticks):
     """advance(): one tick() call per hour (60 ticks)."""
@@ -37,7 +46,33 @@ def tick(state, step):
             continue
         action = decision.decide(fresh, current)
         current = execute(current, fresh, action)
+    if current.time // worldtime.TICKS_PER_DAY > state.time // worldtime.TICKS_PER_DAY:
+        current = collect_upkeep(current)
     return dispatch_opportunities(current)
+
+
+def collect_upkeep(state):
+    current = state
+    for npc in sorted((n for n in current.npcs.values() if n.is_alive and n.resources.coins > 0.0), key=lambda n: n.id):
+        current = reducer.apply(current, ev.NpcRoutineCompleted(
+            id=current.events.next_id(), time=current.time, npc=npc.id, routineType="UPKEEP",
+            location=npc.identity.currentLocation, deltaCoins=F(-DAILY_UPKEEP)))
+    return current
+
+
+def buy_rations_if_hungry(state, buyer_id):
+    buyer = state.npcs.get(buyer_id)
+    if buyer is None or buyer.resources.food >= RATION_HUNGER_THRESHOLD or buyer.resources.coins < RATION_PRICE:
+        return state
+    sellers = sorted((n for n in state.npcs.values()
+                      if n.is_alive and n.id != buyer_id and _is_food_producer(n.identity.occupation)
+                      and n.resources.food >= RATION_FOOD + RATION_SELLER_RESERVE),
+                     key=lambda n: (-n.resources.food, n.id))
+    if not sellers:
+        return state
+    return reducer.apply(state, ev.RationPurchased(
+        id=state.events.next_id(), time=state.time, buyer=buyer_id, seller=sellers[0].id,
+        food=F(RATION_FOOD), price=F(RATION_PRICE), tax=F(RATION_TAX)))
 
 
 def dispatch_opportunities(state):
@@ -94,18 +129,12 @@ def execute(state, npc, intent):
         return reducer.apply(state, e)
     if isinstance(intent, ac.Work):
         producer = _is_food_producer(npc.identity.occupation)
-        needs_ration = (not producer) and npc.resources.food < 5.0 and npc.resources.coins >= 5.0
-        if producer:
-            food_delta = F(1.5)
-        elif needs_ration:
-            food_delta = F(8.0)
-        else:
-            food_delta = F(-0.25)
-        coin_delta = F(-3.0) if needs_ration else F(2.0)
-        e = ev.NpcRoutineCompleted(id=event_id, time=time, npc=npc.id,
-                                   routineType="WORK_AND_RATION_PURCHASE" if needs_ration else "WORK",
-                                   location=intent.location, deltaCoins=coin_delta, deltaFood=food_delta)
-        return reducer.apply(state, e)
+        wage = 0.0 if producer else max(min(F(WORK_WAGE), state.economy.treasury), 0.0)
+        e = ev.NpcRoutineCompleted(id=event_id, time=time, npc=npc.id, routineType="WORK",
+                                   location=intent.location, deltaCoins=F(wage),
+                                   deltaFood=F(1.5) if producer else F(-0.25))
+        worked = reducer.apply(state, e)
+        return worked if producer else buy_rations_if_hungry(worked, npc.id)
     if isinstance(intent, ac.Socialize):
         e = ev.RelationshipShifted(id=event_id, time=time, source=("npc", npc.id), target=("npc", intent.target),
                                    deltaTrust=F(0.05), deltaAffection=F(0.05), deltaRespect=F(0.02), deltaFear=0.0,

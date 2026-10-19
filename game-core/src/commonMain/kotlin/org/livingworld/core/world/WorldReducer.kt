@@ -42,6 +42,7 @@ class DefaultWorldReducer : WorldReducer {
             is GameEvent.RelationshipShifted -> applyRelationshipShift(baseState, event)
             is GameEvent.AllegianceChanged -> applyAllegianceChange(baseState, event)
             is GameEvent.TradeCompleted -> applyTrade(baseState, event)
+            is GameEvent.RationPurchased -> applyRationPurchase(baseState, event)
             is GameEvent.PriceAdjusted -> applyPriceAdjustment(baseState, event)
             is GameEvent.ShopInherited -> applyShopInherited(baseState, event)
             is GameEvent.FactionHostilityDeclared -> applyFactionHostility(baseState, event)
@@ -402,12 +403,15 @@ class DefaultWorldReducer : WorldReducer {
                 q
             }
         }
-        if (bonusReward > 0f) {
-            nextPlayer = nextPlayer.copy(coins = nextPlayer.coins + bonusReward)
+        // The reward is paid from the treasury, so it is limited to what the treasury holds.
+        val reward = minOf(bonusReward, state.economy.treasury).coerceAtLeast(0f)
+        if (reward > 0f) {
+            nextPlayer = nextPlayer.copy(coins = nextPlayer.coins + reward)
         }
 
         val nextEconomy = state.economy.copy(
-            totalTradeVolume = state.economy.totalTradeVolume + paid
+            totalTradeVolume = state.economy.totalTradeVolume + paid,
+            treasury = state.economy.treasury - reward
         )
 
         return state.copy(
@@ -438,12 +442,17 @@ class DefaultWorldReducer : WorldReducer {
             reliability = 1.0f,
             acquiredAt = event.time
         )
+        // The village grants the new shopkeeper a start-up purse from the treasury (limited to what it holds).
+        val grant = minOf(25.0f, state.economy.treasury).coerceAtLeast(0f)
         val updatedHeir = heir.copy(
             identity = heir.identity.copy(occupation = "Shopkeeper (${event.shopName})"),
-            resources = heir.resources.copy(coins = heir.resources.coins + 25.0f),
+            resources = heir.resources.copy(coins = heir.resources.coins + grant),
             beliefs = heir.beliefs.addOrUpdate(inheritanceBelief)
         )
-        return state.copy(npcs = state.npcs + (heir.id to updatedHeir))
+        return state.copy(
+            npcs = state.npcs + (heir.id to updatedHeir),
+            economy = state.economy.copy(treasury = state.economy.treasury - grant)
+        )
     }
 
     private fun applyFactionHostility(
@@ -465,8 +474,10 @@ class DefaultWorldReducer : WorldReducer {
         state: WorldState,
         event: GameEvent.EntitiesMet
     ): WorldState {
+        // Only a pair with no history at all starts out NEUTRAL; an edge with any feeling or history (a grudge with no
+        // trust or affection component, say) is left as it is.
         val currentRel = state.relationships.get(event.entityA, event.entityB)
-        val updatedRels = if (currentRel.trust == 0f && currentRel.affection == 0f) {
+        val updatedRels = if (currentRel == org.livingworld.core.relationships.Relationship.NEUTRAL) {
             state.relationships.set(event.entityA, event.entityB, org.livingworld.core.relationships.Relationship.NEUTRAL)
         } else {
             state.relationships
@@ -518,26 +529,47 @@ class DefaultWorldReducer : WorldReducer {
     ): WorldState {
         val npc = state.npcs[event.npc] ?: return state
         val nextHealth = (npc.resources.health + event.deltaHealth).coerceIn(0f, 100f)
-        val nextCoins = (npc.resources.coins + event.deltaCoins).coerceAtLeast(0f)
+        // Coins are a transfer with the treasury (wage in, upkeep out), limited by what the paying side has.
+        val coinShift = if (event.deltaCoins >= 0f) minOf(event.deltaCoins, state.economy.treasury.coerceAtLeast(0f))
+            else -minOf(-event.deltaCoins, npc.resources.coins)
         val nextFood = (npc.resources.food + event.deltaFood).coerceIn(0.5f, 100f)
         val updatedNpc = npc.copy(
-            resources = npc.resources.copy(health = nextHealth, coins = nextCoins, food = nextFood),
+            resources = npc.resources.copy(health = nextHealth, coins = npc.resources.coins + coinShift, food = nextFood),
             emotionalState = npc.emotionalState.shifted(deltaFear = event.deltaFear)
         )
         val nextNpcs = state.npcs + (npc.id to updatedNpc)
+        val economy = state.economy.copy(treasury = state.economy.treasury - coinShift)
+        return state.copy(npcs = nextNpcs, economy = withBreadScarcity(economy, nextNpcs))
+    }
 
-        val livingNpcs = nextNpcs.values.filter { it.isAlive }
+    /**
+     * Food moves from seller to buyer (the seller keeps the 0.5 floor) and coins from buyer to seller, limited by what
+     * the buyer has; the tax share of what was paid goes to the treasury.
+     */
+    private fun applyRationPurchase(state: WorldState, event: GameEvent.RationPurchased): WorldState {
+        val buyer = state.npcs[event.buyer] ?: return state
+        val seller = state.npcs[event.seller] ?: return state
+        val paid = minOf(event.price, buyer.resources.coins).coerceAtLeast(0f)
+        val tax = minOf(event.tax, paid).coerceAtLeast(0f)
+        val food = minOf(event.food, seller.resources.food - 0.5f).coerceAtLeast(0f)
+        val nextNpcs = state.npcs +
+            (buyer.id to buyer.copy(resources = buyer.resources.copy(
+                coins = buyer.resources.coins - paid, food = (buyer.resources.food + food).coerceAtMost(100f)))) +
+            (seller.id to seller.copy(resources = seller.resources.copy(
+                coins = seller.resources.coins + (paid - tax), food = seller.resources.food - food)))
+        val economy = state.economy.copy(treasury = state.economy.treasury + tax)
+        return state.copy(npcs = nextNpcs, economy = withBreadScarcity(economy, nextNpcs))
+    }
+
+    private fun withBreadScarcity(economy: EconomyState, npcs: Map<NpcId, Npc>): EconomyState {
+        val livingNpcs = npcs.values.filter { it.isAlive }
         val avgFood = if (livingNpcs.isNotEmpty()) {
             livingNpcs.sumOf { it.resources.food.toDouble() }.toFloat() / livingNpcs.size
         } else {
             15f
         }
         val breadScarcity = (15f / avgFood.coerceAtLeast(3f)).coerceIn(0.75f, 2.5f)
-        val nextEconomy = state.economy.copy(
-            scarcityFactors = state.economy.scarcityFactors + ("bread" to breadScarcity)
-        )
-
-        return state.copy(npcs = nextNpcs, economy = nextEconomy)
+        return economy.copy(scarcityFactors = economy.scarcityFactors + ("bread" to breadScarcity))
     }
 
     /**

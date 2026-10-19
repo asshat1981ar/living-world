@@ -6,6 +6,7 @@ import org.livingworld.core.events.CausalLinks
 import org.livingworld.core.events.GameEvent
 import org.livingworld.core.events.TacticalCombatResolver
 import org.livingworld.core.ids.LocationId
+import org.livingworld.core.ids.NpcId
 import org.livingworld.core.npc.Npc
 import org.livingworld.core.npc.Trait
 import org.livingworld.core.relationships.RelationshipGraph
@@ -40,6 +41,8 @@ class SimulationEngine(
             val action = decisionEngine.decide(freshNpc, current)
             current = executeValidatedAction(current, freshNpc, action)
         }
+
+        if (current.time.day > state.time.day) current = collectUpkeep(current)
 
         // Sprint 5 & RT-15: Evaluate emergent crises and dispatch non-duplicate QuestOpportunities
         current = dispatchEmergentOpportunities(current)
@@ -95,6 +98,45 @@ class SimulationEngine(
         return currentState
     }
 
+    /** Once a day every living NPC with coins pays upkeep into the treasury (the reducer takes only what they have). */
+    private fun collectUpkeep(state: WorldState): WorldState {
+        var current = state
+        for (npc in current.npcs.values.filter { it.isAlive && it.resources.coins > 0f }.sortedBy { it.id.value }) {
+            current = reducer.apply(current, GameEvent.NpcRoutineCompleted(
+                id = current.events.nextId(),
+                time = current.time,
+                npc = npc.id,
+                routineType = "UPKEEP",
+                location = npc.identity.currentLocation,
+                deltaCoins = -DAILY_UPKEEP
+            ))
+        }
+        return current
+    }
+
+    /**
+     * A worker who is hungry after a shift buys rations from the producer with the most food to spare (keeping
+     * [RATION_SELLER_RESERVE] after the sale), ties broken by id. This is the market matching buyers and sellers,
+     * not something the NPC knows; with no seller or too few coins the worker goes without.
+     */
+    private fun buyRationsIfHungry(state: WorldState, buyerId: NpcId): WorldState {
+        val buyer = state.npcs[buyerId] ?: return state
+        if (buyer.resources.food >= RATION_HUNGER_THRESHOLD || buyer.resources.coins < RATION_PRICE) return state
+        val seller = state.npcs.values
+            .filter { it.isAlive && it.id != buyerId && isFoodProducer(it.identity.occupation) && it.resources.food >= RATION_FOOD + RATION_SELLER_RESERVE }
+            .sortedWith(compareByDescending<Npc> { it.resources.food }.thenBy { it.id.value })
+            .firstOrNull() ?: return state
+        return reducer.apply(state, GameEvent.RationPurchased(
+            id = state.events.nextId(),
+            time = state.time,
+            buyer = buyerId,
+            seller = seller.id,
+            food = RATION_FOOD,
+            price = RATION_PRICE,
+            tax = RATION_TAX
+        ))
+    }
+
     private fun advanceTime(state: WorldState, duration: WorldDuration): WorldState {
         return state.copy(time = state.time + duration)
     }
@@ -143,25 +185,20 @@ class SimulationEngine(
                 reducer.apply(state, routineEvent)
             }
             is Intent.Work -> {
-                val needsRationRefill = !isFoodProducer(npc.identity.occupation) &&
-                        npc.resources.food < 5.0f && npc.resources.coins >= 5.0f
-                val foodDelta = when {
-                    isFoodProducer(npc.identity.occupation) -> 1.5f
-                    needsRationRefill -> 8.0f
-                    else -> -0.25f
-                }
-                val coinDelta = if (needsRationRefill) -3.0f else 2.0f
-
+                // Producers grow food and earn by selling it; everyone else is paid a wage from the treasury.
+                val producer = isFoodProducer(npc.identity.occupation)
+                val wage = if (producer) 0f else minOf(WORK_WAGE, state.economy.treasury).coerceAtLeast(0f)
                 val routineEvent = GameEvent.NpcRoutineCompleted(
                     id = eventId,
                     time = time,
                     npc = npc.id,
-                    routineType = if (needsRationRefill) "WORK_AND_RATION_PURCHASE" else "WORK",
+                    routineType = "WORK",
                     location = intent.location,
-                    deltaCoins = coinDelta,
-                    deltaFood = foodDelta
+                    deltaCoins = wage,
+                    deltaFood = if (producer) 1.5f else -0.25f
                 )
-                reducer.apply(state, routineEvent)
+                val worked = reducer.apply(state, routineEvent)
+                if (producer) worked else buyRationsIfHungry(worked, npc.id)
             }
             is Intent.Socialize -> {
                 val shiftEvent = GameEvent.RelationshipShifted(
@@ -255,24 +292,7 @@ class SimulationEngine(
                     defenderStance = duel.defenderStance,
                     duelOutcome = duel.outcome
                 )
-                var intermediate = reducer.apply(state, attackEvent)
-
-                val afterHealth = intermediate.npcs[intent.target]?.resources?.health ?: 0f
-                if (afterHealth <= 0f) {
-                    val killEventId = intermediate.events.nextId()
-                    val killEvent = GameEvent.NpcKilled(
-                        id = killEventId,
-                        time = time,
-                        victim = intent.target,
-                        killer = npc.id.toEntityId(),
-                        witnesses = witnesses,
-                        causalEventId = eventId,
-                        location = npc.identity.currentLocation,
-                        motive = "${intent.reason} (${duel.outcome.description})"
-                    )
-                    intermediate = reducer.apply(intermediate, killEvent)
-                }
-                intermediate
+                AttackEvents.apply(reducer, state, attackEvent, motive = "${intent.reason} (${duel.outcome.description})")
             }
             is Intent.InheritShop -> {
                 val inheritEvent = GameEvent.ShopInherited(
@@ -297,6 +317,16 @@ class SimulationEngine(
                 reducer.apply(state, routineEvent)
             }
         }
+    }
+
+    companion object {
+        const val WORK_WAGE = 0.25f
+        const val DAILY_UPKEEP = 3f
+        const val RATION_FOOD = 8f
+        const val RATION_PRICE = 3f
+        const val RATION_TAX = 1f
+        const val RATION_HUNGER_THRESHOLD = 5f
+        const val RATION_SELLER_RESERVE = 5f
     }
 
     fun transmitBelief(

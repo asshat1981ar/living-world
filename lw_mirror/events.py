@@ -99,6 +99,23 @@ class RumorTransmitted:
 
 
 @dataclass(**_kw)
+class RationPurchased:
+    id: int
+    time: int
+    buyer: str
+    seller: str
+    food: float
+    price: float
+    tax: float
+    witnesses: tuple = ()
+    causalEventId: Optional[int] = None
+
+    @property
+    def actors(self):
+        return (("npc", self.buyer), ("npc", self.seller))
+
+
+@dataclass(**_kw)
 class TradeCompleted:
     id: int
     time: int

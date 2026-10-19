@@ -8,6 +8,7 @@ import com.livingworld.game.android.ui.map.MapViewModel
 import kotlinx.coroutines.test.runTest
 import org.livingworld.ai.ondevice.ModelAssetCatalog
 import org.livingworld.ai.ondevice.ModelAssetStatus
+import org.livingworld.core.events.GameEvent
 import org.livingworld.core.events.TacticalStance
 import org.livingworld.core.ids.ItemId
 import org.livingworld.core.ids.LocationId
@@ -103,6 +104,11 @@ class ViewModelTests {
             duelVm.executeDuelRound(TacticalStance.STRIKE)
         }
         assertTrue(duelVm.uiState.value.opponentIsDeceased)
+        // G4: a duel death is recorded as a death (cascade, quests), caused by the final blow, exactly once.
+        val deaths = duelVm.currentWorldState.events.all().filterIsInstance<GameEvent.NpcKilled>()
+        assertEquals(listOf(NpcId("miner_derek")), deaths.map { it.victim })
+        val finalBlow = duelVm.currentWorldState.events.all().filterIsInstance<GameEvent.NpcAttacked>().last()
+        assertEquals(finalBlow.id, deaths.single().causalEventId)
         val roundsAtDeath = duelVm.uiState.value.roundCount
         val eventsAtDeath = duelVm.currentWorldState.events.size
 

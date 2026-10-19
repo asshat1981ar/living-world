@@ -228,6 +228,23 @@ sealed interface GameEvent {
         override val summary: String get() = "${buyer.identifier} bought ${item.value} from ${seller.identifier} for $price coins"
     }
 
+    /** A hungry worker buys food from a producer; [tax] of the [price] goes to the village treasury. */
+    @Serializable
+    data class RationPurchased(
+        override val id: EventId,
+        override val time: WorldTime,
+        val buyer: NpcId,
+        val seller: NpcId,
+        val food: Float,
+        val price: Float,
+        val tax: Float,
+        override val witnesses: List<NpcId> = emptyList(),
+        override val causalEventId: EventId? = null
+    ) : GameEvent {
+        override val actors: List<EntityId> get() = listOf(buyer.toEntityId(), seller.toEntityId())
+        override val summary: String get() = "${buyer.value} bought $food food from ${seller.value} for $price coins"
+    }
+
     @Serializable
     data class AllegianceChanged(
         override val id: EventId,

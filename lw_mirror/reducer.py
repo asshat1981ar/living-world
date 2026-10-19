@@ -239,9 +239,11 @@ def _trade(state, event):
             quests.append(replace(q, status="COMPLETED"))
         else:
             quests.append(q)
-    if bonus > 0.0:
-        player = replace(player, coins=F(player.coins + bonus))
-    economy = replace(state.economy, totalTradeVolume=F(state.economy.totalTradeVolume + paid))
+    reward = max(min(bonus, state.economy.treasury), 0.0)  # paid from the treasury
+    if reward > 0.0:
+        player = replace(player, coins=F(player.coins + reward))
+    economy = replace(state.economy, totalTradeVolume=F(state.economy.totalTradeVolume + paid),
+                      treasury=F(state.economy.treasury - reward))
     return replace(state, npcs=next_npcs, player=player, economy=economy, activeQuests=tuple(quests))
 
 
@@ -255,11 +257,13 @@ def _shop_inherited(state, event):
     if heir is None:
         return state
     belief = _belief(bf.ShopInheritedProp(event.heir, event.shopName), 1.0, bf.DirectObservation(), 1.0, event.time)
+    grant = max(min(25.0, state.economy.treasury), 0.0)  # start-up purse from the treasury
     updated = replace(
         heir, identity=replace(heir.identity, occupation=f"Shopkeeper ({event.shopName})"),
-        resources=replace(heir.resources, coins=F(heir.resources.coins + 25.0)),
+        resources=replace(heir.resources, coins=F(heir.resources.coins + grant)),
         beliefs=heir.beliefs.add_or_update(belief))
-    return replace(state, npcs=_with(state.npcs, heir.id, updated))
+    return replace(state, npcs=_with(state.npcs, heir.id, updated),
+                   economy=replace(state.economy, treasury=F(state.economy.treasury - grant)))
 
 
 def _hostility(state, event):
@@ -277,7 +281,7 @@ def _hostility(state, event):
 def _met(state, event):
     cur = state.relationships.get(event.entityA, event.entityB)
     rels = state.relationships
-    if cur.trust == 0.0 and cur.affection == 0.0:
+    if cur == NEUTRAL:
         rels = rels.set(event.entityA, event.entityB, NEUTRAL)
     return replace(state, relationships=rels)
 
@@ -302,12 +306,37 @@ def _routine(state, event):
     if npc is None:
         return state
     health = coerce_in(F(npc.resources.health + event.deltaHealth), 0.0, 100.0)
-    coins = coerce_at_least(F(npc.resources.coins + event.deltaCoins), 0.0)
+    # coins are a transfer with the treasury, limited by what the paying side has
+    if event.deltaCoins >= 0.0:
+        shift = min(event.deltaCoins, coerce_at_least(state.economy.treasury, 0.0))
+    else:
+        shift = -min(-event.deltaCoins, npc.resources.coins)
     food = coerce_in(F(npc.resources.food + event.deltaFood), F(0.5), 100.0)
-    updated = replace(npc, resources=replace(npc.resources, health=health, coins=coins, food=food),
+    updated = replace(npc, resources=replace(npc.resources, health=health, coins=F(npc.resources.coins + shift), food=food),
                       emotionalState=npc.emotionalState.shifted(deltaFear=event.deltaFear))
     next_npcs = _with(state.npcs, npc.id, updated)
-    living = [n for n in next_npcs.values() if n.is_alive]
+    economy = replace(state.economy, treasury=F(state.economy.treasury - shift))
+    return replace(state, npcs=next_npcs, economy=_with_bread_scarcity(economy, next_npcs))
+
+
+def _ration(state, event):
+    buyer = state.npcs.get(event.buyer)
+    seller = state.npcs.get(event.seller)
+    if buyer is None or seller is None:
+        return state
+    paid = coerce_at_least(min(event.price, buyer.resources.coins), 0.0)
+    tax = coerce_at_least(min(event.tax, paid), 0.0)
+    food = coerce_at_least(min(event.food, F(seller.resources.food - 0.5)), 0.0)
+    nxt = _with(state.npcs, buyer.id, replace(buyer, resources=replace(
+        buyer.resources, coins=F(buyer.resources.coins - paid), food=min(F(buyer.resources.food + food), 100.0))))
+    nxt = _with(nxt, seller.id, replace(seller, resources=replace(
+        seller.resources, coins=F(seller.resources.coins + F(paid - tax)), food=F(seller.resources.food - food))))
+    economy = replace(state.economy, treasury=F(state.economy.treasury + tax))
+    return replace(state, npcs=nxt, economy=_with_bread_scarcity(economy, nxt))
+
+
+def _with_bread_scarcity(economy, npcs):
+    living = [n for n in npcs.values() if n.is_alive]
     if living:
         total = 0.0
         for n in living:  # sumOf { it.toDouble() }: sequential double sum (not math.fsum / sum())
@@ -316,8 +345,7 @@ def _routine(state, event):
     else:
         avg = 15.0
     bread = coerce_in(F(15.0 / coerce_at_least(avg, 3.0)), F(0.75), F(2.5))
-    economy = replace(state.economy, scarcityFactors=_with(state.economy.scarcityFactors, "bread", bread))
-    return replace(state, npcs=next_npcs, economy=economy)
+    return replace(economy, scarcityFactors=_with(economy.scarcityFactors, "bread", bread))
 
 
 def _opportunity(state, event):
@@ -338,6 +366,7 @@ _HANDLERS = {
     ev.RelationshipShifted: _rel_shift,
     ev.AllegianceChanged: _allegiance,
     ev.TradeCompleted: _trade,
+    ev.RationPurchased: _ration,
     ev.PriceAdjusted: _price,
     ev.ShopInherited: _shop_inherited,
     ev.FactionHostilityDeclared: _hostility,

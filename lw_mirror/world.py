@@ -18,6 +18,7 @@ class EconomyState:
     itemPrices: dict = field(default_factory=dict)
     scarcityFactors: dict = field(default_factory=dict)
     totalTradeVolume: float = 0.0
+    treasury: float = 200.0  # EconomyState.STARTING_TREASURY
 
     def get_price(self, item, base_price=10.0):
         cur = self.itemPrices.get(item, base_price)
