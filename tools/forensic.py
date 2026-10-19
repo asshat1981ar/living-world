@@ -1,6 +1,6 @@
-"""Forensic hotspot report for living-world, in the schema of forensics/forensic-report-v6.json.
+"""Forensic hotspot report for living-world, in the schema of the forensics/forensic-report-*.json reports.
 
-Heuristic, stdlib-only metrics (same formula the v6 report used, so reports stay comparable):
+Heuristic, stdlib-only metrics (same formula as the original v6 report, so reports stay comparable):
   loc        non-blank, non-comment lines
   nesting    max brace depth (Kotlin) / indentation depth (Python)
   mccabe     1 + decision points (if, when-branch arrows, for, while, catch, &&, ||, ?:, elif, except, and, or)
