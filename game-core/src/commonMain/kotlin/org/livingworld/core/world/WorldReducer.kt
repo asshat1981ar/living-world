@@ -112,20 +112,7 @@ class DefaultWorldReducer : WorldReducer {
             }
         }
 
-        // G4: people who were not there still hear of it, if the victim mattered to them.
-        val firstWitness = event.witnesses.firstOrNull()
-        for (listener in nextNpcs.values.sortedBy { it.id.value }) {
-            if (!listener.isAlive || listener.id == victim.id || listener.id in event.witnesses) continue
-            val sentiment = nextRelationships.get(listener.id.toEntityId(), victim.id.toEntityId()).overallSentiment
-            val sharedFaction = victim.factions.filter { it in listener.factions }.minByOrNull { it.value }
-            if (sentiment <= 0.2f && sharedFaction == null) continue
-            val source = when {
-                firstWitness != null -> KnowledgeSource.Hearsay(firstWitness)
-                sharedFaction != null -> KnowledgeSource.FactionReport(sharedFaction)
-                else -> KnowledgeSource.Observation(event.id)
-            }
-            nextNpcs = nextNpcs + (listener.id to hearOfDeath(listener, victim.id, event, source, sentiment > 0.2f))
-        }
+        nextNpcs = spreadNewsOfDeath(nextNpcs, nextRelationships, victim, event)
 
         // G4: quests the dead issued can no longer be completed.
         val victimEntity = victim.id.toEntityId()
@@ -140,6 +127,30 @@ class DefaultWorldReducer : WorldReducer {
             relationships = nextRelationships,
             activeQuests = nextQuests
         )
+    }
+
+    /** G4: people who were not there still hear of it, if the victim mattered to them or shared a faction. */
+    private fun spreadNewsOfDeath(
+        npcs: Map<NpcId, Npc>,
+        relationships: RelationshipGraph,
+        victim: Npc,
+        event: GameEvent.NpcKilled
+    ): Map<NpcId, Npc> {
+        var nextNpcs = npcs
+        val firstWitness = event.witnesses.firstOrNull()
+        for (listener in npcs.values.sortedBy { it.id.value }) {
+            if (!listener.isAlive || listener.id == victim.id || listener.id in event.witnesses) continue
+            val sentiment = relationships.get(listener.id.toEntityId(), victim.id.toEntityId()).overallSentiment
+            val sharedFaction = victim.factions.filter { it in listener.factions }.minByOrNull { it.value }
+            if (sentiment <= 0.2f && sharedFaction == null) continue
+            val source = when {
+                firstWitness != null -> KnowledgeSource.Hearsay(firstWitness)
+                sharedFaction != null -> KnowledgeSource.FactionReport(sharedFaction)
+                else -> KnowledgeSource.Observation(event.id)
+            }
+            nextNpcs = nextNpcs + (listener.id to hearOfDeath(listener, victim.id, event, source, sentiment > 0.2f))
+        }
+        return nextNpcs
     }
 
     private fun hearOfDeath(listener: Npc, victimId: NpcId, event: GameEvent.NpcKilled, source: KnowledgeSource, cares: Boolean): Npc {
@@ -215,30 +226,7 @@ class DefaultWorldReducer : WorldReducer {
 
         for (witnessId in event.witnesses) {
             val witness = nextNpcs[witnessId] ?: continue
-            val belief = Belief(
-                proposition = theftProposition,
-                confidence = 0.95f,
-                source = KnowledgeSource.DirectObservation,
-                reliability = 0.95f,
-                acquiredAt = event.time
-            )
-            val opportunisticBelief = Belief(
-                proposition = Proposition.HasTrait(event.thief, Trait.OPPORTUNISTIC),
-                confidence = 0.9f,
-                source = KnowledgeSource.Observation(event.id),
-                reliability = 0.95f,
-                acquiredAt = event.time
-            )
-            val updatedMemories = witness.memories
-                .add(Memory.Episodic(eventId = event.id, importance = 0.8f, createdAt = event.time))
-                .add(Memory.Relationship(entity = event.thief, experience = RelationshipExperience.THEFT, importance = 0.85f, createdAt = event.time))
-
-            val updatedWitness = witness.copy(
-                beliefs = witness.beliefs.addOrUpdate(belief).addOrUpdate(opportunisticBelief),
-                memories = updatedMemories,
-                emotionalState = witness.emotionalState.shifted(deltaAnger = 0.25f, deltaSuspicion = 0.3f)
-            )
-            nextNpcs = nextNpcs + (witnessId to updatedWitness)
+            nextNpcs = nextNpcs + (witnessId to witnessTheft(witness, event, theftProposition))
 
             nextRelationships = modifyRelationship(
                 relationships = nextRelationships,
@@ -264,6 +252,33 @@ class DefaultWorldReducer : WorldReducer {
         }
 
         return state.copy(npcs = nextNpcs, relationships = nextRelationships)
+    }
+
+    /** A witness sees the theft, judges the thief opportunistic, remembers it and grows angry and suspicious. */
+    private fun witnessTheft(witness: Npc, event: GameEvent.ItemStolen, theft: Proposition): Npc {
+        val belief = Belief(
+            proposition = theft,
+            confidence = 0.95f,
+            source = KnowledgeSource.DirectObservation,
+            reliability = 0.95f,
+            acquiredAt = event.time
+        )
+        val opportunisticBelief = Belief(
+            proposition = Proposition.HasTrait(event.thief, Trait.OPPORTUNISTIC),
+            confidence = 0.9f,
+            source = KnowledgeSource.Observation(event.id),
+            reliability = 0.95f,
+            acquiredAt = event.time
+        )
+        val updatedMemories = witness.memories
+            .add(Memory.Episodic(eventId = event.id, importance = 0.8f, createdAt = event.time))
+            .add(Memory.Relationship(entity = event.thief, experience = RelationshipExperience.THEFT, importance = 0.85f, createdAt = event.time))
+
+        return witness.copy(
+            beliefs = witness.beliefs.addOrUpdate(belief).addOrUpdate(opportunisticBelief),
+            memories = updatedMemories,
+            emotionalState = witness.emotionalState.shifted(deltaAnger = 0.25f, deltaSuspicion = 0.3f)
+        )
     }
 
     private fun applyRumor(state: WorldState, event: GameEvent.RumorTransmitted): WorldState {
@@ -367,7 +382,7 @@ class DefaultWorldReducer : WorldReducer {
             nextNpcs = nextNpcs + (buyerNpc.id to buyerNpc.copy(
                 resources = buyerNpc.resources.copy(coins = buyerNpc.resources.coins - paid, items = nextItems)
             ))
-        } else if (event.buyer is EntityId.Player || event.buyer.identifier == state.player.id.identifier) {
+        } else if (isPlayer(state, event.buyer)) {
             paid = minOf(event.price, nextPlayer.coins)
             nextPlayer = nextPlayer.copy(
                 coins = nextPlayer.coins - paid,
@@ -382,7 +397,7 @@ class DefaultWorldReducer : WorldReducer {
             nextNpcs = nextNpcs + (sellerNpc.id to sellerNpc.copy(
                 resources = sellerNpc.resources.copy(coins = nextCoins, items = nextItems)
             ))
-        } else if (event.seller is EntityId.Player || event.seller.identifier == state.player.id.identifier) {
+        } else if (isPlayer(state, event.seller)) {
             nextPlayer = nextPlayer.copy(
                 coins = nextPlayer.coins + paid,
                 inventory = nextPlayer.inventory - event.item,
@@ -392,8 +407,7 @@ class DefaultWorldReducer : WorldReducer {
 
         // RT-16: Complete matching scarcity quest when trade of that commodity occurs
         // Only a trade the player took part in earns the player the reward; failed quests stay failed.
-        val playerInvolved = event.buyer is EntityId.Player || event.seller is EntityId.Player ||
-            event.buyer.identifier == state.player.id.identifier || event.seller.identifier == state.player.id.identifier
+        val playerInvolved = isPlayer(state, event.buyer) || isPlayer(state, event.seller)
         var bonusReward = 0f
         val nextQuests = state.activeQuests.map { q ->
             if (playerInvolved && q.status != QuestStatus.COMPLETED && q.status != QuestStatus.FAILED && q.id == "quest_scarcity_${event.item.value}") {
@@ -421,6 +435,9 @@ class DefaultWorldReducer : WorldReducer {
             activeQuests = nextQuests
         )
     }
+
+    private fun isPlayer(state: WorldState, entity: EntityId): Boolean =
+        entity is EntityId.Player || entity.identifier == state.player.id.identifier
 
     private fun applyPriceAdjustment(
         state: WorldState,

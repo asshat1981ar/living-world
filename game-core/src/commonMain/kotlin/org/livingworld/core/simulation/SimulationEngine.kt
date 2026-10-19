@@ -5,6 +5,7 @@ import org.livingworld.core.beliefs.KnowledgeSource
 import org.livingworld.core.events.CausalLinks
 import org.livingworld.core.events.GameEvent
 import org.livingworld.core.events.TacticalCombatResolver
+import org.livingworld.core.ids.EventId
 import org.livingworld.core.ids.LocationId
 import org.livingworld.core.ids.NpcId
 import org.livingworld.core.npc.Npc
@@ -267,33 +268,7 @@ class SimulationEngine(
                 )
                 reducer.apply(state, changeEvent)
             }
-            is Intent.Attack -> {
-                val target = state.npcs[intent.target] ?: return state
-                if (!target.isAlive) return state
-
-                val duel = TacticalCombatResolver.resolveExchange(npc, target, time)
-                val witnesses = state.npcs.values
-                    .filter {
-                        it.isAlive && it.id != npc.id && it.id != intent.target &&
-                        it.identity.currentLocation == npc.identity.currentLocation
-                    }
-                    .sortedBy { it.id.value }
-                    .map { it.id }
-
-                val attackEvent = GameEvent.NpcAttacked(
-                    id = eventId,
-                    time = time,
-                    attacker = npc.id.toEntityId(),
-                    target = intent.target,
-                    damage = duel.finalDamage,
-                    location = npc.identity.currentLocation,
-                    witnesses = witnesses,
-                    attackerStance = duel.attackerStance,
-                    defenderStance = duel.defenderStance,
-                    duelOutcome = duel.outcome
-                )
-                AttackEvents.apply(reducer, state, attackEvent, motive = "${intent.reason} (${duel.outcome.description})")
-            }
+            is Intent.Attack -> executeAttack(state, npc, intent, eventId)
             is Intent.InheritShop -> {
                 val inheritEvent = GameEvent.ShopInherited(
                     id = eventId,
@@ -317,6 +292,36 @@ class SimulationEngine(
                 reducer.apply(state, routineEvent)
             }
         }
+    }
+
+    /** Resolves one duel exchange; everyone else alive at the attacker's location witnesses it. */
+    private fun executeAttack(state: WorldState, npc: Npc, intent: Intent.Attack, eventId: EventId): WorldState {
+        val time = state.time
+        val target = state.npcs[intent.target] ?: return state
+        if (!target.isAlive) return state
+
+        val duel = TacticalCombatResolver.resolveExchange(npc, target, time)
+        val witnesses = state.npcs.values
+            .filter {
+                it.isAlive && it.id != npc.id && it.id != intent.target &&
+                it.identity.currentLocation == npc.identity.currentLocation
+            }
+            .sortedBy { it.id.value }
+            .map { it.id }
+
+        val attackEvent = GameEvent.NpcAttacked(
+            id = eventId,
+            time = time,
+            attacker = npc.id.toEntityId(),
+            target = intent.target,
+            damage = duel.finalDamage,
+            location = npc.identity.currentLocation,
+            witnesses = witnesses,
+            attackerStance = duel.attackerStance,
+            defenderStance = duel.defenderStance,
+            duelOutcome = duel.outcome
+        )
+        return AttackEvents.apply(reducer, state, attackEvent, motive = "${intent.reason} (${duel.outcome.description})")
     }
 
     companion object {
