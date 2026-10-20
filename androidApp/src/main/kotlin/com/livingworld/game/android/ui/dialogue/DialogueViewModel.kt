@@ -41,7 +41,7 @@ class DialogueViewModel(
     private val manifest: SpriteManifest,
     private val reducer: WorldReducer = DefaultWorldReducer(),
     /** The AI that voices NPC lines; null keeps the built-in lines only. */
-    private val voice: HuggingFaceDialogueAdapter? = null,
+    private var voice: HuggingFaceDialogueAdapter? = null,
     private val scope: CoroutineScope? = null
 ) : ViewModel() {
 
@@ -49,6 +49,11 @@ class DialogueViewModel(
     val uiState: StateFlow<DialogueUiState> = _uiState.asStateFlow()
 
     val currentWorldState: WorldState get() = world
+
+    /** Turns AI-voiced lines on (for example once the player enters a Hugging Face token) or off with null. */
+    fun setVoice(voice: HuggingFaceDialogueAdapter?) {
+        this.voice = voice
+    }
 
     /** How many things this NPC has already told the player this conversation. */
     private var told = 0

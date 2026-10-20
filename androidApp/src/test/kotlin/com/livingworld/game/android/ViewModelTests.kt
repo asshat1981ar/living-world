@@ -146,4 +146,22 @@ class ViewModelTests {
         assertEquals("Greetings, traveler. What brings you to my presence?", vm.uiState.value.dialogueHistory.last().text)
         assertEquals(1, voice.stats.rejected)
     }
+
+    @Test
+    fun aVoiceSetMidConversationVoicesTheNextLineAndRemovingItStops() = runTest {
+        val vm = DialogueViewModel(world, manifest, scope = this)
+        vm.loadNpc(NpcId("merchant"))
+        advanceUntilIdle()
+        assertEquals("Greetings, traveler. What brings you to my presence?", vm.uiState.value.dialogueHistory.last().text)
+
+        vm.setVoice(HuggingFaceDialogueAdapter(transport = MockHfTransport { _, _ -> Result.success(chat("Well met, stranger.")) }))
+        vm.chooseOption(1)
+        advanceUntilIdle()
+        assertEquals("Well met, stranger.", vm.uiState.value.dialogueHistory.last().text)
+
+        vm.setVoice(null)
+        vm.chooseOption(2)
+        advanceUntilIdle()
+        assertEquals("Farewell, traveler.", vm.uiState.value.dialogueHistory.last().text)
+    }
 }
