@@ -60,7 +60,7 @@ class HuggingFaceDialogueAdapter(
         return try {
             val chatResp = json.decodeFromString<HfChatResponse>(result.getOrNull() ?: "")
             val content = chatResp.choices.firstOrNull()?.message?.content?.trim()
-            if (!content.isNullOrBlank() && isGrounded(content, npc, playerTopic, locationId, beliefs)) content
+            if (!content.isNullOrBlank() && isGrounded(content, npc, locationId, beliefs)) content
             else generateDeterministicFallback(npc, playerTopic, beliefs)
         } catch (_: Exception) {
             generateDeterministicFallback(npc, playerTopic, beliefs)
@@ -74,29 +74,46 @@ class HuggingFaceDialogueAdapter(
         beliefs: List<Belief>,
         relationship: Relationship
     ): String {
-        val sanitizedTopic = playerTopic.replace("\n", " ").take(200)
+        val sanitizedTopic = sanitizePlayerText(playerTopic)
         val sb = StringBuilder()
         sb.appendLine("Speaker: ${npc.identity.name} (${npc.identity.occupation})")
         sb.appendLine("Location: ${locationId.value}")
         sb.appendLine("Relationship toward player: Sentiment=${formatFloat2(relationship.overallSentiment)}, Trust=${formatFloat2(relationship.trust)}")
         sb.appendLine("Player said / inquired: \"$sanitizedTopic\"")
         sb.appendLine("KNOWN BELIEFS:")
-        if (beliefs.isEmpty()) {
+        // The same floored facts the reply is checked against: the model is never shown a belief it may not voice.
+        val facts = DialogueGrounding.speakableFacts(beliefs)
+        if (facts.isEmpty()) {
             sb.appendLine("(No specific rumors or secrets known)")
         } else {
-            beliefs.forEach { b -> sb.appendLine("- ${b.proposition.describe()}") }
+            facts.forEach { f -> sb.appendLine("- ${f.line}") }
         }
         sb.appendLine("Respond to the player in 1-2 sentences.")
         return sb.toString()
     }
 
-    /** G3: a model reply may only name what the NPC believes, plus the speaker, the place and the player's own words. */
-    private fun isGrounded(reply: String, npc: Npc, playerTopic: String, locationId: LocationId, beliefs: List<Belief>): Boolean =
+    /**
+     * G3: a model reply may only name what the NPC believes, plus the speaker and the place. The player's own words
+     * are not allowed: otherwise asking "Did Mara do it?" would let the model confirm a name the NPC never heard of.
+     */
+    private fun isGrounded(reply: String, npc: Npc, locationId: LocationId, beliefs: List<Belief>): Boolean =
         GroundingCheck.isGrounded(
             line = reply,
             facts = DialogueGrounding.speakableFacts(beliefs),
-            extraAllowed = listOf(npc.identity.name, npc.id.value, locationId.value, playerTopic)
+            extraAllowed = listOf(npc.identity.name, npc.id.value, locationId.value)
         )
+
+    /**
+     * Player text is untrusted: keep it on one line inside its quotes, with no chat-template tokens, quotes, backticks
+     * or control characters that could close the field or pose as a prompt section.
+     */
+    internal fun sanitizePlayerText(text: String): String =
+        text.replace(Regex("<\\|[^|]*\\|>"), " ")
+            .map { c -> if (c.isISOControl() || c in "\"`<>|\\{}[]") ' ' else c }
+            .joinToString("")
+            .replace(Regex("\\s+"), " ")
+            .trim()
+            .take(200)
 
     private fun generateDeterministicFallback(npc: Npc, playerTopic: String, beliefs: List<Belief>): String =
         DialogueGrounding.speakableFacts(beliefs).firstOrNull()?.line ?: DialogueGrounding.NOTHING_TO_TELL

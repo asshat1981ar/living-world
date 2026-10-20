@@ -59,4 +59,13 @@ class DialogueGroundingTest {
         assertFalse(GroundingCheck.isGrounded("Captain Vane took 40 coins.", facts))
         assertTrue(GroundingCheck.isGrounded("Ask Elara.", facts, extraAllowed = listOf("Elara")))
     }
+
+    @Test
+    fun an_invented_name_at_the_start_of_a_sentence_is_still_a_claim() {
+        val facts = DialogueGrounding.speakableFacts(listOf(belief(theft, 0.9f, KnowledgeSource.DirectObservation)))
+        assertFalse(GroundingCheck.isGrounded("Mara poisoned the well.", facts))
+        assertFalse(GroundingCheck.isGrounded("Aye. Mara poisoned the well.", facts))
+        assertTrue(GroundingCheck.isGrounded("Aye. Perhaps you should ask elsewhere.", facts))
+        assertTrue(GroundingCheck.isGrounded("Elara knows herbs.", facts, extraAllowed = listOf("Elara")))
+    }
 }
