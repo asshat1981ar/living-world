@@ -68,4 +68,21 @@ class DialogueGroundingTest {
         assertTrue(GroundingCheck.isGrounded("Aye. Perhaps you should ask elsewhere.", facts))
         assertTrue(GroundingCheck.isGrounded("Elara knows herbs.", facts, extraAllowed = listOf("Elara")))
     }
+
+    @Test
+    fun period_openers_are_not_names() {
+        val facts = DialogueGrounding.speakableFacts(listOf(belief(theft, 0.9f, KnowledgeSource.DirectObservation)))
+        assertTrue(GroundingCheck.isGrounded("Verily, the night is cold. Hark, prithee keep your voice down.", facts))
+    }
+
+    @Test
+    fun grounded_part_keeps_only_the_grounded_sentences() {
+        val facts = DialogueGrounding.speakableFacts(listOf(belief(theft, 0.9f, KnowledgeSource.DirectObservation)))
+        assertEquals(
+            "Hark! I saw it myself: PlayerStole(iron_sword).",
+            GroundingCheck.groundedPart("Hark! Mara poisoned the well. I saw it myself: PlayerStole(iron_sword).", facts)
+        )
+        assertEquals("Aye, it is cold.", GroundingCheck.groundedPart("Aye, it is cold.", facts))
+        assertNull(GroundingCheck.groundedPart("Mara poisoned the well. Captain Vane fled.", facts))
+    }
 }

@@ -220,6 +220,28 @@ class HuggingFaceAdapterTest {
     }
 
     @Test
+    fun a_reply_with_one_invented_sentence_keeps_its_grounded_sentences() = runTest {
+        val (npc, loc, belief) = dialogueFixture()
+        val adapter = HuggingFaceDialogueAdapter(transport = MockHfTransport { _, _ ->
+            Result.success(chat("Hark! Mara poisoned the well. Aye, guard_captain told me that PlayerStole(iron_sword)."))
+        })
+        val reply = adapter.generateDialogueLine(npc, "Any news?", loc.id, listOf(belief), Relationship.NEUTRAL)
+        assertEquals("Hark! Aye, guard_captain told me that PlayerStole(iron_sword).", reply)
+        assertEquals(DialogueStats(accepted = 0, salvaged = 1, rejected = 0, failed = 0), adapter.stats)
+    }
+
+    @Test
+    fun stats_count_each_outcome() = runTest {
+        val (npc, loc, belief) = dialogueFixture()
+        val replies = ArrayDeque(listOf("Aye, it is cold.", "Mara poisoned the well."))
+        val adapter = HuggingFaceDialogueAdapter(transport = MockHfTransport { _, _ ->
+            replies.removeFirstOrNull()?.let { Result.success(chat(it)) } ?: Result.failure(RuntimeException("offline"))
+        })
+        repeat(3) { adapter.generateDialogueLine(npc, "Any news?", loc.id, listOf(belief), Relationship.NEUTRAL) }
+        assertEquals(DialogueStats(accepted = 1, salvaged = 0, rejected = 1, failed = 1), adapter.stats)
+    }
+
+    @Test
     fun the_prompt_offers_only_beliefs_above_the_confidence_floor() {
         val (npc, loc, belief) = dialogueFixture()
         val doubt = Belief(Proposition.PlayerStole(ItemId("gold_ring")), 0.2f, KnowledgeSource.Rumor(NpcId("drunk")), 0.5f, WorldTime(1440L))

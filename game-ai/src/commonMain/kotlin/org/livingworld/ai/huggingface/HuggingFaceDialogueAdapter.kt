@@ -20,6 +20,10 @@ class HuggingFaceDialogueAdapter(
 ) {
     private val json = Json { ignoreUnknownKeys = true; isLenient = true }
 
+    /** How model replies have fared so far; watch [DialogueStats.rejected] before loosening the grounding check. */
+    var stats = DialogueStats()
+        private set
+
     suspend fun generateDialogueLine(
         npc: Npc,
         playerTopic: String,
@@ -53,18 +57,26 @@ class HuggingFaceDialogueAdapter(
         }
 
         val result = transport.postBounded(config, requestJson, headers)
-        if (result.isFailure) {
+        val content = result.getOrNull()?.let { body ->
+            try {
+                json.decodeFromString<HfChatResponse>(body).choices.firstOrNull()?.message?.content?.trim()
+            } catch (_: Exception) {
+                null
+            }
+        }
+        if (content.isNullOrBlank()) {
+            stats = stats.copy(failed = stats.failed + 1)
             return generateDeterministicFallback(npc, playerTopic, beliefs)
         }
 
-        return try {
-            val chatResp = json.decodeFromString<HfChatResponse>(result.getOrNull() ?: "")
-            val content = chatResp.choices.firstOrNull()?.message?.content?.trim()
-            if (!content.isNullOrBlank() && isGrounded(content, npc, locationId, beliefs)) content
-            else generateDeterministicFallback(npc, playerTopic, beliefs)
-        } catch (_: Exception) {
-            generateDeterministicFallback(npc, playerTopic, beliefs)
+        // Keep every grounded sentence of the reply; only a reply with none falls back to the kernel line.
+        val grounded = groundedPart(content, npc, locationId, beliefs)
+        stats = when (grounded) {
+            null -> stats.copy(rejected = stats.rejected + 1)
+            content -> stats.copy(accepted = stats.accepted + 1)
+            else -> stats.copy(salvaged = stats.salvaged + 1)
         }
+        return grounded ?: generateDeterministicFallback(npc, playerTopic, beliefs)
     }
 
     fun buildDialoguePrompt(
@@ -96,8 +108,8 @@ class HuggingFaceDialogueAdapter(
      * G3: a model reply may only name what the NPC believes, plus the speaker and the place. The player's own words
      * are not allowed: otherwise asking "Did Mara do it?" would let the model confirm a name the NPC never heard of.
      */
-    private fun isGrounded(reply: String, npc: Npc, locationId: LocationId, beliefs: List<Belief>): Boolean =
-        GroundingCheck.isGrounded(
+    private fun groundedPart(reply: String, npc: Npc, locationId: LocationId, beliefs: List<Belief>): String? =
+        GroundingCheck.groundedPart(
             line = reply,
             facts = DialogueGrounding.speakableFacts(beliefs),
             extraAllowed = listOf(npc.identity.name, npc.id.value, locationId.value)
@@ -118,3 +130,6 @@ class HuggingFaceDialogueAdapter(
     private fun generateDeterministicFallback(npc: Npc, playerTopic: String, beliefs: List<Belief>): String =
         DialogueGrounding.speakableFacts(beliefs).firstOrNull()?.line ?: DialogueGrounding.NOTHING_TO_TELL
 }
+
+/** Outcomes of model dialogue replies: used whole, trimmed to their grounded sentences, discarded, or unavailable. */
+data class DialogueStats(val accepted: Int = 0, val salvaged: Int = 0, val rejected: Int = 0, val failed: Int = 0)

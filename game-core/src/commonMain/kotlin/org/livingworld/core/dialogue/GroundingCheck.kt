@@ -11,6 +11,7 @@ package org.livingworld.core.dialogue
 object GroundingCheck {
     private val word = Regex("[A-Za-z0-9_]+")
     private val sentenceEnders = setOf('.', '!', '?', '"', '“')
+    private val sentenceBreak = Regex("(?<=[.!?])\\s+")
 
     fun isGrounded(line: String, facts: List<SpeakableFact>, extraAllowed: Collection<String> = emptyList()): Boolean {
         val allowed = mutableSetOf<String>()
@@ -18,6 +19,16 @@ object GroundingCheck {
         extraAllowed.forEach { e -> word.findAll(e).forEach { allowed += it.value.lowercase() } }
         return claimTokens(line).all { it.lowercase() in allowed }
     }
+
+    /**
+     * The sentences of [line] that are grounded, joined with single spaces, or null if none is. Lets a reply with one
+     * invented sentence keep the rest instead of being discarded whole; every kept sentence passes [isGrounded].
+     */
+    fun groundedPart(line: String, facts: List<SpeakableFact>, extraAllowed: Collection<String> = emptyList()): String? =
+        line.trim().split(sentenceBreak)
+            .filter { it.isNotBlank() && isGrounded(it, facts, extraAllowed) }
+            .joinToString(" ")
+            .ifBlank { null }
 
     internal fun claimTokens(line: String): List<String> =
         word.findAll(line).filter { m ->
@@ -45,6 +56,10 @@ object GroundingCheck {
         "listen", "beware", "mind", "take", "leave", "keep", "stay", "forgive", "pray", "trust", "seek",
         "yes", "aye", "nay", "well", "ah", "oh", "hmm", "alas", "hail", "greetings", "welcome", "farewell",
         "good", "sorry", "perhaps", "maybe", "indeed", "truly", "certainly", "surely", "please", "thank", "thanks",
-        "very", "best", "better", "times", "word", "rumor", "rumour", "news", "careful", "quiet", "hush"
+        "very", "best", "better", "times", "word", "rumor", "rumour", "news", "careful", "quiet", "hush",
+        // Period speech the model reaches for in this setting.
+        "verily", "forsooth", "hark", "lo", "behold", "prithee", "mayhap", "methinks", "ye", "thou", "thee", "thy",
+        "thine", "tis", "twas", "nigh", "bah", "heh", "fie", "woe", "alack", "aught", "anon", "hence", "whence",
+        "wherefore", "begone", "hold", "peace", "stranger", "traveler", "traveller", "friend", "sir", "madam"
     )
 }
