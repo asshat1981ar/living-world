@@ -1,9 +1,14 @@
 package com.livingworld.game.android.ui.dialogue
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import org.livingworld.ai.huggingface.HuggingFaceDialogueAdapter
 import org.livingworld.core.dialogue.DialogueGrounding
 import org.livingworld.core.events.GameEvent
 import org.livingworld.core.ids.EntityId
@@ -34,7 +39,10 @@ data class DialogueUiState(
 class DialogueViewModel(
     private var world: WorldState,
     private val manifest: SpriteManifest,
-    private val reducer: WorldReducer = DefaultWorldReducer()
+    private val reducer: WorldReducer = DefaultWorldReducer(),
+    /** The AI that voices NPC lines; null keeps the built-in lines only. */
+    private val voice: HuggingFaceDialogueAdapter? = null,
+    private val scope: CoroutineScope? = null
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(DialogueUiState())
@@ -64,6 +72,7 @@ class DialogueViewModel(
             ),
             availableOptions = OPTIONS
         )
+        voiceLine(npc, index = 0, topic = "The player approaches and greets you.")
     }
 
     fun chooseOption(optionIndex: Int) {
@@ -111,6 +120,25 @@ class DialogueViewModel(
             dialogueHistory = newHistory + DialogueLine(updatedNpc.identity.name, npcReply, isPlayer = false),
             availableOptions = OPTIONS
         )
+        voiceLine(updatedNpc, index = newHistory.size, topic = chosenText)
+    }
+
+    /**
+     * The built-in line is shown at once; the AI then gets to say it in its own words. Its reply replaces that line
+     * only when it is grounded in what the NPC believes (G3) and the player is still talking to the same NPC.
+     */
+    private fun voiceLine(npc: Npc, index: Int, topic: String) {
+        val voice = voice ?: return
+        (scope ?: viewModelScope).launch {
+            val rel = world.relationships.get(npc.id.toEntityId(), EntityId.Player("player"))
+            val line = voice.generateGroundedLine(npc, topic, npc.identity.currentLocation, npc.beliefs.all().toList(), rel)
+                ?: return@launch
+            _uiState.update { s ->
+                val target = s.dialogueHistory.getOrNull(index)
+                if (s.currentNpc?.id != npc.id || target == null || target.isPlayer) s
+                else s.copy(dialogueHistory = s.dialogueHistory.toMutableList().also { it[index] = target.copy(text = line) })
+            }
+        }
     }
 
     private companion object {

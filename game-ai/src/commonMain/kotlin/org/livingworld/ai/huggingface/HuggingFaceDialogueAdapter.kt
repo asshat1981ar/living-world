@@ -30,7 +30,20 @@ class HuggingFaceDialogueAdapter(
         locationId: LocationId,
         beliefs: List<Belief>,
         relationship: Relationship
-    ): String {
+    ): String = generateGroundedLine(npc, playerTopic, locationId, beliefs, relationship)
+        ?: generateDeterministicFallback(npc, playerTopic, beliefs)
+
+    /**
+     * The model's reply cut down to its grounded sentences, or null when the model failed or every sentence was
+     * ungrounded. Callers that already show a kernel line use this to replace it only with a real model line.
+     */
+    suspend fun generateGroundedLine(
+        npc: Npc,
+        playerTopic: String,
+        locationId: LocationId,
+        beliefs: List<Belief>,
+        relationship: Relationship
+    ): String? {
         val prompt = buildDialoguePrompt(npc, playerTopic, locationId, beliefs, relationship)
 
         val requestJson = json.encodeToString(
@@ -66,7 +79,7 @@ class HuggingFaceDialogueAdapter(
         }
         if (content.isNullOrBlank()) {
             stats = stats.copy(failed = stats.failed + 1)
-            return generateDeterministicFallback(npc, playerTopic, beliefs)
+            return null
         }
 
         // Keep every grounded sentence of the reply; only a reply with none falls back to the kernel line.
@@ -76,7 +89,7 @@ class HuggingFaceDialogueAdapter(
             content -> stats.copy(accepted = stats.accepted + 1)
             else -> stats.copy(salvaged = stats.salvaged + 1)
         }
-        return grounded ?: generateDeterministicFallback(npc, playerTopic, beliefs)
+        return grounded
     }
 
     fun buildDialoguePrompt(

@@ -211,6 +211,7 @@ class MainActivity : ComponentActivity() {
         val world = DefaultVillageFactory.marketVillage()
         val manifest = SpriteManifest.createDefault()
 
+        // No AI voice until the app has a way to get a token at run time; a token is never built into the APK.
         val dialogueViewModel = DialogueViewModel(world, manifest).apply {
             loadNpc(NpcId("merchant"))
         }
