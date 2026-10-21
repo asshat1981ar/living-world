@@ -27,8 +27,11 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = "17"
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
     }
 }
 
@@ -37,6 +40,9 @@ dependencies {
     implementation(project(":game-persistence"))
     implementation(project(":game-ai"))
     implementation(project(":game-ui"))
+
+    // On-device LLM runtime for AI dialogue (Google LiteRT-LM; runs .litertlm models, no token or network needed).
+    implementation("com.google.ai.edge.litertlm:litertlm-android:0.18.0")
 
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.6")

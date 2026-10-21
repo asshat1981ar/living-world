@@ -23,6 +23,7 @@ Deterministic, event-sourced Kotlin Multiplatform simulation kernel for an Andro
 
 # Build environment
 - Gradle works (wrapper, plugin versions, `androidTarget`, `desktopApp:run` all fixed); `./gradlew check` is green as of 2026-10-17. There is still no JDK on the Termux device, so run Gradle on awsbox: `python3 -I tools/lw_remote.py --push --gradle check` (needs a live `aws login --remote` session).
+- Toolchain (2026-10-21): Kotlin 2.4.20 (was 2.0.21; needed by LiteRT-LM, which is built with Kotlin 2.4), AGP 8.5.2, Gradle 8.8 (KGP warns 8.8 is deprecated). Goldens and the 90-day fingerprint `041e2593769b807b` are unchanged by the upgrade. Android Lint (AGP 8.5's embedded Kotlin 2.0 reader) prints `Module was compiled with an incompatible version of Kotlin` lines during `check`; they are noise, the build passes; upgrading AGP removes them.
 - CI: `.github/workflows/ci.yml` (invariants + Python tests, Gradle check). `tools/publish_github.sh` creates the GitHub repo (private by default) and pushes using `GITHUB_TOKEN` from `~/.env`.
 
 # Automation hooks (`.claude/settings.json`, scripts in `tools/hooks/`)
