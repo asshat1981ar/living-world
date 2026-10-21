@@ -5,6 +5,7 @@ import org.livingworld.core.beliefs.Belief
 import org.livingworld.core.ids.*
 import org.livingworld.core.npc.Npc
 import org.livingworld.core.npc.Trait
+import org.livingworld.core.simulation.AdviceOutcome
 import org.livingworld.core.time.WorldTime
 
 /**
@@ -229,6 +230,23 @@ sealed interface GameEvent {
     }
 
     /** A hungry worker buys food from a producer; [tax] of the [price] goes to the village treasury. */
+    /** P9: what an advisory AI chose for [npc], or why the kernel fell back. Changes no state; lets the run be repeated. */
+    @Serializable
+    data class AiAdviceRecorded(
+        override val id: EventId,
+        override val time: WorldTime,
+        val npc: NpcId,
+        val source: String,
+        val outcome: AdviceOutcome,
+        val candidateIndex: Int? = null,
+        val explanation: String? = null,
+        override val witnesses: List<NpcId> = emptyList(),
+        override val causalEventId: EventId? = null
+    ) : GameEvent {
+        override val actors: List<EntityId> get() = listOf(npc.toEntityId())
+        override val summary: String get() = "${npc.value} weighed advice from $source: $outcome" + (candidateIndex?.let { " (candidate $it)" } ?: "")
+    }
+
     @Serializable
     data class RationPurchased(
         override val id: EventId,

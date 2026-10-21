@@ -43,6 +43,8 @@ class DefaultWorldReducer : WorldReducer {
             is GameEvent.AllegianceChanged -> applyAllegianceChange(baseState, event)
             is GameEvent.TradeCompleted -> applyTrade(baseState, event)
             is GameEvent.RationPurchased -> applyRationPurchase(baseState, event)
+            // A record of what an AI advised; the action it led to is its own event.
+            is GameEvent.AiAdviceRecorded -> baseState
             is GameEvent.PriceAdjusted -> applyPriceAdjustment(baseState, event)
             is GameEvent.ShopInherited -> applyShopInherited(baseState, event)
             is GameEvent.FactionHostilityDeclared -> applyFactionHostility(baseState, event)

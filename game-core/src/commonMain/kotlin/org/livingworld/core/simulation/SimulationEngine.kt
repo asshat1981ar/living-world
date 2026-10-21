@@ -39,8 +39,23 @@ class SimulationEngine(
             val freshNpc = current.npcs[npc.id] ?: continue
             if (!freshNpc.isAlive) continue
 
-            val action = decisionEngine.decide(freshNpc, current)
-            current = executeValidatedAction(current, freshNpc, action)
+            val (action, advice) = decisionEngine.decideWithAdvice(freshNpc, current)
+            // P9: an AI's part in the decision is recorded first, and the action names it as its cause.
+            var cause: EventId? = null
+            if (advice != null) {
+                val record = GameEvent.AiAdviceRecorded(
+                    id = current.events.nextId(),
+                    time = current.time,
+                    npc = freshNpc.id,
+                    source = advice.source,
+                    outcome = advice.outcome,
+                    candidateIndex = advice.candidateIndex,
+                    explanation = advice.explanation
+                )
+                current = reducer.apply(current, record)
+                cause = record.id
+            }
+            current = executeValidatedAction(current, freshNpc, action, cause)
         }
 
         if (current.time.day > state.time.day) current = collectUpkeep(current)
@@ -167,7 +182,8 @@ class SimulationEngine(
     private fun executeValidatedAction(
         state: WorldState,
         npc: Npc,
-        validatedAction: ValidatedAction
+        validatedAction: ValidatedAction,
+        cause: EventId? = null
     ): WorldState {
         val eventId = state.events.nextId()
         val time = state.time
@@ -177,6 +193,7 @@ class SimulationEngine(
                 val routineEvent = GameEvent.NpcRoutineCompleted(
                     id = eventId,
                     time = time,
+                    causalEventId = cause,
                     npc = npc.id,
                     routineType = "REST",
                     location = npc.identity.currentLocation,
@@ -192,6 +209,7 @@ class SimulationEngine(
                 val routineEvent = GameEvent.NpcRoutineCompleted(
                     id = eventId,
                     time = time,
+                    causalEventId = cause,
                     npc = npc.id,
                     routineType = "WORK",
                     location = intent.location,
@@ -205,6 +223,7 @@ class SimulationEngine(
                 val shiftEvent = GameEvent.RelationshipShifted(
                     id = eventId,
                     time = time,
+                    causalEventId = cause,
                     source = npc.id.toEntityId(),
                     target = intent.target.toEntityId(),
                     deltaTrust = 0.05f,
@@ -236,6 +255,7 @@ class SimulationEngine(
                 val tradeEvent = GameEvent.TradeCompleted(
                     id = eventId,
                     time = time,
+                    causalEventId = cause,
                     buyer = intent.partner,
                     seller = npc.id.toEntityId(),
                     item = intent.item,
@@ -248,6 +268,7 @@ class SimulationEngine(
                 val priceEvent = GameEvent.PriceAdjusted(
                     id = eventId,
                     time = time,
+                    causalEventId = cause,
                     merchant = npc.id,
                     item = intent.item,
                     oldPrice = oldPrice,
@@ -261,6 +282,7 @@ class SimulationEngine(
                 val changeEvent = GameEvent.AllegianceChanged(
                     id = eventId,
                     time = time,
+                    causalEventId = cause,
                     npc = npc.id,
                     oldFaction = oldFaction,
                     newFaction = intent.newFaction,
@@ -268,7 +290,7 @@ class SimulationEngine(
                 )
                 reducer.apply(state, changeEvent)
             }
-            is Intent.Attack -> executeAttack(state, npc, intent, eventId)
+            is Intent.Attack -> executeAttack(state, npc, intent, eventId, cause)
             is Intent.InheritShop -> {
                 val inheritEvent = GameEvent.ShopInherited(
                     id = eventId,
@@ -284,6 +306,7 @@ class SimulationEngine(
                 val routineEvent = GameEvent.NpcRoutineCompleted(
                     id = eventId,
                     time = time,
+                    causalEventId = cause,
                     npc = npc.id,
                     routineType = "FLEE",
                     location = npc.identity.currentLocation,
@@ -295,7 +318,7 @@ class SimulationEngine(
     }
 
     /** Resolves one duel exchange; everyone else alive at the attacker's location witnesses it. */
-    private fun executeAttack(state: WorldState, npc: Npc, intent: Intent.Attack, eventId: EventId): WorldState {
+    private fun executeAttack(state: WorldState, npc: Npc, intent: Intent.Attack, eventId: EventId, cause: EventId?): WorldState {
         val time = state.time
         val target = state.npcs[intent.target] ?: return state
         if (!target.isAlive) return state
@@ -312,6 +335,7 @@ class SimulationEngine(
         val attackEvent = GameEvent.NpcAttacked(
             id = eventId,
             time = time,
+            causalEventId = cause,
             attacker = npc.id.toEntityId(),
             target = intent.target,
             damage = duel.finalDamage,

@@ -87,6 +87,24 @@ data class AiProposal(
 @JvmInline
 value class ValidatedAction(val intent: Intent)
 
+/** What an advisory AI did for one NPC decision. */
+@Serializable
+enum class AdviceOutcome { FOLLOWED, REJECTED, NOT_A_CANDIDATE, PORT_FAILED }
+
+/**
+ * P9: the AI's part in one decision, recorded as [org.livingworld.core.events.GameEvent.AiAdviceRecorded] so a run
+ * that used a (nondeterministic) AI can be repeated exactly by feeding the recorded choices back. Plain data: game-core
+ * still knows nothing about AI (G1).
+ */
+@Serializable
+data class AiAdvice(
+    val source: String,
+    val outcome: AdviceOutcome,
+    /** Index into the kernel's own candidate list, when the AI picked one. */
+    val candidateIndex: Int? = null,
+    val explanation: String? = null
+)
+
 interface ActionValidator {
     fun validate(
         proposal: AiProposal,

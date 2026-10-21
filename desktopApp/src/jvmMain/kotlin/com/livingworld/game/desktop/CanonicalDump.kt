@@ -28,6 +28,7 @@ object CanonicalDump {
             is GameEvent.RumorTransmitted -> listOf(e.source.value, e.target.value, e.transmittedBelief.proposition.describe(), f4(e.transmittedBelief.confidence), f4(e.distortion))
             is GameEvent.TradeCompleted -> listOf(e.buyer.identifier, e.seller.identifier, e.item.value, f4(e.price))
             is GameEvent.RationPurchased -> listOf(e.buyer.value, e.seller.value, f4(e.food), f4(e.price), f4(e.tax))
+            is GameEvent.AiAdviceRecorded -> listOf(e.npc.value, e.source, e.outcome.name, e.candidateIndex?.toString() ?: "-", e.explanation ?: "-")
             is GameEvent.AllegianceChanged -> listOf(e.npc.value, e.oldFaction?.value ?: "-", e.newFaction.value, e.reason)
             is GameEvent.NpcAttacked -> listOf(e.attacker.identifier, e.target.value, f4(e.damage), e.location.value, e.attackerStance.name, e.defenderStance.name, e.duelOutcome.name)
             is GameEvent.PriceAdjusted -> listOf(e.merchant.value, e.item.value, f4(e.oldPrice), f4(e.newPrice), e.reason)

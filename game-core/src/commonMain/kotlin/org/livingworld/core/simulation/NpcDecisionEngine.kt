@@ -27,6 +27,9 @@ interface NpcDecisionEngine {
         npc: Npc,
         world: WorldState
     ): ValidatedAction
+
+    /** The decision plus, for an AI-advised engine, what the AI did; the engine records non-null advice (P9). */
+    suspend fun decideWithAdvice(npc: Npc, world: WorldState): Pair<ValidatedAction, AiAdvice?> = decide(npc, world) to null
 }
 
 class DefaultNpcDecisionEngine(

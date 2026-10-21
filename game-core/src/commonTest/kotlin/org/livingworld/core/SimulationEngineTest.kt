@@ -9,6 +9,8 @@ import org.livingworld.core.ids.*
 import org.livingworld.core.npc.Goal
 import org.livingworld.core.npc.Npc
 import org.livingworld.core.npc.Trait
+import org.livingworld.core.simulation.AdviceOutcome
+import org.livingworld.core.simulation.AiAdvice
 import org.livingworld.core.simulation.AttackEvents
 import org.livingworld.core.simulation.Intent
 import org.livingworld.core.simulation.NpcDecisionEngine
@@ -346,5 +348,37 @@ class SimulationEngineTest {
         val faint = engine.transmitBelief(s.npc(scholar), s.npc(baker), belief.copy(confidence = 0.05f), WorldTime(5), s.relationships)
         assertEquals(0.1f, faint.confidence)
         assertEquals(0.1f, faint.reliability)
+    }
+
+    @Test
+    fun ai_advice_is_recorded_just_before_the_action_and_changes_nothing_else() = runTest {
+        val start = world(keep = listOf(merchant))
+        val advised = object : NpcDecisionEngine {
+            override suspend fun decide(npc: Npc, world: WorldState) = ValidatedAction(Intent.Rest)
+            override suspend fun decideWithAdvice(npc: Npc, world: WorldState) =
+                ValidatedAction(Intent.Rest) to AiAdvice("test-port", AdviceOutcome.FOLLOWED, candidateIndex = 2, explanation = "tired")
+        }
+        val withAdvice = SimulationEngine(DefaultWorldReducer(), advised).tick(start)
+        val without = SimulationEngine(DefaultWorldReducer(), Scripted { _, _ -> Intent.Rest }).tick(start)
+
+        val events = withAdvice.events.all()
+        val record = events.filterIsInstance<GameEvent.AiAdviceRecorded>().single()
+        assertEquals(merchant, record.npc)
+        assertEquals(AdviceOutcome.FOLLOWED, record.outcome)
+        assertEquals(2, record.candidateIndex)
+        assertEquals("tired", record.explanation)
+        val next = events[events.indexOf(record) + 1]
+        assertTrue(next is GameEvent.NpcRoutineCompleted && next.npc == merchant, "the advised action follows its record")
+        assertEquals(record.id, (next as GameEvent.NpcRoutineCompleted).causalEventId, "the action names the advice as its cause")
+
+        assertEquals(without.npcs, withAdvice.npcs, "a record changes no NPC")
+        assertEquals(without.economy, withAdvice.economy)
+        assertEquals(without.events.size + 1, withAdvice.events.size)
+    }
+
+    @Test
+    fun an_engine_without_advice_records_nothing() = runTest {
+        val state = oneTick(world(keep = listOf(merchant)), merchant, Intent.Rest)
+        assertTrue(state.events.all().none { it is GameEvent.AiAdviceRecorded })
     }
 }

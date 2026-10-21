@@ -4,6 +4,8 @@ import kotlinx.coroutines.test.runTest
 import org.livingworld.core.ids.*
 import org.livingworld.core.npc.Identity
 import org.livingworld.core.npc.Npc
+import org.livingworld.core.events.GameEvent
+import org.livingworld.core.simulation.AdviceOutcome
 import org.livingworld.core.simulation.AiProposal
 import org.livingworld.core.simulation.DefaultNpcDecisionEngine
 import org.livingworld.core.simulation.Intent
@@ -87,5 +89,50 @@ class AiAdvisedDecisionEngineTest {
                 world(), org.livingworld.core.time.WorldDuration.days(5)
             )
         assertEquals(run(), run())
+    }
+
+    @Test
+    fun the_advice_says_what_the_ai_did_with_each_decision() = runTest {
+        val w = world()
+        val candidates = DefaultNpcDecisionEngine().generateCandidates(w.npc(merchant), w).map { it.action }
+        suspend fun adviceFrom(port: AiReasoningPort) = AiAdvisedDecisionEngine(port, source = "test").decideWithAdvice(w.npc(merchant), w).second
+
+        val followed = adviceFrom(FixedPort { AiProposal(candidates[1], 0.9f, "why not") })!!
+        assertEquals(AdviceOutcome.FOLLOWED, followed.outcome)
+        assertEquals(1, followed.candidateIndex)
+        assertEquals("why not", followed.explanation)
+        assertEquals("test", followed.source)
+        assertEquals(AdviceOutcome.NOT_A_CANDIDATE, adviceFrom(FixedPort { AiProposal(Intent.Attack(NpcId("guard"), "murder"), 0.9f, "ai") })!!.outcome)
+        assertEquals(AdviceOutcome.PORT_FAILED, adviceFrom(FixedPort { error("model offline") })!!.outcome)
+    }
+
+    /** An unpredictable advisor: sometimes picks a candidate, sometimes invents an action, sometimes fails. */
+    private class RandomPort(seed: Int) : AiReasoningPort {
+        private val random = kotlin.random.Random(seed)
+        override suspend fun reason(context: ReasoningContext): AiProposal = when (random.nextInt(10)) {
+            0 -> error("model hiccup")
+            1 -> AiProposal(Intent.Attack(NpcId("nobody"), "invented"), 0.5f, "made up")
+            else -> AiProposal(context.candidates[random.nextInt(context.candidates.size)].action, 0.8f, "seed pick")
+        }
+    }
+
+    private suspend fun runWith(port: AiReasoningPort): WorldState =
+        SimulationEngine(decisionEngine = AiAdvisedDecisionEngine(port, source = "random")).advance(
+            world(), org.livingworld.core.time.WorldDuration.days(3)
+        )
+
+    @Test
+    fun a_run_steered_by_an_unpredictable_ai_repeats_exactly_from_its_recorded_advice() = runTest {
+        val original = runWith(RandomPort(seed = 7))
+        val records = original.events.all().filterIsInstance<GameEvent.AiAdviceRecorded>()
+        assertTrue(records.size > 10)
+        assertTrue(records.map { it.outcome }.toSet().size >= 3, "the run exercised following, inventing and failing")
+
+        val repeated = runWith(RecordedAiReasoningPort(records))
+        assertEquals(original.events.all(), repeated.events.all())
+        assertEquals(original, repeated)
+
+        val other = runWith(RandomPort(seed = 8))
+        assertNotEquals(original.events.all(), other.events.all(), "a different advisor really does change the run")
     }
 }
