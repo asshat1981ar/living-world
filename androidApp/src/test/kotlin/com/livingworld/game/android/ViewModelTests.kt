@@ -7,6 +7,7 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.livingworld.ai.dialogue.ChatModel
 import org.livingworld.ai.dialogue.GroundedDialogueVoice
+import org.livingworld.ai.dialogue.PregeneratedLines
 import org.livingworld.core.events.GameEvent
 import org.livingworld.core.events.TacticalStance
 import org.livingworld.core.ids.ItemId
@@ -122,61 +123,62 @@ class ViewModelTests {
         override fun describeFailure(error: Throwable) = error.message ?: "failed"
     })
 
+    private fun linesSaying(reply: String) = PregeneratedLines(voiceSaying(reply))
+    private val greeting = "Greetings, traveler. What brings you to my presence?"
+
     @Test
-    fun aiVoiceReplacesTheBuiltInLineWhenItsReplyIsGrounded() = runTest {
-        val voice = voiceSaying("Verily, the hour grows late.")
-        val vm = DialogueViewModel(world, manifest, voice = voice, scope = this)
+    fun aPreparedAiLineIsShownAtOnceAndAShownLineNeverChanges() = runTest {
+        val vm = DialogueViewModel(world, manifest, lines = linesSaying("Verily, the hour grows late."), scope = this)
         vm.loadNpc(NpcId("merchant"))
+        assertEquals("nothing is prepared on a first meeting", greeting, vm.uiState.value.dialogueHistory.last().text)
         advanceUntilIdle()
-        assertEquals("Verily, the hour grows late.", vm.uiState.value.dialogueHistory.last().text)
+        assertEquals("the shown greeting is never swapped mid-read", greeting, vm.uiState.value.dialogueHistory.last().text)
 
         vm.chooseOption(2)
-        advanceUntilIdle()
         val history = vm.uiState.value.dialogueHistory
         assertEquals(listOf(false, true, false), history.map { it.isPlayer })
-        assertEquals("Verily, the hour grows late.", history.last().text)
+        assertEquals("prepared while the player read the greeting", "Verily, the hour grows late.", history.last().text)
+        assertTrue(history.last().byAi)
+
+        vm.loadNpc(NpcId("merchant"))
+        assertEquals("the greeting is prepared for the next visit", "Verily, the hour grows late.", vm.uiState.value.dialogueHistory.last().text)
     }
 
     @Test
-    fun aiVoiceThatInventsSomethingLeavesTheBuiltInLine() = runTest {
-        val voice = voiceSaying("Mara poisoned the well.")
-        val vm = DialogueViewModel(world, manifest, voice = voice, scope = this)
+    fun anInventedAiLineIsNeverShown() = runTest {
+        val lines = linesSaying("Mara poisoned the well.")
+        val vm = DialogueViewModel(world, manifest, lines = lines, scope = this)
         vm.loadNpc(NpcId("merchant"))
         advanceUntilIdle()
-        assertEquals("Greetings, traveler. What brings you to my presence?", vm.uiState.value.dialogueHistory.last().text)
-        assertEquals(1, voice.stats.rejected)
+        vm.chooseOption(2)
+        assertEquals("Farewell, traveler.", vm.uiState.value.dialogueHistory.last().text)
+        assertFalse(vm.uiState.value.dialogueHistory.last().byAi)
+        assertTrue(lines.stats.rejected > 0)
     }
 
     @Test
-    fun aVoiceSetMidConversationVoicesTheNextLineAndRemovingItStops() = runTest {
+    fun turningTheAiOnMidConversationPreparesTheNextLinesAndTurningItOffStops() = runTest {
         val vm = DialogueViewModel(world, manifest, scope = this)
         vm.loadNpc(NpcId("merchant"))
+        vm.setLines(linesSaying("Well met, stranger."))
         advanceUntilIdle()
-        assertEquals("Greetings, traveler. What brings you to my presence?", vm.uiState.value.dialogueHistory.last().text)
-
-        vm.setVoice(voiceSaying("Well met, stranger."))
         vm.chooseOption(1)
-        advanceUntilIdle()
         assertEquals("Well met, stranger.", vm.uiState.value.dialogueHistory.last().text)
 
-        vm.setVoice(null)
+        vm.setLines(null)
         vm.chooseOption(2)
-        advanceUntilIdle()
         assertEquals("Farewell, traveler.", vm.uiState.value.dialogueHistory.last().text)
     }
 
     @Test
-    fun aiLinesAreMarkedAndTheStatsAreShared() = runTest {
-        val voice = voiceSaying("Well met, stranger.")
-        val vm = DialogueViewModel(world, manifest, voice = voice, scope = this)
+    fun theStatsAreSharedAndThePlayersOwnLineIsNeverMarked() = runTest {
+        val vm = DialogueViewModel(world, manifest, lines = linesSaying("Well met, stranger."), scope = this)
         assertNull(DialogueViewModel(world, manifest).voiceStats.value)
         vm.loadNpc(NpcId("merchant"))
-        assertFalse(vm.uiState.value.dialogueHistory.last().byAi)
         advanceUntilIdle()
-        assertTrue(vm.uiState.value.dialogueHistory.last().byAi)
-        assertEquals(1, vm.voiceStats.value?.accepted)
+        assertTrue((vm.voiceStats.value?.accepted ?: 0) > 0)
 
         vm.chooseOption(0)
-        assertFalse("the player's own line is never marked", vm.uiState.value.dialogueHistory[1].byAi)
+        assertFalse(vm.uiState.value.dialogueHistory[1].byAi)
     }
 }

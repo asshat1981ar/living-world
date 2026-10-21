@@ -21,6 +21,16 @@ CHUNK = 1024 * 1024
 
 # size_bytes and sha256 are Hugging Face's published values (x-linked-size / x-linked-etag at `revision`).
 AVAILABLE_MODELS = {
+    "qwen3-0.6b": {
+        "name": "Qwen3-0.6B for LiteRT-LM (int4 weights)",
+        "repo": "litert-community/Qwen3-0.6B",
+        "revision": "e6687177e00897731e7716267eebd4eba0dde7c2",
+        "filename": "Qwen3-0.6B_dynamic_wi4b32_afp32.litertlm",
+        "target_filename": "qwen3-0.6b-int4.litertlm",
+        "size_bytes": 344671744,
+        "sha256": "03e7da1eb1108b50dffaa9bb52cc7bcbad2eb0c66ca990267f480c1e545d2856",
+        "recommended_for": "Default on-device NPC dialogue model (fits mid-range phones)",
+    },
     "qwen3-1.7b": {
         "name": "Qwen3-1.7B for LiteRT-LM (int4 weights)",
         "repo": "litert-community/Qwen3-1.7B",
@@ -29,7 +39,7 @@ AVAILABLE_MODELS = {
         "target_filename": "qwen3-1.7b-int4.litertlm",
         "size_bytes": 977184032,
         "sha256": "2a72330b504a6596d53a2c00923c57173b10f1b83e6a541213ffec08d1fc5de8",
-        "recommended_for": "On-device NPC dialogue (Apache-2.0, ungated: no account or token needed)",
+        "recommended_for": "Optional higher-quality dialogue model for phones with plenty of free memory",
     },
 }
 
@@ -117,8 +127,8 @@ def _progress(received, total):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description="Download and verify the on-device dialogue model for Living-World RPG")
-    parser.add_argument("--model", choices=list(AVAILABLE_MODELS), default="qwen3-1.7b",
-                        help="Model key to install (default: qwen3-1.7b)")
+    parser.add_argument("--model", choices=list(AVAILABLE_MODELS), default="qwen3-0.6b",
+                        help="Model key to install (default: qwen3-0.6b)")
     parser.add_argument("--dest-dir", default="models", help="Target directory (default: models, gitignored)")
     parser.add_argument("--copy-from", default=None, help="Install (after verifying) a local file instead of downloading")
     parser.add_argument("--verify-only", action="store_true", help="Only check the installed file; never download")

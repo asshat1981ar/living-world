@@ -66,20 +66,30 @@ object ModelIntegrity {
 }
 
 /**
- * The on-device dialogue model, pinned to a repository commit, size and sha256 (Hugging Face's published LFS values,
- * checked 2026-10-21). It is Apache-2.0 and ungated, so downloading it needs no account or token.
+ * The on-device dialogue models, pinned to a repository commit, size and sha256 (Hugging Face's published LFS values,
+ * checked 2026-10-21). Both are Apache-2.0 and ungated, so downloading needs no account or token.
  */
 object ModelAssetCatalog {
-    /** Qwen3-1.7B for LiteRT-LM, int4 weights: the chosen balance of line quality and download size. */
+    /** Default: Qwen3-0.6B for LiteRT-LM, int4 weights. Small enough for mid-range phones (council decision 2026-10-21). */
+    val QWEN3_0_6B_LITERTLM = ModelAssetDescriptor(
+        displayName = "Qwen3 0.6B (standard)",
+        downloadUrl = "https://huggingface.co/litert-community/Qwen3-0.6B/resolve/e6687177e00897731e7716267eebd4eba0dde7c2/Qwen3-0.6B_dynamic_wi4b32_afp32.litertlm",
+        targetFileName = "qwen3-0.6b-int4.litertlm",
+        expectedSizeBytes = 344_671_744L,
+        sha256Checksum = "03e7da1eb1108b50dffaa9bb52cc7bcbad2eb0c66ca990267f480c1e545d2856"
+    )
+
+    /** Optional higher quality: Qwen3-1.7B for LiteRT-LM, int4 weights; for phones with plenty of free memory. */
     val QWEN3_1_7B_LITERTLM = ModelAssetDescriptor(
-        displayName = "Qwen3 1.7B",
+        displayName = "Qwen3 1.7B (high quality)",
         downloadUrl = "https://huggingface.co/litert-community/Qwen3-1.7B/resolve/79bf0667b32ae025b972e5fe555fe72ca6e8816c/Qwen3-1.7B_dynamic_wi4b32_afp32.litertlm",
         targetFileName = "qwen3-1.7b-int4.litertlm",
         expectedSizeBytes = 977_184_032L,
         sha256Checksum = "2a72330b504a6596d53a2c00923c57173b10f1b83e6a541213ffec08d1fc5de8"
     )
 
-    val ALL_ASSETS = listOf(QWEN3_1_7B_LITERTLM)
+    val DEFAULT = QWEN3_0_6B_LITERTLM
+    val ALL_ASSETS = listOf(QWEN3_0_6B_LITERTLM, QWEN3_1_7B_LITERTLM)
 }
 
 /**

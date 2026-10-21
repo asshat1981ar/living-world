@@ -68,8 +68,8 @@ class DownloadModelTests(unittest.TestCase):
         dm.check_url("https://cdn-lfs.huggingface.co/a")
 
     def test_main_replaces_a_wrong_existing_file_instead_of_skipping_it(self):
-        model = dict(dm.AVAILABLE_MODELS["qwen3-1.7b"], size_bytes=len(BODY), sha256=SHA)
-        dm.AVAILABLE_MODELS["qwen3-1.7b"], saved = model, dm.AVAILABLE_MODELS["qwen3-1.7b"]
+        model = dict(dm.AVAILABLE_MODELS["qwen3-0.6b"], size_bytes=len(BODY), sha256=SHA)
+        dm.AVAILABLE_MODELS["qwen3-0.6b"], saved = model, dm.AVAILABLE_MODELS["qwen3-0.6b"]
         try:
             stub = Path(self.tmp.name, model["target_filename"])
             stub.write_bytes(bytes(303))
@@ -78,7 +78,7 @@ class DownloadModelTests(unittest.TestCase):
             self.assertEqual(dm.main(["--dest-dir", self.tmp.name, "--copy-from", str(src)]), 0)
             self.assertEqual(stub.read_bytes(), BODY)
         finally:
-            dm.AVAILABLE_MODELS["qwen3-1.7b"] = saved
+            dm.AVAILABLE_MODELS["qwen3-0.6b"] = saved
 
     def test_main_reports_failure_with_a_nonzero_exit_and_installs_nothing(self):
         src = Path(self.tmp.name, "bad.bin")

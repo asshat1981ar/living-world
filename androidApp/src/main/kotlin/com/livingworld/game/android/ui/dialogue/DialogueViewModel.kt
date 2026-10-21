@@ -6,10 +6,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.livingworld.ai.dialogue.DialogueStats
-import org.livingworld.ai.dialogue.GroundedDialogueVoice
+import org.livingworld.ai.dialogue.LineRequest
+import org.livingworld.ai.dialogue.PregeneratedLines
 import org.livingworld.core.dialogue.DialogueGrounding
 import org.livingworld.core.events.GameEvent
 import org.livingworld.core.ids.EntityId
@@ -43,8 +43,8 @@ class DialogueViewModel(
     private var world: WorldState,
     private val manifest: SpriteManifest,
     private val reducer: WorldReducer = DefaultWorldReducer(),
-    /** The AI that voices NPC lines; null keeps the built-in lines only. */
-    private var voice: GroundedDialogueVoice? = null,
+    /** AI lines prepared ahead of time; null keeps the built-in lines only. */
+    private var lines: PregeneratedLines? = null,
     private val scope: CoroutineScope? = null
 ) : ViewModel() {
 
@@ -53,14 +53,15 @@ class DialogueViewModel(
 
     val currentWorldState: WorldState get() = world
 
-    private val _voiceStats = MutableStateFlow(voice?.stats)
+    private val _voiceStats = MutableStateFlow(lines?.stats)
     /** How the AI voice is doing (null when there is none), for the AI tab's status line. */
     val voiceStats: StateFlow<DialogueStats?> = _voiceStats.asStateFlow()
 
-    /** Turns AI-voiced lines on (for example once the player enters a Hugging Face token) or off with null. */
-    fun setVoice(voice: GroundedDialogueVoice?) {
-        this.voice = voice
-        _voiceStats.value = voice?.stats
+    /** Turns AI lines on (once the on-device model is ready) or off with null; on, it starts preparing at once. */
+    fun setLines(lines: PregeneratedLines?) {
+        this.lines = lines
+        _voiceStats.value = lines?.stats
+        _uiState.value.currentNpc?.let(::prepareNextLines)
     }
 
     /** How many things this NPC has already told the player this conversation. */
@@ -76,16 +77,10 @@ class DialogueViewModel(
             currentNpc = npc,
             portraitCard = card,
             relationship = rel,
-            dialogueHistory = listOf(
-                DialogueLine(
-                    speaker = npc.identity.name,
-                    text = "Greetings, traveler. What brings you to my presence?",
-                    isPlayer = false
-                )
-            ),
+            dialogueHistory = listOf(npcLine(npc, GREETING_TOPIC, builtIn = "Greetings, traveler. What brings you to my presence?")),
             availableOptions = OPTIONS
         )
-        voiceLine(npc, index = 0, topic = "The player approaches and greets you.")
+        prepareNextLines(npc)
     }
 
     fun chooseOption(optionIndex: Int) {
@@ -130,34 +125,45 @@ class DialogueViewModel(
             currentNpc = updatedNpc,
             portraitCard = updatedCard,
             relationship = updatedRel,
-            dialogueHistory = newHistory + DialogueLine(updatedNpc.identity.name, npcReply, isPlayer = false),
+            dialogueHistory = newHistory + npcLine(updatedNpc, chosenText, builtIn = npcReply),
             availableOptions = OPTIONS
         )
-        voiceLine(updatedNpc, index = newHistory.size, topic = chosenText)
+        prepareNextLines(updatedNpc)
     }
 
     /**
-     * The built-in line is shown at once; the AI then gets to say it in its own words. Its reply replaces that line
-     * only when it is grounded in what the NPC believes (G3) and the player is still talking to the same NPC.
+     * The NPC's line: the AI's version if one is already prepared for exactly this NPC, topic and knowledge (G3-checked),
+     * else the built-in line. Nothing is ever swapped in later, so the player never sees text change mid-read.
      */
-    private fun voiceLine(npc: Npc, index: Int, topic: String) {
-        val voice = voice ?: return
+    private fun npcLine(npc: Npc, topic: String, builtIn: String): DialogueLine {
+        val prepared = lines?.lineFor(requestFor(npc, topic))
+        return DialogueLine(npc.identity.name, prepared ?: builtIn, isPlayer = false, byAi = prepared != null)
+    }
+
+    /** While the player reads, prepare what this NPC may say next (the greeting is for the next visit). */
+    private fun prepareNextLines(npc: Npc) {
+        val lines = lines ?: return
         (scope ?: viewModelScope).launch {
-            val rel = world.relationships.get(npc.id.toEntityId(), EntityId.Player("player"))
-            val line = voice.generateGroundedLine(npc, topic, npc.identity.currentLocation, npc.beliefs.all().toList(), rel)
-            if (this@DialogueViewModel.voice === voice) _voiceStats.value = voice.stats
-            if (line == null) return@launch
-            _uiState.update { s ->
-                val target = s.dialogueHistory.getOrNull(index)
-                if (s.currentNpc?.id != npc.id || target == null || target.isPlayer) s
-                else s.copy(dialogueHistory = s.dialogueHistory.toMutableList().also { it[index] = target.copy(text = line, byAi = true) })
+            for (topic in OPTIONS + GREETING_TOPIC) {
+                if (this@DialogueViewModel.lines !== lines) return@launch
+                lines.prepare(requestFor(npc, topic))
+                _voiceStats.value = lines.stats
             }
         }
     }
+
+    private fun requestFor(npc: Npc, topic: String) = LineRequest(
+        npc = npc,
+        topic = topic,
+        location = npc.identity.currentLocation,
+        beliefs = npc.beliefs.all().toList(),
+        relationship = world.relationships.get(npc.id.toEntityId(), EntityId.Player("player"))
+    )
 
     private companion object {
         const val ASK_WHAT_THEY_KNOW = 0
         const val OFFER_ASSISTANCE = 1
         val OPTIONS = listOf("Ask what they have heard", "Offer assistance with local trade", "Farewell.")
+        const val GREETING_TOPIC = "The player approaches and greets you."
     }
 }
