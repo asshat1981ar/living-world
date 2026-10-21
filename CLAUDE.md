@@ -1,6 +1,6 @@
 # Living-World RPG
 
-Deterministic, event-sourced Kotlin Multiplatform simulation kernel for an Android-first tactical RPG. Read `INSTRUCTIONS.md` for invariants G1–G10 and agent directives; `docs/handoff/last.md` for current phase.
+Deterministic, event-sourced Kotlin Multiplatform simulation kernel for an Android-first tactical RPG. Read `INSTRUCTIONS.md` for invariants G1–G10 and agent directives; `docs/handoff/last.md` for current state; `docs/backlog.md` for the work queue (worked by the `feature-loop` skill; verify with `python3 -I tools/verify.py`).
 
 # Modules
 - `game-core` — kernel: ids, time, events/EventLedger, beliefs, memory, npc, relationships, factions, world (WorldState/WorldReducer), simulation (SimulationEngine, NpcDecisionEngine, ActionValidator), inspector. Must not import `org.livingworld.ai` (G1).
@@ -36,7 +36,7 @@ Deterministic, event-sourced Kotlin Multiplatform simulation kernel for an Andro
 - Conductor mod (outside the repo, `~/.claude/dev-mods/<session>/lw-conductor`): CI status line/toasts from `ci_watch` state, and a login-code `state=` annotation on pasted codes.
 - Tests: `python3 -m unittest discover -s tools -p 'test_*.py'`.
 
-# Known issues (as of 2026-10-17, not yet fixed)
+# Known issues and decisions (dated per entry)
 - Model assets (supply chain; rebuilt 2026-10-21): `ModelAssetCatalog.DEFAULT` is `QWEN3_0_6B_LITERTLM` (litert-community/Qwen3-0.6B int4 `.litertlm`, 344,671,744 bytes); `QWEN3_1_7B_LITERTLM` (977,184,032 bytes) is the optional high-quality model. Both pinned to a commit and sha256, Apache-2.0, ungated, no token. `ModelIntegrity` rejects blank, malformed or "verified" hashes and sizes must match exactly; `AndroidModelAssetManager.getStatus` is only `Ready` for a pinned descriptor with the right size and `verifyChecksum` checks the sha256. `scripts/download_model.py` downloads to `.part`, verifies size and sha256, renames atomically, only fetches https huggingface.co, exits non-zero on failure, and must match the Kotlin catalog (`tools/test_download_model.py`). The GGUF models, stubs, llama.cpp bridge and Hugging Face clients were removed 2026-10-21 (user decision: on-device only, no Hugging Face).
 - Dialogue prompt hardening (P3, 2026-10-20): player text is sanitised (`sanitizePlayerText`: one line, no quotes/backticks/brackets/control characters/ChatML tokens, 200 chars); the prompt lists only `speakableFacts` (the confidence floor), the same facts the reply is checked against; the player's words are not on the grounding allow-list; a sentence-initial capitalised word is a claim unless it is in `GroundingCheck.COMMON_OPENERS`. Still open: recording AI choices in the ledger (P9).
 - Relationships: `WorldState.relationships` is the single source of truth (the per-NPC `Npc.relationships` graph was removed 2026-10-17; `reputationToward` and `transmitBelief` take the graph as a parameter; old saves still load because `ignoreUnknownKeys = true`).

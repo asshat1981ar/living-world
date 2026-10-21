@@ -1,3 +1,15 @@
+# Handoff — 2026-10-21
+
+## Where things stand
+  - Live work queue: `docs/backlog.md`. Workflow: `.claude/skills/feature-loop/SKILL.md` (one item per pass; verify with
+    `python3 -I tools/verify.py`, which reports BLOCKED, exit 2, when the AWS session has expired).
+  - Done since 2026-10-17: closed coin economy and the three kernel bug fixes; P3 (grounding/prompt hardening),
+    P4 (perf), P6 (tests), P7 (micro-refactors), P8 (G2 leaks), P9 (AI advice recorded as events), P10/P11 (cleanup).
+  - AI: on-device only (no Hugging Face). Dialogue lines are prepared ahead by `PregeneratedLines` and voiced by a
+    LiteRT-LM model (Qwen3-0.6B default, 1.7B optional) in a separate `:ai` process; opt-in from the app's AI tab.
+    Never run on a real phone yet. Kotlin is 2.4.20 (required by LiteRT-LM).
+  - Facts and known issues: CLAUDE.md. Everything below is the historical log.
+
 # Handoff — 2026-10-17 (Phase 9 Complete; build verified on awsbox)
 
 ## Update 2026-10-17
