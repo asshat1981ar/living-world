@@ -19,6 +19,7 @@ import base64
 import fcntl
 import hashlib
 import json
+import os
 import shlex
 import subprocess
 import sys
@@ -27,8 +28,20 @@ import time
 import zlib
 from pathlib import Path
 
-INSTANCE = "i-060276259b02f38e0"
-REGION = "us-east-2"
+def awsbox_config() -> dict:
+    """Infrastructure ids stay out of the repo: env vars first, else the gitignored .awsbox.json at the repo root."""
+    path = Path(__file__).resolve().parent.parent / ".awsbox.json"
+    cfg = json.loads(path.read_text()) if path.is_file() else {}
+    return {
+        "instance": os.environ.get("LW_AWSBOX_INSTANCE", cfg.get("instance", "")),
+        "gpu_instance": os.environ.get("LW_GPU_INSTANCE", cfg.get("gpu_instance", "")),
+        "region": os.environ.get("LW_AWS_REGION", cfg.get("region", "us-east-2")),
+    }
+
+
+_CFG = awsbox_config()
+INSTANCE = _CFG["instance"]
+REGION = _CFG["region"]
 REMOTE_ROOT = "~/living-world"
 CHUNK = 40_000  # base64 chars per SSM command (well under the API limit)
 PULL_CHUNK = 18_000  # stays under the 24 KB output cap
@@ -49,6 +62,9 @@ def aws(*args: str) -> dict:
 
 def run(script: str, timeout_s: int = 3600) -> tuple[str, str, str]:
     """Run a shell script on awsbox as `ubuntu`; returns (status, stdout, stderr)."""
+    if not INSTANCE:
+        raise SystemExit("awsbox is not configured: set LW_AWSBOX_INSTANCE or create .awsbox.json "
+                         '({"instance": "i-...", "gpu_instance": "i-...", "region": "us-east-2"})')
     # shlex.quote, not json.dumps: SSM's root shell must not expand $HOME etc. before `ubuntu` sees it.
     inner = f"export PATH=$HOME/.local/bin:$PATH; export ANDROID_HOME=$HOME/android-sdk; {script}"
     wrapped = f"sudo -u ubuntu -H bash -lc {shlex.quote(inner)}"

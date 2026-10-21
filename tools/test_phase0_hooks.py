@@ -5,6 +5,7 @@ from __future__ import annotations
 import subprocess
 import sys
 import tempfile
+import os
 import unittest
 from pathlib import Path
 
@@ -129,6 +130,8 @@ class PreflightTests(unittest.TestCase):
         self.assertEqual(out, [sp.LOGIN_HINT])
 
     def test_running_gpu_box_is_warned_about(self):
+        os.environ["LW_GPU_INSTANCE"] = "i-test"
+        self.addCleanup(os.environ.pop, "LW_GPU_INSTANCE", None)
         def runner(argv):
             return (0, '{"UserId": "x"}') if "sts" in argv else (0, '["running"]')
         out = sp.preflight(runner)

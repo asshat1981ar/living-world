@@ -1,3 +1,6 @@
+# Local infrastructure ids (see tools/lw_remote.py awsbox_config)
+.awsbox.json
+
 # Large / local model binaries (scripts/download_model.py puts the dialogue model in models/)
 /models/
 *.litertlm

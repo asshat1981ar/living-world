@@ -9,11 +9,21 @@ as a plain line.
 from __future__ import annotations
 
 import json
+import os
+from pathlib import Path
 import subprocess
 import sys
 
-REGION = "us-east-2"
-GPU_INSTANCE = "i-03f2750336b3e1f62"
+_CONFIG_FILE = Path(__file__).resolve().parents[2] / ".awsbox.json"
+
+
+def _config(key: str, env: str, default: str = "") -> str:
+    """Infrastructure ids stay out of the repo: env var first, else the gitignored .awsbox.json."""
+    cfg = json.loads(_CONFIG_FILE.read_text()) if _CONFIG_FILE.is_file() else {}
+    return os.environ.get(env, cfg.get(key, default))
+
+
+REGION = _config("region", "LW_AWS_REGION", "us-east-2")
 LOGIN_HINT = (
     "AWS session expired: Gradle/awsbox work (tools/lw_remote.py) will fail. Start the FIFO flow from the awsbox-ops "
     "skill (`aws login --remote` fed through a FIFO). Each login attempt has its own URL; a pasted code's trailing "
@@ -38,7 +48,10 @@ def preflight(runner=run) -> list[str]:
             return [LOGIN_HINT]
         return [f"preflight: could not check AWS ({out[-160:]}); awsbox may be unreachable."]
     lines = ["preflight: AWS session OK."]
-    code, out = runner(["aws", "ec2", "describe-instances", "--region", REGION, "--instance-ids", GPU_INSTANCE,
+    gpu_instance = _config("gpu_instance", "LW_GPU_INSTANCE")
+    if not gpu_instance:
+        return lines
+    code, out = runner(["aws", "ec2", "describe-instances", "--region", REGION, "--instance-ids", gpu_instance,
                         "--query", "Reservations[].Instances[].State.Name", "--output", "json"])
     if code == 0:
         try:
@@ -46,7 +59,7 @@ def preflight(runner=run) -> list[str]:
         except ValueError:
             states = []
         if "running" in states or "pending" in states:
-            lines.append(f"WARNING: the GPU box {GPU_INSTANCE} is running and costs money; stop it unless a job needs it.")
+            lines.append(f"WARNING: the GPU box {gpu_instance} is running and costs money; stop it unless a job needs it.")
     return lines
 
 
