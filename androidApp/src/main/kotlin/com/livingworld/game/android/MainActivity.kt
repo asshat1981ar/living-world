@@ -17,7 +17,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import com.livingworld.game.android.ui.dialogue.DialogueScreen
+import com.livingworld.game.android.ai.AiController
 import com.livingworld.game.android.ui.dialogue.DialogueViewModel
+import com.livingworld.game.android.ui.settings.AiSettingsScreen
+import androidx.lifecycle.lifecycleScope
 import com.livingworld.game.android.ui.inventory.InventoryScreen
 import com.livingworld.game.android.ui.inventory.InventoryViewModel
 import com.livingworld.game.android.ui.map.MapScreen
@@ -205,6 +208,8 @@ fun TacticalDuelScreen(
 
 class MainActivity : ComponentActivity() {
 
+    private lateinit var ai: AiController
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -214,6 +219,8 @@ class MainActivity : ComponentActivity() {
         val dialogueViewModel = DialogueViewModel(world, manifest).apply {
             loadNpc(NpcId("merchant"))
         }
+        // On-device AI dialogue: off until the player opts in on the AI tab, and only on phones that can run it.
+        ai = AiController(this, dialogueViewModel, lifecycleScope)
         val mapViewModel = MapViewModel(world, manifest)
         val inventoryViewModel = InventoryViewModel(world, manifest)
         val duelViewModel = TacticalDuelViewModel(world, manifest)
@@ -249,6 +256,12 @@ class MainActivity : ComponentActivity() {
                                 label = { Text("Combat Duel") },
                                 icon = { Text("⚔️") }
                             )
+                            NavigationBarItem(
+                                selected = selectedTab == 4,
+                                onClick = { selectedTab = 4 },
+                                label = { Text("AI") },
+                                icon = { Text("✨") }
+                            )
                         }
                     }
                 ) { padding ->
@@ -258,10 +271,26 @@ class MainActivity : ComponentActivity() {
                             1 -> MapScreen(viewModel = mapViewModel)
                             2 -> InventoryScreen(viewModel = inventoryViewModel)
                             3 -> TacticalDuelScreen(viewModel = duelViewModel)
+                            4 -> AiSettingsScreen(
+                                state = ai.state.collectAsState().value,
+                                choices = ai.choices,
+                                onEnabledChange = ai::setEnabled,
+                                onChooseModel = ai::chooseModel,
+                                onDownload = ai::download,
+                                onCancelDownload = ai::cancelDownload,
+                                onDelete = ai::deleteModel,
+                                onSpeedTest = ai::runSpeedTest
+                            )
                         }
                     }
                 }
             }
         }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        // Free the model's memory while the game is off screen; it reloads on the next prepared line.
+        ai.onStop()
     }
 }

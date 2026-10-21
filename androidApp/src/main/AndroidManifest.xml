@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Only used when an HF token is configured, for AI-voiced NPC dialogue. -->
+    <!-- Only used to download the on-device dialogue model from huggingface.co, once, when the player asks. -->
     <uses-permission android:name="android.permission.INTERNET" />
     <application
         android:allowBackup="true"
@@ -18,5 +18,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <!-- The on-device model runs in its own process so an out-of-memory kill or native crash never takes the game down. -->
+        <service
+            android:name=".ai.AiModelService"
+            android:exported="false"
+            android:process=":ai" />
     </application>
 </manifest>

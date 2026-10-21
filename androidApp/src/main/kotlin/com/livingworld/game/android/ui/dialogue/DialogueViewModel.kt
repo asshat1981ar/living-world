@@ -31,6 +31,9 @@ data class DialogueLine(
     val byAi: Boolean = false
 )
 
+/** How many NPC lines the player has been shown, and how many of those the AI wrote (the share that reached them). */
+data class LineUsage(val npcLines: Int = 0, val aiLines: Int = 0)
+
 data class DialogueUiState(
     val currentNpc: Npc? = null,
     val portraitCard: NpcPortraitCardState? = null,
@@ -56,6 +59,9 @@ class DialogueViewModel(
     private val _voiceStats = MutableStateFlow(lines?.stats)
     /** How the AI voice is doing (null when there is none), for the AI tab's status line. */
     val voiceStats: StateFlow<DialogueStats?> = _voiceStats.asStateFlow()
+
+    private val _lineUsage = MutableStateFlow(LineUsage())
+    val lineUsage: StateFlow<LineUsage> = _lineUsage.asStateFlow()
 
     /** Turns AI lines on (once the on-device model is ready) or off with null; on, it starts preparing at once. */
     fun setLines(lines: PregeneratedLines?) {
@@ -137,6 +143,7 @@ class DialogueViewModel(
      */
     private fun npcLine(npc: Npc, topic: String, builtIn: String): DialogueLine {
         val prepared = lines?.lineFor(requestFor(npc, topic))
+        _lineUsage.value = _lineUsage.value.let { it.copy(npcLines = it.npcLines + 1, aiLines = it.aiLines + if (prepared != null) 1 else 0) }
         return DialogueLine(npc.identity.name, prepared ?: builtIn, isPlayer = false, byAi = prepared != null)
     }
 

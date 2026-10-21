@@ -1,6 +1,7 @@
 package com.livingworld.game.android
 
 import com.livingworld.game.android.ui.dialogue.DialogueViewModel
+import com.livingworld.game.android.ui.dialogue.LineUsage
 import com.livingworld.game.android.ui.inventory.InventoryViewModel
 import com.livingworld.game.android.ui.map.MapViewModel
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -142,6 +143,7 @@ class ViewModelTests {
 
         vm.loadNpc(NpcId("merchant"))
         assertEquals("the greeting is prepared for the next visit", "Verily, the hour grows late.", vm.uiState.value.dialogueHistory.last().text)
+        assertEquals(LineUsage(npcLines = 3, aiLines = 2), vm.lineUsage.value)
     }
 
     @Test
