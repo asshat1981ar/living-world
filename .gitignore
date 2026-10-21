@@ -1,8 +1,7 @@
-# Large / local model binaries (header-only stubs stay tracked)
-/*.gguf
-assets/models/*.gguf
-!assets/models/smollm2-135m-q4_k_m.gguf
-!assets/models/smollm2-135m-stub.gguf
+# Large / local model binaries (scripts/download_model.py puts the dialogue model in models/)
+/models/
+*.litertlm
+*.gguf
 
 # Archived PDF printouts of an old dump (not source)
 _archive/

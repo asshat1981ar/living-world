@@ -25,8 +25,6 @@ jobs:
         run: python3 tools/check_invariants.py --all
       - name: Tooling tests
         run: python3 -m unittest discover -s tools -p 'test_*.py'
-      - name: HuggingFace adapter tests
-        run: python3 test_huggingface_adapter.py
 
   kotlin-check:
     name: Gradle check (KMP + Android lint)

@@ -1,16 +1,12 @@
 package com.livingworld.game.android
 
-import com.livingworld.game.android.ai.AndroidLlamaEngineBridge
-import com.livingworld.game.android.ai.AndroidModelAssetManager
 import com.livingworld.game.android.ui.dialogue.DialogueViewModel
 import com.livingworld.game.android.ui.inventory.InventoryViewModel
 import com.livingworld.game.android.ui.map.MapViewModel
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import org.livingworld.ai.huggingface.HuggingFaceDialogueAdapter
-import org.livingworld.ai.huggingface.MockHfTransport
-import org.livingworld.ai.ondevice.ModelAssetCatalog
-import org.livingworld.ai.ondevice.ModelAssetStatus
+import org.livingworld.ai.dialogue.ChatModel
+import org.livingworld.ai.dialogue.GroundedDialogueVoice
 import org.livingworld.core.events.GameEvent
 import org.livingworld.core.events.TacticalStance
 import org.livingworld.core.ids.ItemId
@@ -120,11 +116,15 @@ class ViewModelTests {
         assertEquals(eventsAtDeath, duelVm.currentWorldState.events.size)
     }
 
-    private fun chat(content: String) = """{"choices":[{"message":{"role":"assistant","content":"$content"}}]}"""
+    /** A voice whose model always answers [reply]. */
+    private fun voiceSaying(reply: String) = GroundedDialogueVoice(object : ChatModel {
+        override suspend fun complete(system: String?, user: String, temperature: Float, maxTokens: Int) = Result.success(reply)
+        override fun describeFailure(error: Throwable) = error.message ?: "failed"
+    })
 
     @Test
     fun aiVoiceReplacesTheBuiltInLineWhenItsReplyIsGrounded() = runTest {
-        val voice = HuggingFaceDialogueAdapter(transport = MockHfTransport { _, _ -> Result.success(chat("Verily, the hour grows late.")) })
+        val voice = voiceSaying("Verily, the hour grows late.")
         val vm = DialogueViewModel(world, manifest, voice = voice, scope = this)
         vm.loadNpc(NpcId("merchant"))
         advanceUntilIdle()
@@ -139,7 +139,7 @@ class ViewModelTests {
 
     @Test
     fun aiVoiceThatInventsSomethingLeavesTheBuiltInLine() = runTest {
-        val voice = HuggingFaceDialogueAdapter(transport = MockHfTransport { _, _ -> Result.success(chat("Mara poisoned the well.")) })
+        val voice = voiceSaying("Mara poisoned the well.")
         val vm = DialogueViewModel(world, manifest, voice = voice, scope = this)
         vm.loadNpc(NpcId("merchant"))
         advanceUntilIdle()
@@ -154,7 +154,7 @@ class ViewModelTests {
         advanceUntilIdle()
         assertEquals("Greetings, traveler. What brings you to my presence?", vm.uiState.value.dialogueHistory.last().text)
 
-        vm.setVoice(HuggingFaceDialogueAdapter(transport = MockHfTransport { _, _ -> Result.success(chat("Well met, stranger.")) }))
+        vm.setVoice(voiceSaying("Well met, stranger."))
         vm.chooseOption(1)
         advanceUntilIdle()
         assertEquals("Well met, stranger.", vm.uiState.value.dialogueHistory.last().text)
@@ -167,7 +167,7 @@ class ViewModelTests {
 
     @Test
     fun aiLinesAreMarkedAndTheStatsAreShared() = runTest {
-        val voice = HuggingFaceDialogueAdapter(transport = MockHfTransport { _, _ -> Result.success(chat("Well met, stranger.")) })
+        val voice = voiceSaying("Well met, stranger.")
         val vm = DialogueViewModel(world, manifest, voice = voice, scope = this)
         assertNull(DialogueViewModel(world, manifest).voiceStats.value)
         vm.loadNpc(NpcId("merchant"))

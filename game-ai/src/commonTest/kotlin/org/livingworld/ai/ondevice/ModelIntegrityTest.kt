@@ -5,7 +5,7 @@ import kotlin.test.*
 /** Supply chain: a model descriptor must vouch for exactly one file (pinned revision, size and sha256). */
 class ModelIntegrityTest {
     private val pinnedSha = "74a4da8c9fdbcd15bd1f6d01d621410d31c6fc00986f5eb687824e7b93d7a9db"
-    private fun descriptor(sha: String?, size: Long = 100L) = ModelAssetCatalog.QWEN_2_5_0_5B_GGUF.copy(expectedSizeBytes = size, sha256Checksum = sha)
+    private fun descriptor(sha: String?, size: Long = 100L) = ModelAssetCatalog.QWEN3_1_7B_LITERTLM.copy(expectedSizeBytes = size, sha256Checksum = sha)
 
     @Test
     fun every_catalog_entry_is_fully_pinned() {
@@ -40,9 +40,4 @@ class ModelIntegrityTest {
         assertFalse(ModelIntegrity.digestMatches(d, pinnedSha.replace('7', '8')))
     }
 
-    @Test
-    fun local_port_without_a_runtime_reports_failure_instead_of_inventing_an_answer() = kotlinx.coroutines.test.runTest {
-        val port = LocalGgufInferencePort(ModelAssetCatalog.QWEN_2_5_0_5B_GGUF, "/models/q.gguf")
-        assertTrue(port.generateCompletion("hi", 8, 0.2f).isFailure)
-    }
 }

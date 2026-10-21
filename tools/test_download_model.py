@@ -17,7 +17,7 @@ dm = importlib.util.module_from_spec(spec)
 sys.modules["download_model"] = dm
 spec.loader.exec_module(dm)
 
-BODY = b"GGUF" + bytes(range(60))
+BODY = bytes(range(64))
 SHA = hashlib.sha256(BODY).hexdigest()
 
 
@@ -28,7 +28,7 @@ def opener(data: bytes):
 class DownloadModelTests(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
-        self.dest = str(Path(self.tmp.name, "m.gguf"))
+        self.dest = str(Path(self.tmp.name, "m.litertlm"))
 
     def tearDown(self):
         self.tmp.cleanup()
@@ -39,7 +39,7 @@ class DownloadModelTests(unittest.TestCase):
     def test_good_download_is_installed_and_verified(self):
         dm.download_verified("https://huggingface.co/x", self.dest, len(BODY), SHA, open_url=opener(BODY))
         self.assertEqual(Path(self.dest).read_bytes(), BODY)
-        self.assertEqual(self.leftovers(), ["m.gguf"])
+        self.assertEqual(self.leftovers(), ["m.litertlm"])
 
     def test_wrong_digest_leaves_nothing_behind(self):
         with self.assertRaises(dm.IntegrityError):
@@ -67,25 +67,25 @@ class DownloadModelTests(unittest.TestCase):
         dm.check_url("https://huggingface.co/a/b")
         dm.check_url("https://cdn-lfs.huggingface.co/a")
 
-    def test_main_replaces_a_303_byte_stub_instead_of_skipping_it(self):
-        model = dict(dm.AVAILABLE_MODELS["smollm2-135m"], size_bytes=len(BODY), sha256=SHA)
-        dm.AVAILABLE_MODELS["smollm2-135m"], saved = model, dm.AVAILABLE_MODELS["smollm2-135m"]
+    def test_main_replaces_a_wrong_existing_file_instead_of_skipping_it(self):
+        model = dict(dm.AVAILABLE_MODELS["qwen3-1.7b"], size_bytes=len(BODY), sha256=SHA)
+        dm.AVAILABLE_MODELS["qwen3-1.7b"], saved = model, dm.AVAILABLE_MODELS["qwen3-1.7b"]
         try:
             stub = Path(self.tmp.name, model["target_filename"])
-            stub.write_bytes(b"GGUF" + bytes(299))
+            stub.write_bytes(bytes(303))
             src = Path(self.tmp.name, "real.bin")
             src.write_bytes(BODY)
             self.assertEqual(dm.main(["--dest-dir", self.tmp.name, "--copy-from", str(src)]), 0)
             self.assertEqual(stub.read_bytes(), BODY)
         finally:
-            dm.AVAILABLE_MODELS["smollm2-135m"] = saved
+            dm.AVAILABLE_MODELS["qwen3-1.7b"] = saved
 
     def test_main_reports_failure_with_a_nonzero_exit_and_installs_nothing(self):
         src = Path(self.tmp.name, "bad.bin")
         src.write_bytes(b"not a model")
         self.assertEqual(dm.main(["--dest-dir", self.tmp.name, "--copy-from", str(src)]), 1)
         self.assertEqual(dm.main(["--dest-dir", self.tmp.name, "--verify-only"]), 1)
-        self.assertEqual([p.name for p in Path(self.tmp.name).iterdir() if p.suffix == ".gguf"], [])
+        self.assertEqual([p.name for p in Path(self.tmp.name).iterdir() if p.suffix == ".litertlm"], [])
 
     def test_python_table_matches_the_kotlin_catalog(self):
         kt = (ROOT / "game-ai/src/commonMain/kotlin/org/livingworld/ai/ondevice/ModelAssetManager.kt").read_text()

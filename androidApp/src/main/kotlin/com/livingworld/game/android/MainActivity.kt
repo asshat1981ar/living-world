@@ -17,12 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import com.livingworld.game.android.ui.dialogue.DialogueScreen
-import com.livingworld.game.android.ai.HfTokenStore
-import com.livingworld.game.android.ai.HttpUrlHfTransport
 import com.livingworld.game.android.ui.dialogue.DialogueViewModel
-import com.livingworld.game.android.ui.settings.AiSettingsScreen
-import org.livingworld.ai.huggingface.HuggingFaceDialogueAdapter
-import org.livingworld.ai.huggingface.HuggingFaceEndpointConfig
 import com.livingworld.game.android.ui.inventory.InventoryScreen
 import com.livingworld.game.android.ui.inventory.InventoryViewModel
 import com.livingworld.game.android.ui.map.MapScreen
@@ -216,13 +211,7 @@ class MainActivity : ComponentActivity() {
         val world = DefaultVillageFactory.marketVillage()
         val manifest = SpriteManifest.createDefault()
 
-        // The player enters a Hugging Face token in the AI tab; none is ever built into the APK. Without one, NPCs use
-        // their built-in lines and the app makes no network calls.
-        val tokenStore = HfTokenStore(noBackupFilesDir)
-        fun voiceFor(token: String?) = token?.let {
-            HuggingFaceDialogueAdapter(HuggingFaceEndpointConfig.defaultFreeTier(it), HttpUrlHfTransport())
-        }
-        val dialogueViewModel = DialogueViewModel(world, manifest, voice = voiceFor(tokenStore.load())).apply {
+        val dialogueViewModel = DialogueViewModel(world, manifest).apply {
             loadNpc(NpcId("merchant"))
         }
         val mapViewModel = MapViewModel(world, manifest)
@@ -232,7 +221,6 @@ class MainActivity : ComponentActivity() {
         setContent {
             ChimeraTheme {
                 var selectedTab by remember { mutableStateOf(0) }
-                var hasToken by remember { mutableStateOf(tokenStore.load() != null) }
 
                 Scaffold(
                     bottomBar = {
@@ -261,12 +249,6 @@ class MainActivity : ComponentActivity() {
                                 label = { Text("Combat Duel") },
                                 icon = { Text("⚔️") }
                             )
-                            NavigationBarItem(
-                                selected = selectedTab == 4,
-                                onClick = { selectedTab = 4 },
-                                label = { Text("AI") },
-                                icon = { Text("✨") }
-                            )
                         }
                     }
                 ) { padding ->
@@ -276,22 +258,6 @@ class MainActivity : ComponentActivity() {
                             1 -> MapScreen(viewModel = mapViewModel)
                             2 -> InventoryScreen(viewModel = inventoryViewModel)
                             3 -> TacticalDuelScreen(viewModel = duelViewModel)
-                            4 -> AiSettingsScreen(
-                                hasToken = hasToken,
-                                stats = dialogueViewModel.voiceStats.collectAsState().value,
-                                onSave = { token ->
-                                    tokenStore.save(token)
-                                    val voice = voiceFor(tokenStore.load())
-                                    dialogueViewModel.setVoice(voice)
-                                    hasToken = voice != null
-                                    voice?.checkConnection()
-                                },
-                                onRemove = {
-                                    tokenStore.clear()
-                                    dialogueViewModel.setVoice(null)
-                                    hasToken = false
-                                }
-                            )
                         }
                     }
                 }
