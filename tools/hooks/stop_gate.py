@@ -269,7 +269,9 @@ def main() -> int:
     started = time.monotonic()
     answer = decide_quick(data, run_remote=os.environ.get("LW_STOP_GATE_REMOTE", "1") != "0")
     outcome = "block" if answer and answer.get("decision") == "block" else "warn" if answer else "pass"
-    telemetry.record("stop_gate", outcome, started)
+    # Why a turn was blocked or went unverified, so telemetry can tell an expired AWS session from a real failure.
+    reason = (answer.get("reason") or answer.get("systemMessage") or "")[:200] if answer else ""
+    telemetry.record("stop_gate", outcome, started, **({"reason": reason} if reason else {}))
     if answer:
         print(json.dumps(answer))
     return 0

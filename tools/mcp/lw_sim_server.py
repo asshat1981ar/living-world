@@ -33,7 +33,15 @@ BuildTask = Literal[
     "assemble",
 ]
 
+Scenario = Literal["default", "turmoil", "feud"]
+VerifyTasks = Literal["full", ":game-core:jvmTest", ":game-ai:jvmTest", ":androidApp:testDebugUnitTest"]
+
 mcp = FastMCP("lw-sim")
+
+
+def _local(*args: str, timeout: int = 3600) -> tuple[int, str]:
+    p = subprocess.run([sys.executable, "-I", *args], cwd=REPO, capture_output=True, text=True, timeout=timeout)
+    return p.returncode, (p.stdout + p.stderr)[-20000:]
 
 
 def _remote(*args: str, timeout: int = 3600) -> tuple[int, str]:
@@ -56,8 +64,10 @@ def _ledger(*args: str) -> dict:
         return {"error": out[-3000:], "exit": code}
 
 
-def _simulate(days: int, tail: int, save: str | None) -> tuple[int, str]:
+def _simulate(days: int, tail: int, save: str | None, scenario: Scenario = "default") -> tuple[int, str]:
     extra = f" --save={SAVE_DIR}/{save}.json" if save else ""
+    if scenario != "default":
+        extra += f" --scenario={scenario}"
     # --args is consumed by the remote shell; all parts are validated ints / slugs.
     return _remote("--push", "--gradle", f":desktopApp:run --args='{days} {tail}{extra}'", "--tail", "200")
 
@@ -70,13 +80,13 @@ def awsbox_build(task: BuildTask = "check") -> str:
 
 
 @mcp.tool()
-def run_simulation(days: int = 30, tail: int = 10, save_name: str | None = None) -> str:
+def run_simulation(days: int = 30, tail: int = 10, save_name: str | None = None, scenario: Scenario = "default") -> str:
     """Run the headless simulation inspector (:desktopApp:run) for `days` (1-365) on awsbox. Prints the event census,
     the deterministic fingerprint and the last `tail` (0-50) causal cards. With `save_name`, also writes the save envelope
     to build/lw-saves/<save_name>.json on awsbox for ledger_summary / ledger_diff / causal_trace."""
     if not 1 <= days <= 365 or not 0 <= tail <= 50:
         raise ValueError("days must be 1..365 and tail 0..50")
-    code, out = _simulate(days, tail, _slug(save_name) if save_name else None)
+    code, out = _simulate(days, tail, _slug(save_name) if save_name else None, scenario)
     return f"exit={code}\n{out}"
 
 
@@ -101,14 +111,14 @@ def causal_trace(save_name: str, event_id: int) -> dict:
 
 
 @mcp.tool()
-def determinism_benchmark(days: int = 30, runs: int = 3) -> dict:
+def determinism_benchmark(days: int = 30, runs: int = 3, scenario: Scenario = "default") -> dict:
     """G8 check: run the same simulation `runs` (2-5) times on awsbox; all FNV-1a fingerprints must match.
     Also reports simulation wall time per run."""
     if not 1 <= days <= 365 or not 2 <= runs <= 5:
         raise ValueError("days must be 1..365 and runs 2..5")
     prints, walls, failures = [], [], []
     for i in range(runs):
-        code, out = _simulate(days, 0, None)
+        code, out = _simulate(days, 0, None, scenario)
         fp = re.search(r"Fingerprint\s*:\s*(\S+)", out)
         wall = re.search(r"Wall time\s*:\s*(\d+)ms", out)
         if code or not fp:
@@ -124,6 +134,25 @@ def determinism_benchmark(days: int = 30, runs: int = 3) -> dict:
         "wall_ms": walls,
         "failures": failures,
     }
+
+
+@mcp.tool()
+def verify(tasks: VerifyTasks = "full", goldens: bool = True) -> dict:
+    """Run tools/verify.py: Gradle (+ the default/turmoil/feud goldens) on awsbox in one call, then invariants and tool
+    tests. status is pass, fail, or blocked (AWS session expired: nothing was verified, never treat it as a pass)."""
+    args = ["tools/verify.py"]
+    if tasks != "full":
+        args += ["--tasks", tasks]
+    if not goldens:
+        args.append("--no-goldens")
+    code, out = _local(*args)
+    checks = {}
+    for line in out.splitlines():
+        parts = line.split()
+        if len(parts) == 2 and parts[0] in ("PASS", "FAIL"):
+            checks[parts[1]] = parts[0] == "PASS"
+    status = "blocked" if code == 2 else "pass" if code == 0 else "fail"
+    return {"status": status, "checks": checks, "output": out[-3000:]}
 
 
 if __name__ == "__main__":

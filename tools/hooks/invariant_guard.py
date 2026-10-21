@@ -20,6 +20,20 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import telemetry  # noqa: E402
 
 
+def repo_relative(path: str, root: Path) -> str | None:
+    """The file's path inside the repo, or None if it is outside. Matches the repo by filesystem identity, not by
+    spelling: on the phone the same tree is reachable as /data/... and /root/termux-home/... (a proot mount) and
+    Path.resolve() does not unify them, which once made this guard skip every edit silently."""
+    for candidate in dict.fromkeys((Path(path), Path(path).resolve())):
+        for parent in candidate.parents:
+            try:
+                if os.path.samefile(parent, root):
+                    return candidate.relative_to(parent).as_posix()
+            except OSError:
+                continue
+    return None
+
+
 def _after(tool: str, ti: dict, old: str) -> str | None:
     if tool == "Write":
         return ti.get("content", "")
@@ -43,10 +57,11 @@ def main() -> int:
     path = ti.get("file_path", "")
     if tool not in ("Edit", "Write", "MultiEdit") or not path.endswith(".kt"):
         return 0
-    root = Path(os.environ.get("CLAUDE_PROJECT_DIR") or Path(__file__).resolve().parents[2]).resolve()
-    try:
-        rel = Path(path).resolve().relative_to(root).as_posix()
-    except ValueError:
+    root = Path(os.environ.get("CLAUDE_PROJECT_DIR") or Path(__file__).resolve().parents[2])
+    rel = repo_relative(path, root)
+    if rel is None:
+        # Visible in telemetry, so a guard that never checks anything cannot hide as silence again.
+        telemetry.record("invariant_guard", "skip")
         return 0
     p = Path(path)
     old = p.read_text(encoding="utf-8", errors="replace") if p.is_file() else ""
