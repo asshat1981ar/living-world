@@ -56,15 +56,6 @@ jobs:
           name: living-world-debug-apk
           path: androidApp/build/outputs/apk/debug/*.apk
           retention-days: 14
-      - name: Build the debug APK
-        run: ./gradlew :androidApp:assembleDebug --no-daemon --console=plain
-      - name: Upload the debug APK
-        uses: actions/upload-artifact@v4
-        with:
-          # Fetch with: gh run download -n living-world-debug-apk (for testing on a phone)
-          name: living-world-debug-apk
-          path: androidApp/build/outputs/apk/debug/*.apk
-          retention-days: 14
       - name: Upload reports
         if: failure()
         uses: actions/upload-artifact@v4
