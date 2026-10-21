@@ -8,8 +8,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.livingworld.ai.huggingface.DialogueStats
-import org.livingworld.ai.huggingface.HuggingFaceDialogueAdapter
+import org.livingworld.ai.dialogue.DialogueStats
+import org.livingworld.ai.dialogue.GroundedDialogueVoice
 import org.livingworld.core.dialogue.DialogueGrounding
 import org.livingworld.core.events.GameEvent
 import org.livingworld.core.ids.EntityId
@@ -44,7 +44,7 @@ class DialogueViewModel(
     private val manifest: SpriteManifest,
     private val reducer: WorldReducer = DefaultWorldReducer(),
     /** The AI that voices NPC lines; null keeps the built-in lines only. */
-    private var voice: HuggingFaceDialogueAdapter? = null,
+    private var voice: GroundedDialogueVoice? = null,
     private val scope: CoroutineScope? = null
 ) : ViewModel() {
 
@@ -58,7 +58,7 @@ class DialogueViewModel(
     val voiceStats: StateFlow<DialogueStats?> = _voiceStats.asStateFlow()
 
     /** Turns AI-voiced lines on (for example once the player enters a Hugging Face token) or off with null. */
-    fun setVoice(voice: HuggingFaceDialogueAdapter?) {
+    fun setVoice(voice: GroundedDialogueVoice?) {
         this.voice = voice
         _voiceStats.value = voice?.stats
     }

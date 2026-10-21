@@ -9,7 +9,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
-import org.livingworld.ai.huggingface.DialogueStats
+import org.livingworld.ai.dialogue.DialogueStats
 
 /**
  * Where the player pastes a Hugging Face token to let the AI voice NPC dialogue. The token is never shown back:

@@ -1,6 +1,7 @@
 package org.livingworld.ai.huggingface
 
 import kotlinx.coroutines.test.runTest
+import org.livingworld.ai.dialogue.DialogueStats
 import org.livingworld.ai.ondevice.GgufBinaryHeaderParser
 import org.livingworld.ai.reasoning.DeterministicAiFallback
 import org.livingworld.ai.reasoning.ReasoningContext
