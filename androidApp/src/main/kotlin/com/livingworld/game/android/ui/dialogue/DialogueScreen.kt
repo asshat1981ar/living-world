@@ -103,7 +103,8 @@ fun DialogueScreen(
                         .padding(8.dp)
                 ) {
                     Text(
-                        text = line.speaker,
+                        // A faint mark on lines the AI wrote, so a player can tell the AI voice is getting through.
+                        text = if (line.byAi) "${line.speaker}  ✨" else line.speaker,
                         color = if (line.isPlayer) ChimeraSpritePalette.ACCENT_GOLD.toComposeColor() else Color(0xFFD4AF37),
                         fontWeight = FontWeight.Bold,
                         fontSize = 11.sp

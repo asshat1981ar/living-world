@@ -164,4 +164,19 @@ class ViewModelTests {
         advanceUntilIdle()
         assertEquals("Farewell, traveler.", vm.uiState.value.dialogueHistory.last().text)
     }
+
+    @Test
+    fun aiLinesAreMarkedAndTheStatsAreShared() = runTest {
+        val voice = HuggingFaceDialogueAdapter(transport = MockHfTransport { _, _ -> Result.success(chat("Well met, stranger.")) })
+        val vm = DialogueViewModel(world, manifest, voice = voice, scope = this)
+        assertNull(DialogueViewModel(world, manifest).voiceStats.value)
+        vm.loadNpc(NpcId("merchant"))
+        assertFalse(vm.uiState.value.dialogueHistory.last().byAi)
+        advanceUntilIdle()
+        assertTrue(vm.uiState.value.dialogueHistory.last().byAi)
+        assertEquals(1, vm.voiceStats.value?.accepted)
+
+        vm.chooseOption(0)
+        assertFalse("the player's own line is never marked", vm.uiState.value.dialogueHistory[1].byAi)
+    }
 }

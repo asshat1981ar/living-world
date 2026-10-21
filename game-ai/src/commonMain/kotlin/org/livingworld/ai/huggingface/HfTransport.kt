@@ -15,6 +15,12 @@ interface HfTransport {
     ): Result<String>
 }
 
+/** Hugging Face answered with a non-2xx status; [status] lets callers tell a bad token from an outage. */
+class HfHttpError(val status: Int) : Exception("Hugging Face returned HTTP $status")
+
+/** Hugging Face did not answer within the configured timeout. */
+class HfTimeout(timeoutMillis: Long) : Exception("Hugging Face request timed out after $timeoutMillis ms")
+
 /**
  * Mock transport for deterministic testing and headless simulation verification without network access.
  */
@@ -50,7 +56,7 @@ suspend fun HfTransport.postBounded(
 ): Result<String> = try {
     // withTimeoutOrNull only reports OUR timeout as null; a cancellation coming from the caller still propagates.
     withTimeoutOrNull(config.timeoutMillis) { executePost(config.effectiveUrl, jsonBody, headers) }
-        ?: Result.failure(IllegalStateException("Hugging Face request timed out after ${config.timeoutMillis} ms"))
+        ?: Result.failure(HfTimeout(config.timeoutMillis))
 } catch (e: CancellationException) {
     throw e
 } catch (e: Exception) {

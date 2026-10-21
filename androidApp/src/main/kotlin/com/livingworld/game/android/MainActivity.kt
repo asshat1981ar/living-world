@@ -278,10 +278,13 @@ class MainActivity : ComponentActivity() {
                             3 -> TacticalDuelScreen(viewModel = duelViewModel)
                             4 -> AiSettingsScreen(
                                 hasToken = hasToken,
+                                stats = dialogueViewModel.voiceStats.collectAsState().value,
                                 onSave = { token ->
                                     tokenStore.save(token)
-                                    dialogueViewModel.setVoice(voiceFor(tokenStore.load()))
-                                    hasToken = tokenStore.load() != null
+                                    val voice = voiceFor(tokenStore.load())
+                                    dialogueViewModel.setVoice(voice)
+                                    hasToken = voice != null
+                                    voice?.checkConnection()
                                 },
                                 onRemove = {
                                     tokenStore.clear()

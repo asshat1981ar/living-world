@@ -238,7 +238,46 @@ class HuggingFaceAdapterTest {
             replies.removeFirstOrNull()?.let { Result.success(chat(it)) } ?: Result.failure(RuntimeException("offline"))
         })
         repeat(3) { adapter.generateDialogueLine(npc, "Any news?", loc.id, listOf(belief), Relationship.NEUTRAL) }
-        assertEquals(DialogueStats(accepted = 1, salvaged = 0, rejected = 1, failed = 1), adapter.stats)
+        assertEquals(DialogueStats(accepted = 1, salvaged = 0, rejected = 1, failed = 1, lastFailure = "Could not reach Hugging Face."), adapter.stats)
+    }
+
+    @Test
+    fun a_failed_reply_records_why_in_plain_words() = runTest {
+        val (npc, loc, belief) = dialogueFixture()
+        suspend fun reasonFor(error: Exception): String? {
+            val adapter = HuggingFaceDialogueAdapter(transport = MockHfTransport { _, _ -> Result.failure(error) })
+            adapter.generateDialogueLine(npc, "Any news?", loc.id, listOf(belief), Relationship.NEUTRAL)
+            return adapter.stats.lastFailure
+        }
+        assertEquals("Hugging Face rejected the token (HTTP 401).", reasonFor(HfHttpError(401)))
+        assertEquals("Hugging Face rejected the token (HTTP 403).", reasonFor(HfHttpError(403)))
+        assertEquals("This Hugging Face account is out of credits (HTTP 402).", reasonFor(HfHttpError(402)))
+        assertEquals("Hugging Face is limiting requests; try again later (HTTP 429).", reasonFor(HfHttpError(429)))
+        assertEquals("Hugging Face could not answer (HTTP 503).", reasonFor(HfHttpError(503)))
+        assertEquals("Could not reach Hugging Face.", reasonFor(RuntimeException("Unable to resolve host")))
+    }
+
+    @Test
+    fun an_unreadable_reply_is_a_failure_and_a_later_success_keeps_the_last_reason() = runTest {
+        val (npc, loc, belief) = dialogueFixture()
+        val replies = ArrayDeque(listOf("not json", chat("Aye, it is cold.")))
+        val adapter = HuggingFaceDialogueAdapter(transport = MockHfTransport { _, _ -> Result.success(replies.removeFirst()) })
+        adapter.generateDialogueLine(npc, "Any news?", loc.id, listOf(belief), Relationship.NEUTRAL)
+        assertEquals("Hugging Face sent a reply the game could not read.", adapter.stats.lastFailure)
+        adapter.generateDialogueLine(npc, "Any news?", loc.id, listOf(belief), Relationship.NEUTRAL)
+        assertEquals(DialogueStats(accepted = 1, failed = 1, lastFailure = "Hugging Face sent a reply the game could not read."), adapter.stats)
+    }
+
+    @Test
+    fun checking_the_connection_returns_null_when_it_works_and_the_reason_when_not() = runTest {
+        val working = HuggingFaceDialogueAdapter(transport = MockHfTransport { _, body ->
+            assertTrue(body.contains("\"max_tokens\":4"))
+            Result.success(chat("OK"))
+        })
+        assertNull(working.checkConnection())
+        val refused = HuggingFaceDialogueAdapter(transport = MockHfTransport { _, _ -> Result.failure(HfHttpError(401)) })
+        assertEquals("Hugging Face rejected the token (HTTP 401).", refused.checkConnection())
+        assertEquals(DialogueStats(), refused.stats, "a check is not a dialogue line")
     }
 
     @Test

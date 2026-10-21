@@ -3,6 +3,7 @@ package com.livingworld.game.android.ai
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.livingworld.ai.huggingface.HfHttpError
 import org.livingworld.ai.huggingface.HfTransport
 import java.net.HttpURLConnection
 import java.net.URL
@@ -26,7 +27,7 @@ class HttpUrlHfTransport(private val timeoutMillis: Int = 20_000) : HfTransport 
                     connection.outputStream.use { it.write(jsonBody.toByteArray(Charsets.UTF_8)) }
                     val status = connection.responseCode
                     if (status !in 200..299) {
-                        Result.failure(IllegalStateException("Hugging Face returned HTTP $status"))
+                        Result.failure(HfHttpError(status))
                     } else {
                         Result.success(connection.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() })
                     }

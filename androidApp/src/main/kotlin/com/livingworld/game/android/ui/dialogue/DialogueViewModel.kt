@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.livingworld.ai.huggingface.DialogueStats
 import org.livingworld.ai.huggingface.HuggingFaceDialogueAdapter
 import org.livingworld.core.dialogue.DialogueGrounding
 import org.livingworld.core.events.GameEvent
@@ -25,7 +26,9 @@ import org.livingworld.ui.sprites.SpriteManifest
 data class DialogueLine(
     val speaker: String,
     val text: String,
-    val isPlayer: Boolean
+    val isPlayer: Boolean,
+    /** Written by the AI voice rather than the built-in line; the screen marks these. */
+    val byAi: Boolean = false
 )
 
 data class DialogueUiState(
@@ -50,9 +53,14 @@ class DialogueViewModel(
 
     val currentWorldState: WorldState get() = world
 
+    private val _voiceStats = MutableStateFlow(voice?.stats)
+    /** How the AI voice is doing (null when there is none), for the AI tab's status line. */
+    val voiceStats: StateFlow<DialogueStats?> = _voiceStats.asStateFlow()
+
     /** Turns AI-voiced lines on (for example once the player enters a Hugging Face token) or off with null. */
     fun setVoice(voice: HuggingFaceDialogueAdapter?) {
         this.voice = voice
+        _voiceStats.value = voice?.stats
     }
 
     /** How many things this NPC has already told the player this conversation. */
@@ -137,11 +145,12 @@ class DialogueViewModel(
         (scope ?: viewModelScope).launch {
             val rel = world.relationships.get(npc.id.toEntityId(), EntityId.Player("player"))
             val line = voice.generateGroundedLine(npc, topic, npc.identity.currentLocation, npc.beliefs.all().toList(), rel)
-                ?: return@launch
+            if (this@DialogueViewModel.voice === voice) _voiceStats.value = voice.stats
+            if (line == null) return@launch
             _uiState.update { s ->
                 val target = s.dialogueHistory.getOrNull(index)
                 if (s.currentNpc?.id != npc.id || target == null || target.isPlayer) s
-                else s.copy(dialogueHistory = s.dialogueHistory.toMutableList().also { it[index] = target.copy(text = line) })
+                else s.copy(dialogueHistory = s.dialogueHistory.toMutableList().also { it[index] = target.copy(text = line, byAi = true) })
             }
         }
     }

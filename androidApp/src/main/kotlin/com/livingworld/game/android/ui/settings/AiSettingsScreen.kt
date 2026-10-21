@@ -8,14 +8,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
+import org.livingworld.ai.huggingface.DialogueStats
 
 /**
  * Where the player pastes a Hugging Face token to let the AI voice NPC dialogue. The token is never shown back:
- * the field starts empty and only says whether one is saved.
+ * the field starts empty and only says whether one is saved. Saving checks the token once ([onSave] returns null when
+ * it works, otherwise the reason), and [stats] shows how this session's AI lines have fared, so a broken token is
+ * visible here without interrupting play.
  */
 @Composable
-fun AiSettingsScreen(hasToken: Boolean, onSave: (String) -> Unit, onRemove: () -> Unit) {
+fun AiSettingsScreen(
+    hasToken: Boolean,
+    stats: DialogueStats?,
+    onSave: suspend (String) -> String?,
+    onRemove: () -> Unit
+) {
     var entry by remember { mutableStateOf("") }
+    var check by remember { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text("AI dialogue", style = MaterialTheme.typography.titleLarge)
@@ -34,8 +45,25 @@ fun AiSettingsScreen(hasToken: Boolean, onSave: (String) -> Unit, onRemove: () -
             modifier = Modifier.fillMaxWidth()
         )
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Button(onClick = { onSave(entry); entry = "" }, enabled = entry.isNotBlank()) { Text("Save") }
-            OutlinedButton(onClick = onRemove, enabled = hasToken) { Text("Remove") }
+            Button(
+                onClick = {
+                    val token = entry
+                    entry = ""
+                    check = "Checking the token..."
+                    scope.launch { check = onSave(token)?.let { "Saved, but it does not work yet: $it" } ?: "Token works." }
+                },
+                enabled = entry.isNotBlank()
+            ) { Text("Save") }
+            OutlinedButton(onClick = { onRemove(); check = null }, enabled = hasToken) { Text("Remove") }
+        }
+        check?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
+        if (hasToken && stats != null) {
+            Text(
+                "This session: ${stats.accepted} lines voiced, ${stats.salvaged} trimmed, " +
+                    "${stats.rejected} rejected, ${stats.failed} failed.",
+                style = MaterialTheme.typography.bodySmall
+            )
+            stats.lastFailure?.let { Text("Last problem: $it", style = MaterialTheme.typography.bodySmall) }
         }
         Text(
             "The token is stored only on this phone, outside backups, and is sent only to huggingface.co. " +

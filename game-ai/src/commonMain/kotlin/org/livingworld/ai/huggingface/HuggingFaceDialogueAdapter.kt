@@ -46,39 +46,21 @@ class HuggingFaceDialogueAdapter(
     ): String? {
         val prompt = buildDialoguePrompt(npc, playerTopic, locationId, beliefs, relationship)
 
-        val requestJson = json.encodeToString(
-            HfChatRequest.serializer(),
-            HfChatRequest(
-                model = config.modelId,
-                messages = listOf(
-                    HfChatMessage(
-                        role = "system",
-                        content = "You are roleplaying as ${npc.identity.name}, a ${npc.identity.occupation} in a dark gothic fantasy RPG. " +
-                                "Speak in character with concise medieval phrasing. " +
-                                "CRITICAL CONSTRAINT: You can only state or reference facts present in your KNOWN BELIEFS. Never fabricate facts."
-                    ),
-                    HfChatMessage(role = "user", content = prompt)
+        val reply = ask(
+            listOf(
+                HfChatMessage(
+                    role = "system",
+                    content = "You are roleplaying as ${npc.identity.name}, a ${npc.identity.occupation} in a dark gothic fantasy RPG. " +
+                            "Speak in character with concise medieval phrasing. " +
+                            "CRITICAL CONSTRAINT: You can only state or reference facts present in your KNOWN BELIEFS. Never fabricate facts."
                 ),
-                temperature = 0.7f,
-                max_tokens = 120
-            )
+                HfChatMessage(role = "user", content = prompt)
+            ),
+            temperature = 0.7f,
+            maxTokens = 120
         )
-
-        val headers = mutableMapOf("Content-Type" to "application/json")
-        if (!config.apiToken.isNullOrBlank()) {
-            headers["Authorization"] = "Bearer ${config.apiToken}"
-        }
-
-        val result = transport.postBounded(config, requestJson, headers)
-        val content = result.getOrNull()?.let { body ->
-            try {
-                json.decodeFromString<HfChatResponse>(body).choices.firstOrNull()?.message?.content?.trim()
-            } catch (_: Exception) {
-                null
-            }
-        }
-        if (content.isNullOrBlank()) {
-            stats = stats.copy(failed = stats.failed + 1)
+        val content = reply.getOrElse { e ->
+            stats = stats.copy(failed = stats.failed + 1, lastFailure = describeFailure(e))
             return null
         }
 
@@ -90,6 +72,48 @@ class HuggingFaceDialogueAdapter(
             else -> stats.copy(salvaged = stats.salvaged + 1)
         }
         return grounded
+    }
+
+    /**
+     * One tiny request to see whether the token and endpoint work: null when they do, otherwise the reason in plain
+     * words. It does not count towards [stats].
+     */
+    suspend fun checkConnection(): String? =
+        ask(listOf(HfChatMessage(role = "user", content = "Reply with the word OK.")), temperature = 0.1f, maxTokens = 4)
+            .exceptionOrNull()?.let(::describeFailure)
+
+    /** The reply text, or a failure: the transport's own error, or [UnreadableReply] for a body that is not a chat reply. */
+    private suspend fun ask(messages: List<HfChatMessage>, temperature: Float, maxTokens: Int): Result<String> {
+        val requestJson = json.encodeToString(
+            HfChatRequest.serializer(),
+            HfChatRequest(model = config.modelId, messages = messages, temperature = temperature, max_tokens = maxTokens)
+        )
+        val headers = mutableMapOf("Content-Type" to "application/json")
+        if (!config.apiToken.isNullOrBlank()) {
+            headers["Authorization"] = "Bearer ${config.apiToken}"
+        }
+        val body = transport.postBounded(config, requestJson, headers).getOrElse { return Result.failure(it) }
+        val content = try {
+            json.decodeFromString<HfChatResponse>(body).choices.firstOrNull()?.message?.content?.trim()
+        } catch (_: Exception) {
+            null
+        }
+        return if (content.isNullOrBlank()) Result.failure(UnreadableReply()) else Result.success(content)
+    }
+
+    private class UnreadableReply : Exception("Hugging Face reply was not a chat completion")
+
+    /** What went wrong, worded for the player: a bad token reads differently from a network or service problem. */
+    private fun describeFailure(error: Throwable): String = when (error) {
+        is HfHttpError -> when (error.status) {
+            401, 403 -> "Hugging Face rejected the token (HTTP ${error.status})."
+            402 -> "This Hugging Face account is out of credits (HTTP 402)."
+            429 -> "Hugging Face is limiting requests; try again later (HTTP 429)."
+            else -> "Hugging Face could not answer (HTTP ${error.status})."
+        }
+        is HfTimeout -> "Hugging Face did not answer in time."
+        is UnreadableReply -> "Hugging Face sent a reply the game could not read."
+        else -> "Could not reach Hugging Face."
     }
 
     fun buildDialoguePrompt(
@@ -145,4 +169,11 @@ class HuggingFaceDialogueAdapter(
 }
 
 /** Outcomes of model dialogue replies: used whole, trimmed to their grounded sentences, discarded, or unavailable. */
-data class DialogueStats(val accepted: Int = 0, val salvaged: Int = 0, val rejected: Int = 0, val failed: Int = 0)
+data class DialogueStats(
+    val accepted: Int = 0,
+    val salvaged: Int = 0,
+    val rejected: Int = 0,
+    val failed: Int = 0,
+    /** Why the most recent failed reply failed, in plain words; kept after later successes. */
+    val lastFailure: String? = null
+)
