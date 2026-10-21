@@ -183,4 +183,35 @@ class ViewModelTests {
         vm.chooseOption(0)
         assertFalse(vm.uiState.value.dialogueHistory[1].byAi)
     }
+
+    @Test
+    fun askingAgainGetsTheNextFactInTheAisWordsNotTheSameLine() = runTest {
+        fun seen(item: String) = org.livingworld.core.beliefs.Belief(
+            org.livingworld.core.beliefs.Proposition.PlayerStole(ItemId(item)), 0.9f,
+            org.livingworld.core.beliefs.KnowledgeSource.DirectObservation, 1f, world.time
+        )
+        val merchant = world.npcs.getValue(NpcId("merchant"))
+        val knowing = world.copy(npcs = world.npcs + (merchant.id to merchant.copy(
+            beliefs = merchant.beliefs.addOrUpdate(seen("iron_sword")).addOrUpdate(seen("gold_ring"))
+        )))
+        // A model that rewords exactly the fact it is asked to tell, so each fact gets its own AI line.
+        val echo = GroundedDialogueVoice(object : ChatModel {
+            override suspend fun complete(system: String?, user: String, temperature: Float, maxTokens: Int): Result<String> {
+                val fact = user.substringAfter("in your own words: ", "").substringBefore("\"")
+                return Result.success(if (fact.isEmpty()) "Aye." else "Aye, $fact")
+            }
+            override fun describeFailure(error: Throwable) = "failed"
+        })
+        val vm = DialogueViewModel(knowing, manifest, lines = PregeneratedLines(echo), scope = this)
+        vm.loadNpc(NpcId("merchant"))
+        advanceUntilIdle()
+        vm.chooseOption(0)
+        val first = vm.uiState.value.dialogueHistory.last()
+        advanceUntilIdle()
+        vm.chooseOption(0)
+        val second = vm.uiState.value.dialogueHistory.last()
+        assertTrue(first.byAi && second.byAi)
+        assertNotEquals("the second ask tells the next fact", first.text, second.text)
+        assertTrue(first.text.contains("gold_ring") || first.text.contains("iron_sword"))
+    }
 }

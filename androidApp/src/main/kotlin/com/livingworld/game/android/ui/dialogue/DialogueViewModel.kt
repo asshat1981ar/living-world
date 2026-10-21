@@ -116,6 +116,8 @@ class DialogueViewModel(
         val updatedRel = world.relationships.get(npc.id.toEntityId(), EntityId.Player("player"))
         val updatedCard = ChimeraUiLayoutEngine.createPortraitCardState(updatedNpc, manifest, updatedRel)
 
+        // Worked out before `told` moves on, so the AI rewords exactly the fact the built-in line tells.
+        val topic = topicFor(updatedNpc, optionIndex)
         // G3: an NPC only asserts what it believes; everything else is a non-claim.
         val npcReply = when (optionIndex) {
             ASK_WHAT_THEY_KNOW -> {
@@ -131,7 +133,7 @@ class DialogueViewModel(
             currentNpc = updatedNpc,
             portraitCard = updatedCard,
             relationship = updatedRel,
-            dialogueHistory = newHistory + npcLine(updatedNpc, chosenText, builtIn = npcReply),
+            dialogueHistory = newHistory + npcLine(updatedNpc, topic, builtIn = npcReply),
             availableOptions = OPTIONS
         )
         prepareNextLines(updatedNpc)
@@ -151,13 +153,23 @@ class DialogueViewModel(
     private fun prepareNextLines(npc: Npc) {
         val lines = lines ?: return
         (scope ?: viewModelScope).launch {
-            for (topic in OPTIONS + GREETING_TOPIC) {
+            for (topic in OPTIONS.indices.map { topicFor(npc, it) } + GREETING_TOPIC) {
                 if (this@DialogueViewModel.lines !== lines) return@launch
                 lines.prepare(requestFor(npc, topic))
                 _voiceStats.value = lines.stats
             }
         }
     }
+
+    /**
+     * What the AI is asked to say for an option. Asking what they have heard names the next fact the built-in line would
+     * tell, so each ask gets its own prepared line instead of repeating the first one.
+     */
+    private fun topicFor(npc: Npc, optionIndex: Int): String =
+        if (optionIndex != ASK_WHAT_THEY_KNOW) OPTIONS[optionIndex]
+        else DialogueGrounding.speakableFacts(npc).getOrNull(told)
+            ?.let { "The player asks what you have heard. Tell them this, in your own words: ${it.line}" }
+            ?: "The player asks what you have heard, but you have nothing more to tell."
 
     private fun requestFor(npc: Npc, topic: String) = LineRequest(
         npc = npc,
