@@ -10,7 +10,7 @@ import kotlinx.serialization.json.Json
 @Serializable
 data class HuggingFaceEndpointConfig(
     val endpointUrl: String = "https://router.huggingface.co/hf-inference/models/",
-    val modelId: String = "Qwen/Qwen2.5-7B-Instruct",
+    val modelId: String = HuggingFaceEndpointConfig.MODEL_QWEN_3_4B_INSTRUCT,
     /** Never serialized and never printed: the token is supplied at runtime and only ever sent to an allow-listed host. */
     @Transient val apiToken: String? = null,
     val temperature: Float = 0.3f,
@@ -39,7 +39,8 @@ data class HuggingFaceEndpointConfig(
     val effectiveUrl: String
         get() = when {
             isFreeSpace && !customSpaceUrl.isNullOrBlank() -> customSpaceUrl
-            useOpenAiChatFormat -> "https://router.huggingface.co/hf-inference/v1/chat/completions"
+            // /v1 lets the router pick a live provider; its own hf-inference provider no longer serves chat LLMs.
+            useOpenAiChatFormat -> "https://router.huggingface.co/v1/chat/completions"
             else -> endpointUrl.trimEnd('/') + "/" + modelId
         }
 
@@ -54,7 +55,12 @@ data class HuggingFaceEndpointConfig(
             return host == "huggingface.co" || host.endsWith(".huggingface.co") || host.endsWith(".hf.space")
         }
 
-        // Recommended free and low-cost open-weight models on Hugging Face
+        // Open-weight chat models with live Inference Providers (checked 2026-10-21). None is free: free accounts
+        // must buy credits; PRO accounts get $2.00 a month.
+        /** Default: Apache-2.0 and ungated (no per-user license approval), live providers, non-thinking variant. */
+        const val MODEL_QWEN_3_4B_INSTRUCT = "Qwen/Qwen3-4B-Instruct-2507"
+        /** More providers and cheap, but gated: each user must be approved by Meta on Hugging Face first. */
+        const val MODEL_LLAMA_3_1_8B = "meta-llama/Llama-3.1-8B-Instruct"
         const val MODEL_QWEN_2_5_7B = "Qwen/Qwen2.5-7B-Instruct"
         const val MODEL_LLAMA_3_2_3B = "meta-llama/Llama-3.2-3B-Instruct"
         const val MODEL_MISTRAL_7B = "mistralai/Mistral-7B-Instruct-v0.3"
@@ -63,7 +69,7 @@ data class HuggingFaceEndpointConfig(
 
         fun defaultFreeTier(apiToken: String? = null): HuggingFaceEndpointConfig {
             return HuggingFaceEndpointConfig(
-                modelId = MODEL_QWEN_2_5_7B,
+                modelId = MODEL_QWEN_3_4B_INSTRUCT,
                 apiToken = apiToken,
                 temperature = 0.3f,
                 maxTokens = 256

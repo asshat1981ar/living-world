@@ -32,6 +32,16 @@ class HuggingFaceEndpointConfigTest {
     }
 
     @Test
+    fun the_default_posts_chat_to_the_auto_routing_endpoint_with_a_model_that_has_live_providers() {
+        val config = HuggingFaceEndpointConfig.defaultFreeTier()
+        // The router's own hf-inference provider does not serve chat LLMs like these; /v1 picks a live provider.
+        assertEquals("https://router.huggingface.co/v1/chat/completions", config.effectiveUrl)
+        // Ungated (no per-user license approval), Apache-2.0, live on several providers, non-thinking.
+        assertEquals("Qwen/Qwen3-4B-Instruct-2507", config.modelId)
+        assertEquals(config.modelId, HuggingFaceEndpointConfig().modelId, "the plain constructor uses the same model")
+    }
+
+    @Test
     fun the_token_neither_prints_nor_serializes() {
         val config = HuggingFaceEndpointConfig.defaultFreeTier(apiToken = token)
         assertEquals(token, config.apiToken, "still available at runtime for the Authorization header")

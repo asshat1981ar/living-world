@@ -94,12 +94,16 @@ class HuggingFaceDialogueAdapter(
         }
         val body = transport.postBounded(config, requestJson, headers).getOrElse { return Result.failure(it) }
         val content = try {
-            json.decodeFromString<HfChatResponse>(body).choices.firstOrNull()?.message?.content?.trim()
+            json.decodeFromString<HfChatResponse>(body).choices.firstOrNull()?.message?.content
+                // A reasoning model's private thinking is never dialogue.
+                ?.replace(thinkBlock, "")?.trim()
         } catch (_: Exception) {
             null
         }
         return if (content.isNullOrBlank()) Result.failure(UnreadableReply()) else Result.success(content)
     }
+
+    private val thinkBlock = Regex("(?s)<think>.*?</think>")
 
     private class UnreadableReply : Exception("Hugging Face reply was not a chat completion")
 

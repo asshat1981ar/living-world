@@ -281,6 +281,15 @@ class HuggingFaceAdapterTest {
     }
 
     @Test
+    fun a_thinking_block_is_never_spoken() = runTest {
+        val (npc, loc, belief) = dialogueFixture()
+        val adapter = HuggingFaceDialogueAdapter(transport = MockHfTransport { _, _ ->
+            Result.success(chat("<think>the merchant probably lies</think> Aye, it is cold."))
+        })
+        assertEquals("Aye, it is cold.", adapter.generateDialogueLine(npc, "Any news?", loc.id, listOf(belief), Relationship.NEUTRAL))
+    }
+
+    @Test
     fun the_prompt_offers_only_beliefs_above_the_confidence_floor() {
         val (npc, loc, belief) = dialogueFixture()
         val doubt = Belief(Proposition.PlayerStole(ItemId("gold_ring")), 0.2f, KnowledgeSource.Rumor(NpcId("drunk")), 0.5f, WorldTime(1440L))
