@@ -23,54 +23,75 @@ class StopGateTests(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.state = Path(self.tmp.name, "last-green")
+        self.det_state = Path(self.tmp.name, "last-green-determinism")
         self.calls: list[str] = []
+
+    def decide(self, *args, **kwargs):
+        """decide() with the determinism marker kept inside the temp directory."""
+        kwargs.setdefault("det_state", self.det_state)
+        return sg.decide(*args, **kwargs)
 
     def tearDown(self):
         self.tmp.cleanup()
 
-    def checks(self, inv=OK, tools=OK, kotlin=OK, digest="d1"):
+    def checks(self, inv=OK, tools=OK, kotlin=OK, det=OK, digest="d1"):
         def track(name, value):
             def f():
                 self.calls.append(name)
                 return value
             return f
         return {"invariants": track("inv", inv), "tool tests": track("tools", tools),
-                "kotlin": track("kotlin", kotlin), "digest": lambda: digest}
+                "kotlin": track("kotlin", kotlin), "determinism": track("det", det),
+                "digest": lambda: digest}
 
     def test_all_green_allows_and_records_digest(self):
-        self.assertIsNone(sg.decide({}, True, self.checks(), self.state))
+        self.assertIsNone(self.decide({}, True, self.checks(), self.state))
         self.assertEqual("d1", self.state.read_text().strip())
 
     def test_invariant_failure_blocks_before_anything_else(self):
-        out = sg.decide({}, True, self.checks(inv=FAIL), self.state)
+        out = self.decide({}, True, self.checks(inv=FAIL), self.state)
         self.assertEqual("block", out["decision"])
         self.assertIn("invariants failed", out["reason"])
         self.assertEqual(["inv"], self.calls)
 
     def test_tool_test_failure_blocks_with_output(self):
-        out = sg.decide({}, True, self.checks(tools=FAIL), self.state)
+        out = self.decide({}, True, self.checks(tools=FAIL), self.state)
         self.assertIn("AssertionError: boom", out["reason"])
 
     def test_kotlin_skipped_when_unchanged(self):
         self.state.write_text("d1\n")
-        self.assertIsNone(sg.decide({}, True, self.checks(kotlin=FAIL), self.state))
+        self.assertIsNone(self.decide({}, True, self.checks(kotlin=FAIL), self.state))
         self.assertNotIn("kotlin", self.calls)
 
     def test_kotlin_failure_blocks_and_keeps_old_digest(self):
         self.state.write_text("old\n")
-        out = sg.decide({}, True, self.checks(kotlin=FAIL, digest="new"), self.state)
+        out = self.decide({}, True, self.checks(kotlin=FAIL, digest="new"), self.state)
         self.assertEqual("block", out["decision"])
         self.assertEqual("old", self.state.read_text().strip())
 
     def test_infra_failure_warns_without_blocking(self):
-        out = sg.decide({}, True, self.checks(kotlin=INFRA), self.state)
+        out = self.decide({}, True, self.checks(kotlin=INFRA), self.state)
         self.assertNotIn("decision", out)
         self.assertIn("could not run", out["systemMessage"])
         self.assertFalse(self.state.exists())
 
     def test_remote_tier_can_be_disabled(self):
-        self.assertIsNone(sg.decide({}, False, self.checks(kotlin=FAIL), self.state))
+        self.assertIsNone(self.decide({}, False, self.checks(kotlin=FAIL), self.state))
         self.assertNotIn("kotlin", self.calls)
+
+    def test_pre_push_gate_also_proves_determinism_and_the_goldens(self):
+        self.assertIsNone(self.decide({}, True, self.checks(), self.state))
+        self.assertIn("det", self.calls, "the pre-push gate must run the G8/golden tier")
+
+    def test_a_determinism_failure_blocks_the_push(self):
+        out = self.decide({}, True, self.checks(det=FAIL), self.state)
+        self.assertEqual("block", out["decision"])
+        self.assertIn("determinism", out["reason"])
+
+    def test_a_determinism_infra_failure_only_warns(self):
+        out = self.decide({}, True, self.checks(det=INFRA), self.state)
+        self.assertNotIn("decision", out)
+        self.assertIn("could not run", out["systemMessage"])
 
     def test_gradle_verdict_vs_infra_classification(self):
         orig = sg._run

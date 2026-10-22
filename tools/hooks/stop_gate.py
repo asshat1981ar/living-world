@@ -12,7 +12,9 @@ Full gate tiers (cheapest first; the first failing tier blocks):
   2. tool tests  python3 -m unittest discover tools 'test_*.py'
   3. kotlin      ./gradlew check on awsbox via tools/lw_remote.py, only when a Kotlin/Gradle input changed since the
                  last green run (digest kept in .git/lw-stop-gate/last-green). LW_STOP_GATE_REMOTE=0 skips it.
-
+  4. determinism  the same G8 tier the Stop hook runs: each scenario twice with identical fingerprints, plus the three
+                 checked-in goldens (the Kotlin output must still match tests/golden). It runs when the Kotlin digest
+                 changed, and its verdict is cached in .git/lw-stop-gate/last-green-determinism.
 A failing tier blocks: {"decision": "block", "reason": <what failed + output tail>}; Claude continues and must fix it.
 Claude Code's own cap (8 consecutive continuations) bounds the loop.
 An infrastructure failure (AWS session expired, SSM error, timeout) does NOT block, since it cannot be fixed from inside
@@ -36,6 +38,7 @@ import telemetry  # noqa: E402
 
 REPO = Path(os.environ.get("CLAUDE_PROJECT_DIR") or Path(__file__).resolve().parents[2])
 STATE = REPO / ".git" / "lw-stop-gate" / "last-green"
+DETERMINISM_STATE = REPO / ".git" / "lw-stop-gate" / "last-green-determinism"
 QUICK_STATE = REPO / ".git" / "lw-stop-gate" / "quick.json"
 KOTLIN_INPUTS = (".kt", ".kts", "gradle.properties", "gradle-wrapper.properties")
 MODULES = ("game-core", "game-persistence", "game-ai", "game-ui", "androidApp", "desktopApp")
@@ -87,9 +90,11 @@ def gradle_check(tasks: str = "check") -> Outcome:
     return o
 
 
-def decide(data: dict, run_remote: bool, checks=None, state: Path = STATE) -> dict | None:
+def decide(data: dict, run_remote: bool, checks=None, state: Path = STATE,
+           det_state: Path = DETERMINISM_STATE) -> dict | None:
     """The hook's JSON answer, or None to allow the stop silently. `checks` is injectable for tests."""
-    checks = checks or {"invariants": check_invariants, "tool tests": tool_tests, "kotlin": gradle_check}
+    checks = checks or {"invariants": check_invariants, "tool tests": tool_tests, "kotlin": gradle_check,
+                        "determinism": determinism_check}
     warnings: list[str] = []
     for name in ("invariants", "tool tests"):
         o = checks[name]()
@@ -106,6 +111,17 @@ def decide(data: dict, run_remote: bool, checks=None, state: Path = STATE) -> di
             if o.ok:
                 state.parent.mkdir(parents=True, exist_ok=True)
                 state.write_text(digest + "\n")
+                # The pre-push gate also proves G8 and the goldens: without this tier a kernel change could be
+                # pushed with the goldens no longer matching.
+                det = checks.get("determinism", determinism_check)()
+                if det.ok:
+                    det_state.parent.mkdir(parents=True, exist_ok=True)
+                    det_state.write_text(digest + "\n")
+                elif det.infra:
+                    warnings.append("stop gate: determinism check could not run (not blocking): "
+                                    f"{det.output.strip().splitlines()[-1][-200:]}")
+                else:
+                    return _block("determinism and the goldens (G8)", det.output)
             elif o.infra:
                 last_line = o.output.strip().splitlines()[-1][-300:] if o.output.strip() else "no output"
                 warnings.append(f"stop gate: Kotlin check on awsbox could not run (not blocking): {last_line}")
