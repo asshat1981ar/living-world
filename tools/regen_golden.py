@@ -10,16 +10,23 @@ lw_mirror to match, and commit goldens and mirror together.
 
 from __future__ import annotations
 
-import json
+import importlib.util
 import subprocess
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 # The scenario list lives in tests/golden/scenarios.json (one source for verify, the stop gate, regen, parity and CI).
-_SCENARIOS = json.loads((ROOT / "tests" / "golden" / "scenarios.json").read_text())
-SCENARIOS = {name: "" if name == "default" else f" --scenario={name}" for name in _SCENARIOS["scenarios"]}
-DAYS = _SCENARIOS["days"]
+def _load_scenarios(root):
+    """The strict reader of tests/golden/scenarios.json (tools/scenarios_config.py), loaded by path because -I hides this directory."""
+    spec = importlib.util.spec_from_file_location("scenarios_config", root / "tools" / "scenarios_config.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.load(root / "tests" / "golden" / "scenarios.json")
+
+
+DAYS, _NAMES = _load_scenarios(ROOT)
+SCENARIOS = {name: "" if name == "default" else f" --scenario={name}" for name in _NAMES}
 
 
 def remote(*args: str) -> None:

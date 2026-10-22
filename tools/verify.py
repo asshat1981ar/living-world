@@ -25,9 +25,16 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_TASKS = "check -x lint -x lintDebug -x lintRelease --continue"
 # The scenario list lives in tests/golden/scenarios.json (one source for verify, the stop gate, regen, parity and CI).
-_SCENARIOS = json.loads((ROOT / "tests" / "golden" / "scenarios.json").read_text())
-DAYS = _SCENARIOS["days"]
-_FLAGS = {name: "" if name == "default" else f" --scenario={name}" for name in _SCENARIOS["scenarios"]}
+def _load_scenarios(root):
+    """The strict reader of tests/golden/scenarios.json (tools/scenarios_config.py), loaded by path because -I hides this directory."""
+    spec = importlib.util.spec_from_file_location("scenarios_config", root / "tools" / "scenarios_config.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.load(root / "tests" / "golden" / "scenarios.json")
+
+
+DAYS, _NAMES = _load_scenarios(ROOT)
+_FLAGS = {name: "" if name == "default" else f" --scenario={name}" for name in _NAMES}
 GOLDENS = {name: f"{DAYS} 0{flag}" for name, flag in _FLAGS.items()}
 
 

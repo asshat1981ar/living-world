@@ -38,6 +38,30 @@ def _load(name, path):
     return module
 
 
+# Files every reader must refuse, whatever it is: shared by the jq/shell validator and the Python loader.
+BAD_CONFIGS = {
+    "empty list": '{"days": 10, "scenarios": []}',
+    "no scenarios key": '{"days": 10}',
+    "scenarios is a string": '{"days": 10, "scenarios": "default"}',
+    "a number among the names": '{"days": 10, "scenarios": ["default", 5]}',
+    "a name with a space": '{"days": 10, "scenarios": ["a b"]}',
+    "a name that is a shell command": '{"days": 10, "scenarios": ["x;touch pwned"]}',
+    "an upper-case name": '{"days": 10, "scenarios": ["Default"]}',
+    "a name with an embedded newline": '{"days": 10, "scenarios": ["default\\n"]}',
+    "a name with a trailing newline plus another": '{"days": 10, "scenarios": ["a\\nb"]}',
+    "a duplicated name": '{"days": 10, "scenarios": ["default", "default"]}',
+    "days is a string": '{"days": "10", "scenarios": ["default"]}',
+    "days is fractional": '{"days": 10.5, "scenarios": ["default"]}',
+    "days is a float spelled 10.0": '{"days": 10.0, "scenarios": ["default"]}',
+    "days is true": '{"days": true, "scenarios": ["default"]}',
+    "days is zero": '{"days": 0, "scenarios": ["default"]}',
+    "days is negative": '{"days": -3, "scenarios": ["default"]}',
+    "no days": '{"scenarios": ["default"]}',
+    "not json": "not json",
+    "empty file": "",
+}
+
+
 class ScenarioListTests(unittest.TestCase):
     def test_the_list_is_sane(self):
         self.assertIn("default", NAMES)
@@ -112,22 +136,7 @@ class ListScenariosScriptTests(unittest.TestCase):
         self.assertEqual([str(DAYS)] + NAMES, run.stdout.split())
 
     def test_every_kind_of_bad_file_fails_and_prints_nothing(self):
-        bad = {
-            "empty list": '{"days": 10, "scenarios": []}',
-            "no scenarios key": '{"days": 10}',
-            "scenarios is a string": '{"days": 10, "scenarios": "default"}',
-            "a number among the names": '{"days": 10, "scenarios": ["default", 5]}',
-            "a name with a space": '{"days": 10, "scenarios": ["a b"]}',
-            "a name that is a shell command": '{"days": 10, "scenarios": ["x;touch pwned"]}',
-            "an upper-case name": '{"days": 10, "scenarios": ["Default"]}',
-            "days is a string": '{"days": "10", "scenarios": ["default"]}',
-            "days is fractional": '{"days": 10.5, "scenarios": ["default"]}',
-            "days is zero": '{"days": 0, "scenarios": ["default"]}',
-            "no days": '{"scenarios": ["default"]}',
-            "not json": "not json",
-            "empty file": "",
-        }
-        for label, content in bad.items():
+        for label, content in BAD_CONFIGS.items():
             with self.subTest(label):
                 run = self.run_script(content)
                 self.assertNotEqual(0, run.returncode, f"accepted: {label}")
@@ -142,6 +151,80 @@ class ListScenariosScriptTests(unittest.TestCase):
         workflow = (ROOT / ".github/workflows/ci.yml").read_text()
         self.assertIn("config=$(bash tools/list_scenarios.sh tests/golden/scenarios.json)", workflow)
         self.assertIn("set -euo pipefail", workflow)
+
+
+class StrictLoaderTests(unittest.TestCase):
+    """tools/scenarios_config.py is the one Python reader: it refuses exactly what the shell validator refuses."""
+
+    def test_the_real_file_loads(self):
+        loader = _load("scenarios_config", ROOT / "tools" / "scenarios_config.py")
+        self.assertEqual((DAYS, NAMES), loader.load(GOLDEN / "scenarios.json"))
+
+    def test_every_kind_of_bad_file_is_refused(self):
+        loader = _load("scenarios_config", ROOT / "tools" / "scenarios_config.py")
+        for label, content in BAD_CONFIGS.items():
+            with self.subTest(label), tempfile.TemporaryDirectory() as d:
+                f = Path(d) / "scenarios.json"
+                f.write_text(content)
+                with self.assertRaises(ValueError, msg=f"accepted: {label}"):
+                    loader.load(f)
+
+    def test_a_missing_file_is_refused(self):
+        loader = _load("scenarios_config", ROOT / "tools" / "scenarios_config.py")
+        with self.assertRaises(ValueError):
+            loader.load("/nonexistent/scenarios.json")
+
+    def test_every_consumer_reads_through_it(self):
+        for tool in ("verify.py", "regen_golden.py", "mirror_parity.py", "hooks/stop_gate.py"):
+            self.assertIn("scenarios_config", (ROOT / "tools" / tool).read_text(), f"{tool} has its own reader")
+
+
+class GoldenSetTests(unittest.TestCase):
+    """mirror_parity must see exactly the configured goldens, at the configured length."""
+
+    def setUp(self):
+        sys.path.insert(0, str(ROOT / "tools"))
+        try:
+            import mirror_parity
+        finally:
+            sys.path.pop(0)
+        self.check = mirror_parity.golden_set_problem
+
+    def test_exact_sets_pass(self):
+        both = {("default", 10), ("feud", 10)}
+        self.assertIsNone(self.check(["default", "feud"], 10, both, both))
+
+    def test_a_scenario_missing_from_both_sets_is_a_problem(self):
+        only = {("default", 10)}
+        self.assertIsNotNone(self.check(["default", "feud"], 10, only, only))
+
+    def test_a_golden_of_another_length_is_a_problem(self):
+        self.assertIsNotNone(self.check(["default"], 10, {("default", 7)}, {("default", 7)}))
+
+    def test_an_extra_unlisted_golden_is_a_problem(self):
+        got = {("default", 10), ("ghost", 10)}
+        self.assertIsNotNone(self.check(["default"], 10, got, got))
+
+    def test_the_filter_narrows_the_expectation(self):
+        one = {("feud", 10)}
+        self.assertIsNone(self.check(["default", "feud"], 10, one, one, only="feud"))
+
+    def test_events_without_state_is_a_problem(self):
+        self.assertIsNotNone(self.check(["default"], 10, {("default", 10)}, set()))
+
+
+class CiDeterminismTests(unittest.TestCase):
+    """CI must repeat the runs the stop gate repeats (G8), with the same arguments."""
+
+    def test_ci_runs_the_stop_gates_determinism_scenarios_twice(self):
+        stop_gate = _load("stop_gate", ROOT / "tools" / "hooks" / "stop_gate.py")
+        workflow = (ROOT / ".github/workflows/ci.yml").read_text()
+        self.assertIn("Determinism (G8)", workflow)
+        for _, args in stop_gate.DETERMINISM_SCENARIOS:
+            spec = args.format(days=stop_gate.DETERMINISM_DAYS)
+            self.assertIn(f'"{spec}"', workflow, f"CI does not run {spec!r} for the determinism check")
+        self.assertIn("first=$(", workflow)
+        self.assertIn("second=$(", workflow)
 
 
 class StopGateFailsClosedTests(unittest.TestCase):

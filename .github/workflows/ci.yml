@@ -86,6 +86,19 @@ jobs:
             fi
             echo "golden $s OK"
           done
+      - name: Determinism (G8) - the same run twice must give the same fingerprint
+        run: |
+          set -euo pipefail
+          # The same two runs as the stop gate's determinism tier (tools/hooks/stop_gate.py DETERMINISM_SCENARIOS);
+          # tools/test_scenarios.py checks that the arguments agree. Separate JVMs, because that is what G8 is about.
+          for spec in "30 0" "15 0 --scenario=turmoil"; do
+            first=$(./gradlew :desktopApp:run --no-daemon --console=plain -q --args="$spec" | grep '^Fingerprint' || true)
+            second=$(./gradlew :desktopApp:run --no-daemon --console=plain -q --args="$spec" | grep '^Fingerprint' || true)
+            if [ -z "$first" ] || [ "$first" != "$second" ]; then
+              echo "G8: '$spec' gave '$first' then '$second'"; exit 1
+            fi
+            echo "deterministic: $spec -> $first"
+          done
       - name: Build the debug APK
         run: ./gradlew :androidApp:assembleDebug --no-daemon --console=plain
       - name: Upload the debug APK

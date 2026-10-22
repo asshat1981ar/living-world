@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import argparse
 import gzip
-import json
+import importlib.util
 import re
 import sys
 from pathlib import Path
@@ -30,12 +30,28 @@ def goldens(scenario: str | None):
             yield m.group(1), int(m.group(2)), path
 
 
+def _load_scenarios(root):
+    """The strict reader of tests/golden/scenarios.json (tools/scenarios_config.py), loaded by path because -I hides this directory."""
+    spec = importlib.util.spec_from_file_location("scenarios_config", root / "tools" / "scenarios_config.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.load(root / "tests" / "golden" / "scenarios.json")
+
+
 def state_goldens(scenario: str | None):
     """The state dumps (CanonicalStateDump): tests/golden/<scenario>-<days>d.state.txt.gz."""
     for path in sorted(GOLDEN.glob("*-*d.state.txt.gz")):
         m = re.fullmatch(r"(\w+)-(\d+)d\.state\.txt\.gz", path.name)
         if m and (scenario is None or m.group(1) == scenario):
             yield m.group(1), int(m.group(2)), path
+
+
+def golden_set_problem(names, days, events, states, only=None):
+    """None when the event and state goldens are exactly the configured scenarios at the configured length."""
+    expected = {(n, days) for n in names if only in (None, n)}
+    if events == expected and states == expected:
+        return None
+    return f"configured {sorted(expected)}, event goldens {sorted(events)}, state goldens {sorted(states)}"
 
 
 def compare(expected: list[str], actual: list[str], context: int) -> str | None:
@@ -56,7 +72,8 @@ def compare(expected: list[str], actual: list[str], context: int) -> str | None:
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--scenario", choices=json.loads((GOLDEN / "scenarios.json").read_text())["scenarios"])
+    days, names = _load_scenarios(ROOT)
+    ap.add_argument("--scenario", choices=names)
     ap.add_argument("--context", type=int, default=2)
     args = ap.parse_args(argv)
 
@@ -69,11 +86,13 @@ def main(argv=None) -> int:
 
     failures = 0
     # Every scenario needs both goldens: a deleted or never-committed state golden must not read as a pass.
-    events = {(s, d) for s, d, _ in goldens(args.scenario)}
-    states = {(s, d) for s, d, _ in state_goldens(args.scenario)}
-    if not events or events != states:
+    # ...and exactly the configured ones (tests/golden/scenarios.json) at the configured length: a scenario missing
+    # from both sets, or a golden of another length, must not read as a pass.
+    problem = golden_set_problem(names, days, {(s, d) for s, d, _ in goldens(args.scenario)},
+                                 {(s, d) for s, d, _ in state_goldens(args.scenario)}, args.scenario)
+    if problem:
         failures += 1
-        print(f"FAIL golden set: events {sorted(events)} vs state {sorted(states)} (each scenario needs both, none may be missing)")
+        print(f"FAIL golden set: {problem}")
     for scenario, days, path in goldens(args.scenario):
         expected = gzip.open(path, "rt").read().splitlines()
         actual = runner.run(scenario, days)

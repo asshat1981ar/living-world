@@ -173,13 +173,13 @@ DETERMINISM_SCENARIOS = (("default", "{days} 0"), ("turmoil", "15 0 --scenario=t
 # this gate and the pre-push gate (bash_guard imports this module) would silently let everything through.
 SCENARIOS_FILE = Path(__file__).resolve().parents[2] / "tests" / "golden" / "scenarios.json"
 try:
-    _SCENARIOS = json.loads(SCENARIOS_FILE.read_text())
-    _DAYS = int(_SCENARIOS["days"])
-    _NAMES = [str(n) for n in _SCENARIOS["scenarios"]]
-    if _DAYS <= 0 or not _NAMES:
-        raise ValueError("days must be positive and at least one scenario is needed")
+    import importlib.util as _ilu
+    _spec = _ilu.spec_from_file_location("scenarios_config", SCENARIOS_FILE.parents[2] / "tools" / "scenarios_config.py")
+    _cfg = _ilu.module_from_spec(_spec)
+    _spec.loader.exec_module(_cfg)
+    _DAYS, _NAMES = _cfg.load(SCENARIOS_FILE)  # the strict reader shared with verify, regen, mirror_parity
     SCENARIOS_ERROR = None
-except (OSError, ValueError, KeyError, TypeError) as _e:
+except (OSError, ValueError, KeyError, TypeError, AttributeError, ImportError) as _e:
     _DAYS, _NAMES, SCENARIOS_ERROR = 0, [], f"{SCENARIOS_FILE} is unreadable or invalid: {_e}"
 GOLDEN_RUNS = tuple(
     (f"golden {name}", f"{_DAYS} 0{'' if name == 'default' else ' --scenario=' + name} "
