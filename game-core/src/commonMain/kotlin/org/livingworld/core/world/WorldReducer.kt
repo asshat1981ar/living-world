@@ -53,6 +53,7 @@ class DefaultWorldReducer : WorldReducer {
             is GameEvent.EntitiesMet -> applyEntitiesMet(baseState, event)
             is GameEvent.NpcAttacked -> applyNpcAttacked(baseState, event)
             is GameEvent.NpcRoutineCompleted -> applyRoutineCompleted(baseState, event)
+            is GameEvent.PlayerMoved -> applyPlayerMoved(baseState, event)
             is GameEvent.OpportunityDispatched -> applyOpportunityDispatched(baseState, event)
         }
     }
@@ -574,6 +575,10 @@ class DefaultWorldReducer : WorldReducer {
             relationships = updatedRels
         )
     }
+
+    /** The player moves: the world keeps the player where they are now, in the ledger. */
+    private fun applyPlayerMoved(state: WorldState, event: GameEvent.PlayerMoved): WorldState =
+        state.copy(player = state.player.copy(currentLocation = event.to))
 
     private fun applyRoutineCompleted(
         state: WorldState,

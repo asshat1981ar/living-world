@@ -342,6 +342,19 @@ sealed interface GameEvent {
     }
 
     @Serializable
+    data class PlayerMoved(
+        override val id: EventId,
+        override val time: WorldTime,
+        val from: LocationId,
+        val to: LocationId,
+        override val witnesses: List<NpcId> = emptyList(),
+        override val causalEventId: EventId? = null
+    ) : GameEvent {
+        override val actors: List<EntityId> get() = listOf(EntityId.Player("player"))
+        override val summary: String get() = "The player walked from ${from.value} to ${to.value}"
+    }
+
+    @Serializable
     data class NpcRoutineCompleted(
         override val id: EventId,
         override val time: WorldTime,

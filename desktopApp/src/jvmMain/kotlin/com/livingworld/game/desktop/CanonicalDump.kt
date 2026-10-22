@@ -42,6 +42,7 @@ object CanonicalDump {
             is GameEvent.ShopInherited -> listOf(e.heir.value, e.predecessor.value, e.shopName)
             is GameEvent.FactionHostilityDeclared -> listOf(e.declaringFaction.value, e.targetFaction.value, e.reason)
             is GameEvent.NpcRoutineCompleted -> listOf(e.npc.value, e.routineType, e.location.value, f4(e.deltaHealth), f4(e.deltaCoins), f4(e.deltaFood), f4(e.deltaFear))
+            is GameEvent.PlayerMoved -> listOf(e.from.value, e.to.value)
             is GameEvent.OpportunityDispatched -> listOf(e.opportunityId, e.opportunityType, e.title, e.location.value, f4(e.urgency), e.actors.joinToString(",") { it.identifier })
         }
         val type = e::class.simpleName

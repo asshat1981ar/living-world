@@ -41,6 +41,8 @@ def line(e):
         body = [e.heir, e.predecessor, e.shopName]
     elif t is ev.FactionHostilityDeclared:
         body = [e.declaringFaction, e.targetFaction, e.reason]
+    elif t is ev.PlayerMoved:
+        body = [e.from_, e.to]
     elif t is ev.NpcRoutineCompleted:
         body = [e.npc, e.routineType, e.location, f4(e.deltaHealth), f4(e.deltaCoins), f4(e.deltaFood), f4(e.deltaFear)]
     elif t is ev.OpportunityDispatched:

@@ -75,6 +75,7 @@ object WorldInvariants {
         is GameEvent.NpcRoutineCompleted -> listOf(event.npc)
         is GameEvent.AiAdviceRecorded -> listOf(event.npc)
         is GameEvent.OpportunityDispatched -> event.actors.filterIsInstance<EntityId.Npc>().map { it.id }
+        is GameEvent.PlayerMoved -> emptyList()
         is GameEvent.FactionHostilityDeclared -> emptyList()
     } + event.witnesses
 }
