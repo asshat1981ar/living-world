@@ -17,33 +17,83 @@ every add" → C7.2.
 
 ## Queue
 
-- [ ] **Push and let CI pass** `[ask]` S. Local commits are not on GitHub yet; the on-device AI commits have not been
-      through CI.
-- [ ] **Smoke-test on-device AI on a real phone** `[human]` M. Never run on a device (CLAUDE.md, On-device AI). CI now
-      uploads the debug APK (`living-world-debug-apk` artifact): `gh run download -n living-world-debug-apk`. Check:
-      the AI tab, the download, the speed test, ✨ lines, and that killing the AI process turns the AI off.
+Re-seeded 2026-10-22 from `docs/refactor-plan-2026-10-22.md` §6 (W0–W2 are done; see §15 of the plan for the progress
+log and the commits). The first items need no approval and no golden re-record.
+
+**W2 leftovers**
+
+- [ ] **Grounding v2** M. `GroundingCheck` only treats capitalised or numeric tokens as claims, so an invented
+      lowercase sentence passes (`docs/reports/adversarial-2026-10-22.md` §2.3.4). Needs a curated small-talk
+      vocabulary, plus a test that "alden poisoned the well" is rejected without facts.
+- [ ] **`EventValidator` for entity existence** M. The reducer's pre-checks are inline; make them one reusable object and
+      cover "every event actor, owner and victim exists" (plan C1.1/C2.11).
+- [ ] **A separate state dump (dump v2)** M. The canonical dump still omits belief content, items, traits, the player,
+      the quests and the places, so changes there stay invisible to the goldens (the digest sees them now, the dump does
+      not). Write it as its own file so the goldens need no re-record.
+- [ ] **A golden scenario for uncovered kernel paths** M. Allegiance, flee, faction war, NPC-to-NPC trades and
+      `EntitiesMet` are still unexercised by any golden, and the mirror ports of those paths are unverified. Adds a
+      fourth scenario (a new golden file, not a re-record).
+**W3 — test depth**
+
+- [ ] **Replay and soak compare the whole state** M. `ReplayDeterminismTest` compares only `time` and `npcs`
+      (`ReplayDeterminismTest.kt:26`–`:45`); extend it to factions, relationships, economy, quests, the player and the
+      ledger.
+- [ ] **Conservation and append-only tests over 30 days** M. `CharacterizationTest` covers coins and the ledger order;
+      add item conservation and a "the ledger only grows" test.
+
+**W4 — one world in the app** (no golden change)
+
 - [ ] **One shared world in the Android app** L. `MainActivity` hands one `marketVillage()` to four view models that
       each keep a private copy (`InventoryViewModel.kt` `private var world`); nothing ticks the simulation or saves
-      (`SaveManager` is only used by desktopApp); state is lost on Activity recreation. No golden change.
+      (`SaveManager` is only used by desktopApp); state is lost on Activity recreation. Introduce a `WorldStore`.
+- [ ] **The inventory comes from the world** M. `InventoryViewModel` starts from a hardcoded `mapOf("bread" to 3, …)`
+      instead of `world.player.inventory`, and the catalog is not refreshed after a trade.
+- [ ] **Player travel is an event** M. `MapViewModel.travelToSelected` mutates the state with `world.copy(player = …)`
+      and no `GameEvent`, so a replay cannot reproduce the player's location.
+- [ ] **A duel can be lost** M. The duel is one-sided (the opponent never attacks) and the player has no health.
+
+**W5 — AI, Android and shipping** (`[ask]` for the dependency part)
+
+- [ ] **Verify the model digest on every load** M. `ModelDownloader.isInstalled` checks the size only
+      (`AiSetup.kt:106`); `AndroidModelAssetManager.verifyChecksum` exists but is used only by a test.
+- [ ] **Keep the model out of backups** S. `android:allowBackup="true"` with no rules covers the 345 MB model directory.
+- [ ] **Validate the redirect target** S. `AiController.openHttps` follows redirects without re-checking the host.
+- [ ] **Fail a pending request on release** S. `OnDeviceChatModel.release` leaves the request hanging for 120 s.
 - [ ] **game-ai cleanups** S. `DeterministicAiFallback` adds the same goal bonus to every candidate and treats any text
-      containing "fallback" as a fallback (`AiReasoningPort.kt`); `extractLastJsonObject` / `isFallbackProposal` have
-      no callers since the Hugging Face code was removed; `game-ui` declares a `game-ai` dependency only its tests use.
-      Also fix the "half-life of 14 days" comment in `Memory.kt` (it is 20). No golden change.
-- [ ] **A golden scenario for uncovered kernel paths** M. `lw_mirror` ports of ChangeAllegiance, Flee/survival,
-      faction war, NPC-to-NPC trades and EntitiesMet are unverified (CLAUDE.md, Python kernel mirror). Adds a fourth
-      golden; may expose mirror bugs. Lowers the risk of the P5 re-record.
-- [ ] **P5 gameplay realism** `[ask]` `golden` L. Starvation is impossible (food floors at 0.5 in `WorldReducer`),
-      GREEDY merchants re-price constantly, NPCs work through the night and three of them drain to 0 coins, every death
-      becomes an unresolved homicide. Fold in the clearest `current_behaviour_*` pins (theft from the player takes
-      nothing; a second kill repeats the cascade). One golden re-record + mirror port.
+      containing "fallback" as a fallback (`AiReasoningPort.kt`); `extractLastJsonObject` / `isFallbackProposal` have no
+      callers; `game-ui` declares a `game-ai` dependency only its tests use. Also fix the "half-life of 14 days" comment
+      in `Memory.kt` (it is 20).
 - [ ] **Toolchain** `[ask]` M. Gradle 8.8 (deprecated by Kotlin 2.4's plugin) and AGP 8.5.2 (its lint prints harmless
-      "incompatible version" lines). Dependency changes need `LW_ALLOW_DEPS=1` and the user's OK.
+      "incompatible version" lines). Also `targetSdk 34` is below Play's API-36 requirement and the launcher icon is
+      still the system placeholder. Dependency changes need `LW_ALLOW_DEPS=1` and the user's OK.
+- [ ] **Smoke-test the app on a real phone** `[human]` M. The AI has never run on a device (CLAUDE.md). CI uploads the
+      debug APK (`living-world-debug-apk`): `gh run download -n living-world-debug-apk`. Check the AI tab, the download,
+      the speed test, ✨ lines, and that killing the AI process turns the AI off.
+
+**W6/W7 — realism and performance** (`[ask]` for W6)
+
+- [ ] **P5 gameplay realism** `[ask]` `golden` L. NPCs work through the night, three of them drain to 0 coins by day 90
+      and 15 by day 365, prices are repriced ~24 times a day, and a completed investigation leaves the problem open.
+      One golden re-record + mirror port.
 - [ ] **MemoryStore copies its list on every add** S. O(n²) over long runs (`Memory.kt` `add`); must keep the 90-day
       fingerprint identical. Low priority until profiled (G10).
+- [ ] **Block-structured EventLedger** M. `EventLedger.append` copies the whole history on every event: 45,615 events in
+      1.3 s but 184,726 in 42 s. Batch or chunk it, and measure on an emulator.
+- [ ] **Compact saves** M. A 90-day world is a ~10 MB pretty-printed JSON; measure save/load and make it compact.
 
 ## Done
 
+- [x] **Push and let CI pass** `[ask]` S. PR #1 merged into `main` (`c152626`); CI now runs the goldens and the dependency
+      isolation gate, and the `main` run is green.
+- [x] W0 — the gate: `verify.py --local`, the pre-push determinism tier, the extra invariant rules, the wider secret
+      guard, the token-free publish script, the Gradle checksum, the characterisation tests, the docs truth pass.
+- [x] W1 — the kernel contract: idempotent events, the dead do not act, `WorldInvariants`, the hardened save gate, the
+      90-day fingerprint as a test.
+- [x] W2a — typed entity keys, the full-state digest, save schema v4, knowledge-scoped AI snapshots.
+- [x] W2b — the closed economy (a trade needs a living seller that holds the item, a theft moves the item), quest
+      issuers that know, causes that point backwards, the mirror port and one golden re-record.
 - [x] P9 AI advice recorded as events, runs repeat exactly (`11ee900`).
 - [x] P6 remainder: WorldTime, Memory, Faction, inspector tests (`21e2c1c`).
 - [x] Repeat-ask AI line fix (`6e266a5`).
-- [x] Dev loop: `tools/verify.py` (one remote call, BLOCKED on an expired session); CI uploads the debug APK.
+- [x] Dev loop: `tools/verify.py` (one remote call, BLOCKED on an expired session; `--local` needs no session); CI uploads
+      the debug APK.
