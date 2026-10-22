@@ -10,7 +10,8 @@ synthesis in which the claims I rely on were re-checked against the code. Estima
 
 ## 1. Evidence base
 
-Measured (from `.git/lw-telemetry/events.jsonl`, 127 of 168 rows carry a duration):
+Measured (from `.git/lw-telemetry/events.jsonl`, snapshot of 168 rows taken about 10:40 UTC on 2026-10-22, 127 of them with
+a duration; the live log keeps growing, 173 rows when re-read):
 
 | Fact | Number |
 |---|---|
@@ -29,7 +30,11 @@ Verified in the code or on disk while writing this (so they are facts, not subag
   runner depends on: `game-persistence`, `game-ai` and `game-ui` (their code), the `build` group (root `*.kts`,
   `gradle.properties`, wrapper: a toolchain bump does not re-run G8 at Stop), and `tests/golden/**` plus
   `scenarios.json` (`KOTLIN_INPUTS` only lists `.kt/.kts/gradle` files, so re-recording a golden or editing the scenario
-  list triggers nothing at Stop). Those are only caught by the full pre-push gate.
+  list triggers nothing at Stop). **The pre-push gate has the same blind spot**: `bash_guard` calls `stop_gate.decide({})`, which
+  uses the same `kotlin_digest()`/`KOTLIN_INPUTS` filter and skips the Kotlin and determinism tiers when the digest equals
+  the last green one. So a re-recorded golden or an edited `scenarios.json` is checked only Python-side before a push
+  (mirror parity, `test_scenarios`); its Kotlin-versus-golden comparison first runs in CI. `CLAUDE.md`'s sentence that the
+  pre-push gate "still runs the full `check`" is therefore inaccurate (A4 fixes the text).
   (`tools/hooks/stop_gate.py`: `DETERMINISM_MODULES`, `module_of`, `KOTLIN_INPUTS`, `module_digests`.)
   Note: the 769 in `TESTCOUNT` is a JUnit XML count over all modules and targets, not the 264 `@Test` functions in the
   repository; it may include parameterised cases and stale result files, so treat it as a trend line, not a census.
@@ -56,20 +61,21 @@ Ranking is value per effort. "Strictness" says what each change does to what the
 |---|---|---|---|---|
 | A1 | **Telemetry completeness** (additive fields only): every outcome records `s`, a short `reason`, `sha`; add `telemetry.py stale` (a guard with zero rows is flagged) | all 41 `invariant_guard` rows lack a duration, 21 warns unexplained | S | adds |
 | A3 | **Backlog-vs-git check** (`tools/check_backlog.py`, advisory first): flag an unchecked item whose title/hash/id appears in a recent commit subject or is marked done in `docs/refactor-plan-2026-10-22.md` §15 | 2 of the first 3 backlog items were already done | S | adds |
-| A4 | **lw-sim `verify` returns structured counts** (parse `TESTCOUNT`; it also drops `--local`'s three-token `PASS  gradle check` line), fix its docstring (`lw_sim_server.py:141` still names three goldens, there are five) and the SDK-34 text in the `awsbox-build` skill and CI | verified above | S | adds |
+| A4 | **lw-sim `verify` returns structured counts** (parse `TESTCOUNT`; it also drops `--local`'s three-token `PASS  gradle check` line), fix its docstring (`lw_sim_server.py:141` still names three goldens, there are five), the SDK-34 text in the `awsbox-build` skill, and the `CLAUDE.md` sentence about the pre-push gate (it runs `decide()`, which skips an unchanged digest, not always the full `check`) | verified above | S | adds (docs and a parser) |
 | A5 | **Guard canary tests**: feed each real hook a synthetic bad input (a banned import under *both* path spellings, `git add -A` with a secret-like file) and assert it blocks; run in the tool tests | `invariant_guard` was a silent no-op for its whole life and was found by accident | M | adds |
 | A9 | **Property/mutation-replay tests for the reducer** (seeded, real ledgers mutated: coins and items conserved, idempotent events, replay equals live digest); no new dependency | the adversarial pass broke 13 of 14 probes; NPC trade will touch these paths | S–M | adds |
 | A10 | **Chronicle/census report** over a long run (deaths by cause, wars, defections, rumors, trades by pair type, coin distribution) and a census diff for golden re-records | the risk register wants a census diff; none exists; emergent politics is only visible in dump lines | S | report, never blocks |
-| A11 | **Restore `chmod 600`** on the observations file and set a size/rotation rule | verified mode 644, secret-bearing | S | privacy |
+| A11 | **Protect the observations file**: `chmod 600 /root/.local/share/ecc-homunculus/projects/af6b49ce08e5/observations.jsonl` and `chmod 700 /root/.local/share/ecc-homunculus`; proposed rotation: keep the last 2,000 lines once it passes 1 MiB (a small script with a test on a temp file; the threshold is a proposal for you to confirm). Verify: `stat -c %a` prints 600 and 700, and the file is outside any synced or backed-up directory | file is 3.5 MB, mode 644, holds raw tool input/output | S | privacy |
 | A12 | **Loop skills**: feature-loop gets a pre-flight "already done?" step and a negative-check step for any new gate; sprint-loop calls a generated restart brief; rule "one gated first-touch edit per batch" (verify: dry-run the loops on a fixture backlog containing one already-done item) | the three repeated frictions | S | adds |
 
 ### Tier B — needs your approval (changes a guard, hook, plugin scope, build file or dependency)
 | # | Change | Why it needs you |
 |---|---|---|
-| B13 | **Narrow and widen the determinism trigger** (was A2): ignore test source sets; add `game-persistence`/`game-ai`/`game-ui` code, the `build` group, `tests/golden/**` and `scenarios.json` to what re-runs G8 and the goldens at Stop. Write its negative test together with the A5 canary | changes a guard's trigger. It **tightens** (closes three real gaps) and speeds up (the lens estimates ~40 min over the recorded history) |
+| B13 | **Narrow and widen the determinism trigger** (was A2): ignore test source sets; add `game-persistence`/`game-ai`/`game-ui` code, the `build` group, `tests/golden/**` and `scenarios.json` to what re-runs G8 and the goldens at Stop. Write its negative test together with the A5 canary | changes a guard's trigger. It **tightens** by closing three real gaps and **loosens** one thing, stated plainly: after a test-only edit, Stop would no longer re-run the G8 repeat and the goldens (they cannot change from a test-only edit, because tests are not on the runner's classpath, and the `jvmTest` tiers still run). It must change **both** paths, because the stop gate and the pre-push gate share `kotlin_digest`/`determinism_digest` and `KOTLIN_INPUTS`. Estimated saving ~40 min over the recorded history (a lens estimate) |
 | B14 | **Fail-closed wrapper** (was A6): any exception in a *blocking* decision exits 2 and records `crash`. **Scope it**: `bash_guard` runs before every Bash call, so a bug there would block all Bash use. Fail closed only for the push and secret decisions; every other Bash command fails open with a visible warning. Advisory hooks never fail closed | changes exit behaviour of guards; the brick-the-session risk must be accepted explicitly |
 | B15 | **Local checks in parallel with the remote run, and test the AWS session first** (was A7) | changes the order and timing inside `verify.py` and the stop gate; same checks, estimated 40–55 s per verify |
 | B16 | **Preflight under 5 s** (was A8): the two `aws` calls concurrently with short timeouts, cache the result for ~60 s, always print one line | changes a SessionStart hook's timing; advisory, no protection lost |
+| B17 | **CI: replace the stale Android SDK 34 install** (`.github/workflows/ci.yml`, the `sdkmanager … android-34` step) with SDK 36 or none (CLAUDE.md says AGP downloads the missing platform) | a build-workflow change; only a real CI run can validate it (was part of A4) |
 | B1 | **GateGuard exemption** for the repo's own source (script already given; the agent cannot edit its own settings) | guard configuration |
 | B2 | **One remote script for all scenario runs**: compile once, print the runtime classpath, loop `java -cp …` (separate JVMs, so G8 still means something) for every golden and determinism repeat | changes how the gates run; the lens estimates 4–5 min saved on every stop that triggers the tier, ~15–30 min/day (an estimate; measure first with `--profile`) |
 | B3 | **Stop gate tiers**: lint out of the quick tier; `desktopApp`-only edits map to compile + determinism; the slow tier moves to push | **loosens Stop** (a G8 break or a lint failure is then caught at push, not at the turn end). Do after B13/B2 shrink the slow tier; the lens itself ranks it last |
@@ -92,7 +98,7 @@ Ranking is value per effort. "Strictness" says what each change does to what the
    before/after census and economy curve.
 3. **Retire the stale `ck_2026-10-18` memory entry** (its "next steps" are out of date).
 4. **Pushing.** `origin/main` is at `a70304b`, the starvation commit that was later reverted and redone; local `main` and
-   `cline/6cjpf2h3` are `4270a29`, 23 commits ahead of it, so a push is a fast-forward. Nothing after `3b7be85` has been
+   the working branch are about two dozen commits ahead of it, so a push is a fast-forward (`git log origin/main..HEAD`). Nothing after `3b7be85` has been
    pushed. CI only runs on pushes to `main`, on pull requests and on manual dispatch.
 
 Five hand-written instincts worth saving (each atomic, evidence-backed):
