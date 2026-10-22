@@ -697,10 +697,25 @@ W0 can be prepared in parallel with W1 but should land first, because it is what
 (45,615 events, ~1.3 s) and only its fingerprint moved, `python3 -I tools/verify.py --local` is green, and the Python
 mirror still matches the goldens (the mirror keys relationships by kind as well).
 
-**Still to come in W2b** (the behaviour half, one golden re-record at the end): C2.2 trade rules (stock, alive, no
-mint), C2.3 theft moves the item, C2.4 quest issuers and problem lifecycle, C2.5 causes point backwards, C2.10
-grounding v2, C2.11 entity-existence checks, C2.12 the fourth scenario, the dump v2 format, the mirror port and the
-re-record.
+### W2b — the behaviour half (one golden re-record)
+
+| Item | State | Commit |
+|---|---|---|
+| C2.2 trade rules | **done** — a trade needs two parties that exist, a living seller that holds the item and a buyer that can pay; the merchants keep stock (3 bread, 6 goods) | `55d9ee5` |
+| C2.3 theft moves the item | **done** — the item goes from the owner's hands to the thief's (player victim loses it, player thief gains it); the Turmoil scenario gives the blacksmith the blade | `55d9ee5` |
+| C2.4 quest issuers and problem lifecycle | **done** — only a living NPC that *knows* asks for an investigation (the guard captain no longer issues a quest for his own murder, a murder nobody saw produces no quest), one problem per victim, and a settled investigation stops being an open problem | `55d9ee5` |
+| C2.5 causes point backwards | **done** — `CausalLinks.originOf` is bounded by the belief's time | `f68e250` |
+| mirror port + one re-record | **done** — the mirror follows every rule and the three goldens were re-recorded once | `c15f053` |
+
+**W2b exit gate (verified 2026-10-22):** `python3 -I tools/verify.py --local` is green (invariants, 98 tool tests, Gradle
+check, all three goldens), the Python mirror matches the new goldens byte for byte, and the 90-day default run is
+unchanged (45,615 events, ~1.3 s) with the fingerprint `7ae29cd5c158da35` (the digest sees the whole world, so it moved
+with the behaviour).
+
+**Still open in W2:** C2.10 grounding v2 (a curated vocabulary, so a lowercase invention is rejected), C2.11 the
+entity-existence pre-conditions as a reusable `EventValidator`, C2.12 a fourth scenario that exercises allegiance,
+flee, war and NPC-to-NPC trades, and the dump v2 format (the state section of the dump - best written as a separate
+state dump so the goldens do not have to be re-recorded again).
 
 **W1 exit gate (verified 2026-10-22):** the three goldens are byte-identical, the 90-day fingerprint is unchanged, the
 full local gate (`python3 -I tools/verify.py --local`) is green, and a 30-day world still saves through the hardened
