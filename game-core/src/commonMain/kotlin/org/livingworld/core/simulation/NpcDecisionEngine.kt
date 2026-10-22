@@ -223,13 +223,16 @@ class DefaultNpcDecisionEngine(
                     .mapNotNull { b ->
                         val p = b.proposition as? Proposition.EntityKilledNpc ?: return@mapNotNull null
                         val killerId = (p.killer as? EntityId.Npc)?.id
-                        if (p.victim in faction.members && killerId != null && killerId in rival.members) p else null
+                        // A death removes the victim from Faction.members, so a member who died is still one of ours
+                        // by the faction ids the dead NPC keeps (the same ones the death cascade reads).
+                        val ours = p.victim in faction.members || faction.id in (world.npcs[p.victim]?.factions ?: emptySet())
+                        if (ours && killerId != null && killerId in rival.members) p else null
                     }
                     .minByOrNull { it.describe() }
                 if (grievance != null) {
                     candidates.add(
                         ActionCandidate(
-                            action = Intent.DeclareHostility(faction.id, rival.id, "Retaliation: ${grievance.describe()}"),
+                            action = Intent.DeclareHostility(faction.id, rival.id, grievance.victim, "Retaliation: ${grievance.describe()}"),
                             expectedEffects = listOf(ExpectedEffect("Avenge a killing", WAR_UTILITY))
                         )
                     )

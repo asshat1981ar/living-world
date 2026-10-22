@@ -71,28 +71,37 @@ object TurmoilScenario {
     }
 
     /**
-     * A schism: the guild declares hostility toward the order, the order's successor and then its leader switch sides
-     * (the faction ends up leaderless), two NPCs meet (one pair is strangers, one already has a history), the blacksmith
-     * sells a blade to the baker, and the tanner starts wounded and terrified. The engine never produces an allegiance
-     * change, a faction war, a meeting or an NPC-to-NPC trade on its own, so these events are seeded; the tanner takes
-     * the engine's survival rule (Flee). It exists so a golden holds those reducer branches and the mirror's ports.
+     * A schism: the order's successor and then its leader switch sides (the faction ends up leaderless), a farmer of
+     * the order kills a guild miner in front of the guildmaster, the blacksmith comes to resent the guildmaster, two
+     * NPCs meet (one pair is strangers, one already has a history), the blacksmith sells a blade to the baker, and the
+     * tanner starts wounded and terrified. Only causes are seeded for the politics: the engine itself must turn the
+     * killing into a war declaration (with the killing as its cause), the resentment into a defection, and the tanner's
+     * fear into a Flee. Seeded directly because nothing else produces them: the allegiance changes of the two order
+     * leaders, the meetings and the NPC-to-NPC trade.
      */
     fun seedSchism(start: WorldState): WorldState {
         val reducer = DefaultWorldReducer()
         var world = start
         fun next() = world.events.nextId()
 
-        world = reducer.apply(world, GameEvent.FactionHostilityDeclared(
-            id = next(), time = world.time, declaringFaction = FactionId("iron_guild"),
-            targetFaction = FactionId("verdant_order"), reason = "Scenario: a dispute over the mine",
-            witnesses = listOf(NpcId("elder_rowan"))
-        ))
         for (defector in listOf("herbalist_lyra", "elder_rowan")) {
             world = reducer.apply(world, GameEvent.AllegianceChanged(
                 id = next(), time = world.time, npc = NpcId(defector), oldFaction = FactionId("verdant_order"),
                 newFaction = FactionId("iron_guild"), reason = "Scenario: sided with the guild"
             ))
         }
+        // A cross-faction killing the guildmaster sees: the engine's war rule reads it from his beliefs.
+        world = reducer.apply(world, GameEvent.NpcKilled(
+            id = next(), time = world.time, victim = NpcId("miner_derek"), killer = NpcId("farmer_giles").toEntityId(),
+            witnesses = listOf(NpcId("guildmaster_titus")), location = world.npc(NpcId("miner_derek")).identity.currentLocation,
+            motive = "Scenario: a quarrel at the mine"
+        ))
+        // The honest blacksmith has lost faith in the guildmaster: the engine's defection rule reads his own edge.
+        world = reducer.apply(world, GameEvent.RelationshipShifted(
+            id = next(), time = world.time, source = NpcId("blacksmith_krag").toEntityId(),
+            target = NpcId("guildmaster_titus").toEntityId(), deltaTrust = -0.5f, deltaAffection = -0.3f,
+            deltaRespect = 0f, deltaFear = 0f, deltaResentment = 0.9f, reason = "Scenario: a broken promise"
+        ))
         // Strangers (a fresh edge) and the apprentice/merchant pair (an edge with a history, which must be kept).
         world = reducer.apply(world, GameEvent.EntitiesMet(
             id = next(), time = world.time, entityA = NpcId("baker_milo").toEntityId(),

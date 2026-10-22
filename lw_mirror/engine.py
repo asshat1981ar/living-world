@@ -187,6 +187,11 @@ def execute(state, npc, intent):
         e = ev.AllegianceChanged(id=event_id, time=time, npc=npc.id, oldFaction=old, newFaction=intent.newFaction,
                                  reason=intent.reason)
         return reducer.apply(state, e)
+    if isinstance(intent, ac.DeclareHostility):
+        e = ev.FactionHostilityDeclared(id=event_id, time=time, declaringFaction=intent.declaring,
+                                        targetFaction=intent.target, reason=intent.reason,
+                                        causalEventId=causal.death_of(state.events, intent.victim))
+        return reducer.apply(state, e)
     if isinstance(intent, ac.Attack):
         target = state.npcs.get(intent.target)
         if target is None or not target.is_alive:

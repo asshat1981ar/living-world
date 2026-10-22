@@ -125,32 +125,47 @@ class EmergentPoliticsTest {
     @Test
     fun only_the_leader_may_declare_war_for_a_faction() {
         val world = village()
-        val forged = AiProposal(Intent.DeclareHostility(guild, order, "test"), 0.85f, "test")
+        val forged = AiProposal(Intent.DeclareHostility(guild, order, derek, "test"), 0.85f, "test")
         assertTrue(DefaultActionValidator().validate(forged, world.npc(titus), world).isSuccess)
         assertTrue(DefaultActionValidator().validate(forged, world.npc(derek), world).isFailure)
-        val self = AiProposal(Intent.DeclareHostility(guild, guild, "test"), 0.85f, "test")
+        val self = AiProposal(Intent.DeclareHostility(guild, guild, derek, "test"), 0.85f, "test")
         assertTrue(DefaultActionValidator().validate(self, world.npc(titus), world).isFailure)
-        val unknown = AiProposal(Intent.DeclareHostility(guild, FactionId("nowhere"), "test"), 0.85f, "test")
+        val unknown = AiProposal(Intent.DeclareHostility(guild, FactionId("nowhere"), derek, "test"), 0.85f, "test")
         assertTrue(DefaultActionValidator().validate(unknown, world.npc(titus), world).isFailure)
     }
 
     @Test
     fun the_war_is_declared_in_the_ledger_and_the_factions_turn_hostile() = runTest {
-        val world = SimulationEngine().advance(believing(village(), titus, killing), WorldDuration.days(1))
+        val start = village()
+        val killingEvent = GameEvent.NpcKilled(
+            id = start.events.nextId(), time = start.time, victim = derek, killer = giles.toEntityId(),
+            witnesses = emptyList(), location = start.npc(derek).identity.currentLocation, motive = "test"
+        )
+        val killed = DefaultWorldReducer().apply(start, killingEvent)
+        val world = SimulationEngine().advance(believing(killed, titus, killing), WorldDuration.days(1))
         val declared = world.events.ofType<GameEvent.FactionHostilityDeclared>().single()
         assertEquals(guild, declared.declaringFaction)
         assertEquals(order, declared.targetFaction)
-        assertNotNull(declared.causalEventId, "the war should name the decision that caused it")
+        assertEquals(killingEvent.id, declared.causalEventId, "the war should name the killing it avenges")
         assertTrue(order in world.factions.getValue(guild).enemies)
         assertTrue(guild in world.factions.getValue(order).enemies)
     }
 
     @Test
     fun a_resentful_member_defects_in_the_ledger() = runTest {
-        val world = SimulationEngine().advance(resent(village(), derek, titus), WorldDuration.days(1))
+        val krag = NpcId("blacksmith_krag")
+        val world = SimulationEngine().advance(resent(village(), krag, titus), WorldDuration.days(1))
         val change = world.events.ofType<GameEvent.AllegianceChanged>().single()
-        assertEquals(derek, change.npc)
+        assertEquals(krag, change.npc)
         assertEquals(order, change.newFaction)
-        assertTrue(order in world.npc(derek).factions && guild !in world.npc(derek).factions)
+        assertTrue(order in world.npc(krag).factions && guild !in world.npc(krag).factions)
+    }
+
+    @Test
+    fun a_vengeful_member_fights_its_leader_before_it_defects() = runTest {
+        // Attack and defection tie at 0.65 for a vengeful NPC; Attack comes first in the candidate list.
+        val world = resent(village(), derek, titus)
+        val decided = engine.decide(world.npc(derek), world).intent
+        assertTrue(decided is Intent.Attack, "decided $decided")
     }
 }

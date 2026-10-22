@@ -54,9 +54,12 @@ sealed interface Intent {
         override val description: String get() = "Switch allegiance to ${newFaction.value} ($reason)"
     }
 
-    /** A faction's leader takes it to war with [target]; [declaring] must be a faction the NPC leads. */
+    /**
+     * A faction's leader takes it to war with [target]; [declaring] must be a faction the NPC leads. [victim] is the
+     * member whose killing is avenged, so the declaration can name that killing as its cause (G6).
+     */
     @Serializable
-    data class DeclareHostility(val declaring: FactionId, val target: FactionId, val reason: String) : Intent {
+    data class DeclareHostility(val declaring: FactionId, val target: FactionId, val victim: NpcId, val reason: String) : Intent {
         override val description: String get() = "Declare hostility from ${declaring.value} to ${target.value} ($reason)"
     }
 
