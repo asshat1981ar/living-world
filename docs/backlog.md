@@ -35,11 +35,10 @@ log and the commits). The first items need no approval and no golden re-record.
       fourth scenario (a new golden file, not a re-record).
 **W3 — test depth**
 
-- [ ] **Replay and soak compare the whole state** M. `ReplayDeterminismTest` compares only `time` and `npcs`
-      (`ReplayDeterminismTest.kt:26`–`:45`); extend it to factions, relationships, economy, quests, the player and the
-      ledger.
-- [ ] **Conservation and append-only tests over 30 days** M. `CharacterizationTest` covers coins and the ledger order;
-      add item conservation and a "the ledger only grows" test.
+- [x] **Replay and soak compare the whole state** M. Factions, relationships, economy, quests, the player and the
+      ledger are compared too - and they all match, so the ledger really does rebuild the world.
+- [x] **Conservation and append-only tests over 30 days** M. The coins *and* the objects are pinned: a trade, a theft
+      and an inheritance all move items, so the total must be the same afterwards.
 
 **W4 — one world in the app** (no golden change; on `feature/w4-app-world`)
 

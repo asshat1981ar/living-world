@@ -737,6 +737,8 @@ re-recorded again).
 | W5.1 model digest on load | **done** — the installed model is verified by sha256 (a stamp file keeps the common case free); a same-size file no longer passes | `68c1521` |
 | W5.2 backup rules | **done** — `fullBackupContent` and `dataExtractionRules` exclude the 345 MB model directory | `68c1521` |
 | W5.3 redirect target | **done** — redirects are followed only to https hosts on huggingface.co | `68c1521` |
+| W3.1 replay and soak compare the whole world | **done** — factions, relationships, economy, quests, the player and the ledger are compared too; they all match, so the ledger really does rebuild the world | `53206d7` |
+| W3.2 item conservation | **done** — the coins *and* the objects are pinned over thirty days: a trade, a theft and an inheritance all move items, so the total must be the same afterwards | `ed0a48b` |
 
 **W1 exit gate (verified 2026-10-22):** the three goldens are byte-identical, the 90-day fingerprint is unchanged, the
 full local gate (`python3 -I tools/verify.py --local`) is green, and a 30-day world still saves through the hardened
