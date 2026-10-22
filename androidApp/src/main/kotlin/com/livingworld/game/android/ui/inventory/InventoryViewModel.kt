@@ -1,15 +1,12 @@
 package com.livingworld.game.android.ui.inventory
 
 import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import com.livingworld.game.android.world.WorldStore
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import org.livingworld.core.events.GameEvent
-import org.livingworld.core.ids.EntityId
 import org.livingworld.core.ids.ItemId
 import org.livingworld.core.ids.NpcId
-import org.livingworld.core.world.DefaultWorldReducer
-import org.livingworld.core.world.WorldReducer
 import org.livingworld.core.world.WorldState
 import org.livingworld.ui.compose.ChimeraUiLayoutEngine
 import org.livingworld.ui.compose.MarketItemCardState
@@ -21,10 +18,13 @@ data class InventoryUiState(
     val inventoryCounts: Map<String, Int> = emptyMap()
 )
 
+/**
+ * The market screen reads the one world, so what it shows is what the player carries: the counts come from
+ * `world.player.inventory`, not from a number this screen made up.
+ */
 class InventoryViewModel(
-    private var world: WorldState,
-    private val manifest: SpriteManifest,
-    private val reducer: WorldReducer = DefaultWorldReducer()
+    private val store: WorldStore,
+    private val manifest: SpriteManifest
 ) : ViewModel() {
 
     private val commodities = listOf(
@@ -32,22 +32,22 @@ class InventoryViewModel(
         ItemId("iron_ingot"), ItemId("omen_stone"), ItemId("healing_salve")
     )
 
-    private val _uiState = MutableStateFlow(
+    val uiState: Flow<InventoryUiState> = store.state.map { world ->
         InventoryUiState(
             playerCoins = world.player.coins,
-            catalog = ChimeraUiLayoutEngine.createMarketCatalog(commodities, world, manifest),
-            inventoryCounts = mapOf("bread" to 3, "herb_bundle" to 1)
+            catalog = catalogFor(world),
+            inventoryCounts = world.player.inventory.groupingBy { it.value }.eachCount()
         )
-    )
-    val uiState: StateFlow<InventoryUiState> = _uiState.asStateFlow()
+    }
 
-    val currentWorldState: WorldState get() = world
+    val currentWorldState: WorldState get() = store.state.value
 
     fun buyItem(itemId: ItemId) {
-        val current = _uiState.value
-        val item = current.catalog.firstOrNull { it.itemId == itemId } ?: return
-        if (current.playerCoins >= item.currentPrice) {
-            val tradeEvent = GameEvent.TradeCompleted(
+        val world = store.state.value
+        val item = catalogFor(world).firstOrNull { it.itemId == itemId } ?: return
+        if (world.player.coins < item.currentPrice) return
+        store.apply(
+            GameEvent.TradeCompleted(
                 id = world.events.nextId(),
                 time = world.time,
                 buyer = world.player.id,
@@ -55,31 +55,25 @@ class InventoryViewModel(
                 item = itemId,
                 price = item.currentPrice
             )
-            world = reducer.apply(world, tradeEvent)
-            val counts = current.inventoryCounts.toMutableMap()
-            counts[itemId.value] = (counts[itemId.value] ?: 0) + 1
-            _uiState.value = current.copy(playerCoins = world.player.coins, inventoryCounts = counts)
-        }
+        )
     }
 
     fun sellItem(itemId: ItemId) {
-        val current = _uiState.value
-        val item = current.catalog.firstOrNull { it.itemId == itemId } ?: return
-        val count = current.inventoryCounts[itemId.value] ?: 0
-        if (count > 0) {
-            val sellPrice = item.currentPrice * 0.85f
-            val tradeEvent = GameEvent.TradeCompleted(
+        val world = store.state.value
+        val item = catalogFor(world).firstOrNull { it.itemId == itemId } ?: return
+        if (!world.player.inventory.contains(itemId)) return      // you cannot sell what you do not have
+        store.apply(
+            GameEvent.TradeCompleted(
                 id = world.events.nextId(),
                 time = world.time,
                 buyer = NpcId("merchant").toEntityId(),
                 seller = world.player.id,
                 item = itemId,
-                price = sellPrice
+                price = item.currentPrice * 0.85f
             )
-            world = reducer.apply(world, tradeEvent)
-            val counts = current.inventoryCounts.toMutableMap()
-            counts[itemId.value] = count - 1
-            _uiState.value = current.copy(playerCoins = world.player.coins, inventoryCounts = counts)
-        }
+        )
     }
+
+    private fun catalogFor(world: WorldState): List<MarketItemCardState> =
+        ChimeraUiLayoutEngine.createMarketCatalog(commodities, world, manifest)
 }

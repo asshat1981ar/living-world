@@ -1,6 +1,7 @@
 package com.livingworld.game.android.ui.dialogue
 
 import androidx.lifecycle.ViewModel
+import com.livingworld.game.android.world.WorldStore
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,8 +17,6 @@ import org.livingworld.core.ids.EntityId
 import org.livingworld.core.ids.NpcId
 import org.livingworld.core.npc.Npc
 import org.livingworld.core.relationships.Relationship
-import org.livingworld.core.world.DefaultWorldReducer
-import org.livingworld.core.world.WorldReducer
 import org.livingworld.core.world.WorldState
 import org.livingworld.ui.compose.ChimeraUiLayoutEngine
 import org.livingworld.ui.compose.NpcPortraitCardState
@@ -43,9 +42,8 @@ data class DialogueUiState(
 )
 
 class DialogueViewModel(
-    private var world: WorldState,
+    private val store: WorldStore,
     private val manifest: SpriteManifest,
-    private val reducer: WorldReducer = DefaultWorldReducer(),
     /** AI lines prepared ahead of time; null keeps the built-in lines only. */
     private var lines: PregeneratedLines? = null,
     private val scope: CoroutineScope? = null
@@ -54,7 +52,7 @@ class DialogueViewModel(
     private val _uiState = MutableStateFlow(DialogueUiState())
     val uiState: StateFlow<DialogueUiState> = _uiState.asStateFlow()
 
-    val currentWorldState: WorldState get() = world
+    val currentWorldState: WorldState get() = store.state.value
 
     private val _voiceStats = MutableStateFlow(lines?.stats)
     /** How the AI voice is doing (null when there is none), for the AI tab's status line. */
@@ -74,9 +72,10 @@ class DialogueViewModel(
     private var told = 0
 
     fun loadNpc(npcId: NpcId) {
+        val world = store.state.value
         val npc = world.npcs[npcId] ?: return
         told = 0
-        val rel = world.relationships.get(npcId.toEntityId(), EntityId.Player("player"))
+        val rel = world.relationships.get(npcId.toEntityId(), world.player.id)
         val card = ChimeraUiLayoutEngine.createPortraitCardState(npc, manifest, rel)
 
         _uiState.value = DialogueUiState(
@@ -98,11 +97,12 @@ class DialogueViewModel(
 
         // Social simulation feedback: record canonical RelationshipShifted event via WorldReducer (Invariant G5)
         val deltaTrust = if (optionIndex == OFFER_ASSISTANCE) 0.15f else 0.05f
+        val world = store.state.value
         val shiftEvent = GameEvent.RelationshipShifted(
             id = world.events.nextId(),
             time = world.time,
             source = npc.id.toEntityId(),
-            target = EntityId.Player("player"),
+            target = world.player.id,
             deltaTrust = deltaTrust,
             deltaAffection = 0.1f,
             deltaRespect = 0.05f,
@@ -110,10 +110,12 @@ class DialogueViewModel(
             deltaResentment = 0f,
             reason = "Dialogue choice: $chosenText"
         )
-        world = reducer.apply(world, shiftEvent)
+        store.apply(shiftEvent)
 
-        val updatedNpc = world.npcs[npc.id] ?: npc
-        val updatedRel = world.relationships.get(npc.id.toEntityId(), EntityId.Player("player"))
+        // Read the world again: the shift is in it now.
+        val after = store.state.value
+        val updatedNpc = after.npcs[npc.id] ?: npc
+        val updatedRel = after.relationships.get(npc.id.toEntityId(), after.player.id)
         val updatedCard = ChimeraUiLayoutEngine.createPortraitCardState(updatedNpc, manifest, updatedRel)
 
         // Worked out before `told` moves on, so the AI rewords exactly the fact the built-in line tells.
@@ -176,7 +178,7 @@ class DialogueViewModel(
         topic = topic,
         location = npc.identity.currentLocation,
         beliefs = npc.beliefs.all().toList(),
-        relationship = world.relationships.get(npc.id.toEntityId(), EntityId.Player("player"))
+        relationship = store.state.value.relationships.get(npc.id.toEntityId(), store.state.value.player.id)
     )
 
     private companion object {

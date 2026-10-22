@@ -23,13 +23,17 @@ import com.livingworld.game.android.ui.settings.AiSettingsScreen
 import androidx.lifecycle.lifecycleScope
 import com.livingworld.game.android.ui.inventory.InventoryScreen
 import com.livingworld.game.android.ui.inventory.InventoryViewModel
+import com.livingworld.game.android.world.WorldStore
 import com.livingworld.game.android.ui.map.MapScreen
 import com.livingworld.game.android.ui.map.MapViewModel
 import com.livingworld.game.android.ui.theme.ChimeraTheme
 import com.livingworld.game.android.ui.theme.toComposeColor
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import org.livingworld.core.events.GameEvent
 import org.livingworld.core.simulation.AttackEvents
 import org.livingworld.core.events.TacticalCombatResolver
@@ -53,15 +57,14 @@ import org.livingworld.ui.theme.ChimeraSpritePalette
  * Enforces RT-17 dead-combatant guard so deceased NPCs cannot execute or receive additional duel rounds.
  */
 class TacticalDuelViewModel(
-    private var world: WorldState,
+    private val store: WorldStore,
     private val manifest: SpriteManifest,
-    private val opponentId: NpcId = NpcId("miner_derek"),
-    private val reducer: WorldReducer = DefaultWorldReducer()
+    private val opponentId: NpcId = NpcId("miner_derek")
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(
         ChimeraUiLayoutEngine.createTacticalDuelState(
-            world = world,
+            world = store.state.value,
             opponentId = opponentId,
             playerStance = TacticalStance.STRIKE,
             opponentStance = TacticalStance.WARD,
@@ -70,9 +73,10 @@ class TacticalDuelViewModel(
     )
     val uiState: StateFlow<TacticalDuelCanvasState> = _uiState.asStateFlow()
 
-    val currentWorldState: WorldState get() = world
+    val currentWorldState: WorldState get() = store.state.value
 
     fun executeDuelRound(playerStance: TacticalStance) {
+        val world = store.state.value
         val opponent = world.npcs[opponentId] ?: return
         if (!opponent.isAlive || opponent.resources.health <= 0f) {
             return
@@ -116,12 +120,14 @@ class TacticalDuelViewModel(
             defenderStance = resolution.defenderStance,
             duelOutcome = resolution.outcome
         )
-        world = AttackEvents.apply(reducer, world, attackEvent, motive = "Defeated in tactical duel (${resolution.outcome.description})")
+        store.applyChain { current ->
+            AttackEvents.apply(DefaultWorldReducer(), current, attackEvent, motive = "Defeated in tactical duel (${resolution.outcome.description})")
+        }
 
         val nextRound = _uiState.value.roundCount + 1
         val summary = "Round $nextRound: Player [${playerStance.name}] vs ${opponent.identity.name} [${oppStance.name}] -> ${resolution.outcome.description} (${resolution.finalDamage} dmg)"
         _uiState.value = ChimeraUiLayoutEngine.createTacticalDuelState(
-            world = world,
+            world = store.state.value,
             opponentId = opponentId,
             playerStance = playerStance,
             opponentStance = oppStance,
@@ -209,21 +215,33 @@ fun TacticalDuelScreen(
 class MainActivity : ComponentActivity() {
 
     private lateinit var ai: AiController
+    private var currentWorld: WorldStore? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val world = DefaultVillageFactory.marketVillage()
+        // One world for the whole app: the screens share it, it ticks, and it is saved when the app goes away.
+        val store = WorldStore()
+        currentWorld = store
+        restoreWorld(store)
         val manifest = SpriteManifest.createDefault()
 
-        val dialogueViewModel = DialogueViewModel(world, manifest).apply {
+        val dialogueViewModel = DialogueViewModel(store, manifest).apply {
             loadNpc(NpcId("merchant"))
         }
         // On-device AI dialogue: off until the player opts in on the AI tab, and only on phones that can run it.
         ai = AiController(this, dialogueViewModel, lifecycleScope)
-        val mapViewModel = MapViewModel(world, manifest)
-        val inventoryViewModel = InventoryViewModel(world, manifest)
-        val duelViewModel = TacticalDuelViewModel(world, manifest)
+        val mapViewModel = MapViewModel(store, manifest, lifecycleScope)
+        val inventoryViewModel = InventoryViewModel(store, manifest)
+        val duelViewModel = TacticalDuelViewModel(store, manifest)
+
+        // The village keeps living while the app is in front of the player.
+        lifecycleScope.launch {
+            while (isActive) {
+                delay(HOUR_MILLIS)
+                store.tick()
+            }
+        }
 
         setContent {
             ChimeraTheme {
@@ -292,5 +310,24 @@ class MainActivity : ComponentActivity() {
         super.onStop()
         // Free the model's memory while the game is off screen; it reloads on the next prepared line.
         ai.onStop()
+        // The world is written down, so the village is still there next time.
+        saveWorld()
+    }
+
+    /** The saved world, if there is one. */
+    private fun worldFile() = java.io.File(filesDir, "world.json")
+
+    private fun restoreWorld(store: WorldStore) {
+        val file = worldFile()
+        if (file.isFile) store.restore(file.readText())
+    }
+
+    private fun saveWorld() {
+        val envelope = currentWorld?.save() ?: return
+        worldFile().writeText(envelope)
+    }
+
+    private companion object {
+        const val HOUR_MILLIS = 3_600_000L
     }
 }

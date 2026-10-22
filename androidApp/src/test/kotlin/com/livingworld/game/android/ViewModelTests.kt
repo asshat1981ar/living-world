@@ -1,9 +1,11 @@
 package com.livingworld.game.android
 
 import com.livingworld.game.android.ui.dialogue.DialogueViewModel
+import com.livingworld.game.android.world.WorldStore
 import com.livingworld.game.android.ui.dialogue.LineUsage
 import com.livingworld.game.android.ui.inventory.InventoryViewModel
 import com.livingworld.game.android.ui.map.MapViewModel
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.livingworld.ai.dialogue.ChatModel
@@ -23,11 +25,12 @@ import java.io.File
 class ViewModelTests {
 
     private val world = DefaultVillageFactory.marketVillage()
+    private val store = WorldStore(world)
     private val manifest = SpriteManifest.createDefault()
 
     @Test
     fun testDialogueViewModelTurnProgressionAndLetterAvatarFallback() {
-        val vm = DialogueViewModel(world, manifest)
+        val vm = DialogueViewModel(store, manifest)
         vm.loadNpc(NpcId("merchant"))
 
         val state = vm.uiState.value
@@ -46,13 +49,13 @@ class ViewModelTests {
         assertFalse(updated.dialogueHistory.last().text.contains("Iron Guild"))
 
         // G3: with no beliefs the NPC claims nothing; once it believes something it can say exactly that.
-        val vmAsk = DialogueViewModel(world, manifest)
+        val vmAsk = DialogueViewModel(store, manifest)
         vmAsk.loadNpc(NpcId("merchant"))
         vmAsk.chooseOption(0)
         assertEquals(org.livingworld.core.dialogue.DialogueGrounding.NOTHING_TO_TELL, vmAsk.uiState.value.dialogueHistory.last().text)
 
         val emptyManifest = SpriteManifest()
-        val vmFallback = DialogueViewModel(world, emptyManifest)
+        val vmFallback = DialogueViewModel(store, emptyManifest)
         vmFallback.loadNpc(NpcId("merchant"))
         assertNull(
             "PRO-58: Sprite should be null in empty manifest to trigger LetterAvatarFallback",
@@ -62,7 +65,7 @@ class ViewModelTests {
 
     @Test
     fun testMapViewModelSelectionAndTravel() {
-        val vm = MapViewModel(world, manifest)
+        val vm = MapViewModel(store, manifest)
         val initial = vm.uiState.value
         assertEquals(LocationId("village_square"), initial.playerCurrentLocation)
         assertTrue(initial.canvasState.nodes.isNotEmpty())
@@ -75,21 +78,25 @@ class ViewModelTests {
     }
 
     @Test
-    fun testInventoryViewModelBuySellEconomy() {
-        val vm = InventoryViewModel(world, manifest)
-        val initial = vm.uiState.value
+    fun testInventoryViewModelBuySellEconomy() = runTest {
+        val vm = InventoryViewModel(store, manifest)
+        val initial = vm.uiState.first()
         val initialCoins = initial.playerCoins
         val breadCount = initial.inventoryCounts["bread"] ?: 0
+        assertEquals(
+            "the inventory screen must show what the player really carries",
+            world.player.inventory.groupingBy { it.value }.eachCount(), initial.inventoryCounts
+        )
 
         vm.buyItem(ItemId("bread"))
-        val afterBuy = vm.uiState.value
+        val afterBuy = vm.uiState.first()
         assertTrue(afterBuy.playerCoins < initialCoins)
         assertEquals(breadCount + 1, afterBuy.inventoryCounts["bread"] ?: 0)
         assertEquals(1, vm.currentWorldState.events.size)
 
         val coinsBeforeSell = afterBuy.playerCoins
         vm.sellItem(ItemId("bread"))
-        val afterSell = vm.uiState.value
+        val afterSell = vm.uiState.first()
         assertTrue(afterSell.playerCoins > coinsBeforeSell)
         assertEquals(breadCount, afterSell.inventoryCounts["bread"] ?: 0)
         assertEquals(2, vm.currentWorldState.events.size)
@@ -97,7 +104,7 @@ class ViewModelTests {
 
     @Test
     fun testTacticalDuelViewModelAndRt17DeadCombatantGuard() {
-        val duelVm = TacticalDuelViewModel(world, manifest, opponentId = NpcId("miner_derek"))
+        val duelVm = TacticalDuelViewModel(store, manifest, opponentId = NpcId("miner_derek"))
         assertEquals(1.0f, duelVm.uiState.value.opponentHealthPercent)
         assertFalse(duelVm.uiState.value.opponentIsDeceased)
 
@@ -129,7 +136,7 @@ class ViewModelTests {
 
     @Test
     fun aPreparedAiLineIsShownAtOnceAndAShownLineNeverChanges() = runTest {
-        val vm = DialogueViewModel(world, manifest, lines = linesSaying("Aye, friend. Well met, traveler."), scope = this)
+        val vm = DialogueViewModel(store, manifest, lines = linesSaying("Aye, friend. Well met, traveler."), scope = this)
         vm.loadNpc(NpcId("merchant"))
         assertEquals("nothing is prepared on a first meeting", greeting, vm.uiState.value.dialogueHistory.last().text)
         advanceUntilIdle()
@@ -147,9 +154,39 @@ class ViewModelTests {
     }
 
     @Test
+    fun every_screen_shares_one_world() = runTest {
+        val shared = WorldStore(world)
+        val inventory = InventoryViewModel(shared, manifest)
+        val map = MapViewModel(shared, manifest)
+        val dialogue = DialogueViewModel(shared, manifest)
+
+        inventory.buyItem(ItemId("bread"))
+
+        // The trade is in the world's ledger, so every screen sees the same village.
+        assertEquals(1, shared.state.value.events.size)
+        assertEquals(1, inventory.uiState.first().inventoryCounts["bread"] ?: 0)
+        assertEquals(shared.state.value.player.coins, map.currentWorldState.player.coins)
+        assertEquals(shared.state.value.player.coins, dialogue.currentWorldState.player.coins)
+    }
+
+    @Test
+    fun the_world_survives_a_save_and_a_restore() = runTest {
+        val store = WorldStore(world)
+        InventoryViewModel(store, manifest).buyItem(ItemId("bread"))
+        val envelope = store.save()
+        assertNotNull(envelope)
+
+        val restored = WorldStore()
+        assertTrue("a saved world must load again", restored.restore(envelope!!))
+        assertEquals(store.state.value.player.coins, restored.state.value.player.coins)
+        assertEquals(store.state.value.events.size, restored.state.value.events.size)
+        assertEquals(1, restored.state.value.player.inventory.count { it.value == "bread" })
+    }
+
+    @Test
     fun anInventedAiLineIsNeverShown() = runTest {
         val lines = linesSaying("Mara poisoned the well.")
-        val vm = DialogueViewModel(world, manifest, lines = lines, scope = this)
+        val vm = DialogueViewModel(store, manifest, lines = lines, scope = this)
         vm.loadNpc(NpcId("merchant"))
         advanceUntilIdle()
         vm.chooseOption(2)
@@ -160,7 +197,7 @@ class ViewModelTests {
 
     @Test
     fun turningTheAiOnMidConversationPreparesTheNextLinesAndTurningItOffStops() = runTest {
-        val vm = DialogueViewModel(world, manifest, scope = this)
+        val vm = DialogueViewModel(store, manifest, scope = this)
         vm.loadNpc(NpcId("merchant"))
         vm.setLines(linesSaying("Well met, stranger."))
         advanceUntilIdle()
@@ -174,8 +211,8 @@ class ViewModelTests {
 
     @Test
     fun theStatsAreSharedAndThePlayersOwnLineIsNeverMarked() = runTest {
-        val vm = DialogueViewModel(world, manifest, lines = linesSaying("Well met, stranger."), scope = this)
-        assertNull(DialogueViewModel(world, manifest).voiceStats.value)
+        val vm = DialogueViewModel(store, manifest, lines = linesSaying("Well met, stranger."), scope = this)
+        assertNull(DialogueViewModel(store, manifest).voiceStats.value)
         vm.loadNpc(NpcId("merchant"))
         advanceUntilIdle()
         assertTrue((vm.voiceStats.value?.accepted ?: 0) > 0)
@@ -202,7 +239,7 @@ class ViewModelTests {
             }
             override fun describeFailure(error: Throwable) = "failed"
         })
-        val vm = DialogueViewModel(knowing, manifest, lines = PregeneratedLines(echo), scope = this)
+        val vm = DialogueViewModel(WorldStore(knowing), manifest, lines = PregeneratedLines(echo), scope = this)
         vm.loadNpc(NpcId("merchant"))
         advanceUntilIdle()
         vm.chooseOption(0)

@@ -29,7 +29,7 @@ fun InventoryScreen(
     viewModel: InventoryViewModel,
     modifier: Modifier = Modifier
 ) {
-    val state by viewModel.uiState.collectAsState()
+    val state by viewModel.uiState.collectAsState(initial = InventoryUiState())
 
     Column(
         modifier = modifier
