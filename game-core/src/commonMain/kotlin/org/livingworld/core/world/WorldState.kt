@@ -3,6 +3,8 @@ package org.livingworld.core.world
 import kotlinx.serialization.Serializable
 import org.livingworld.core.events.EventLedger
 import org.livingworld.core.events.GameEvent
+import org.livingworld.core.events.isPublic
+import org.livingworld.core.events.location
 import org.livingworld.core.factions.Faction
 import org.livingworld.core.factions.Ideology
 import org.livingworld.core.factions.LeadershipState
@@ -262,6 +264,38 @@ data class WorldState(
             presentNpcs = present,
             controllingFaction = loc.controllingFaction,
             recentEvents = recent
+        )
+    }
+
+    /**
+     * The events this NPC could know about: the ones it witnessed or took part in, and the public ones that happened
+     * where it stands. The world's last events are not its knowledge (G2), so the AI advisor gets this and not the
+     * global history.
+     */
+    fun knownEvents(npc: Npc): List<GameEvent> {
+        val here = npc.identity.currentLocation
+        val self = npc.id.toEntityId()
+        return events.all().filter { event ->
+            npc.id in event.witnesses ||
+                self in event.actors ||
+                (event.isPublic() && event.location() == here)
+        }
+    }
+
+    /** The snapshot an advisor may see for this NPC: what it knows, not what the world knows. */
+    fun snapshotFor(npc: Npc): WorldSnapshot {
+        val loc = locations[npc.identity.currentLocation]
+            ?: Location(npc.identity.currentLocation, "Unknown")
+        val present = npcs.values
+            .filter { it.isAlive && it.identity.currentLocation == npc.identity.currentLocation }
+            .sortedBy { it.id.value }
+            .map { it.id }
+        return WorldSnapshot(
+            time = time,
+            location = loc,
+            presentNpcs = present,
+            controllingFaction = loc.controllingFaction,
+            recentEvents = knownEvents(npc).takeLast(10)
         )
     }
 }

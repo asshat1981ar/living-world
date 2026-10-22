@@ -40,8 +40,7 @@ class AiAdvisedDecisionEngine(
         if (base.isSurvivalOverride(npc)) return fallback to null
         val candidates = base.generateCandidates(npc, world)
         if (candidates.size < 2) return fallback to null
-        val here = npc.identity.currentLocation
-        val snapshot = world.snapshotFor(here)
+        val snapshot = world.snapshotFor(npc)
         val context = ReasoningContext(
             npc = npc,
             relevantWorldState = snapshot,
