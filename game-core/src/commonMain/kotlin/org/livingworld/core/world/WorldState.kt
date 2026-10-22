@@ -1,6 +1,7 @@
 package org.livingworld.core.world
 
 import kotlinx.serialization.Serializable
+import org.livingworld.core.beliefs.Proposition
 import org.livingworld.core.events.EventLedger
 import org.livingworld.core.events.GameEvent
 import org.livingworld.core.events.isPublic
@@ -83,9 +84,18 @@ object ProceduralQuestEngine {
     fun deriveActiveProblems(state: WorldState): List<WorldProblem> {
         val problems = mutableListOf<WorldProblem>()
 
+        // An investigation that is done (or failed) is no longer an open problem.
+        val settled = state.activeQuests
+            .filter { it.status == QuestStatus.COMPLETED || it.status == QuestStatus.FAILED }
+            .mapNotNull { it.id.removePrefix("quest_death_").takeIf { id -> id.isNotEmpty() } }
+            .toSet()
+
         // 1. Unsolved or unavenged villager deaths
         val deaths = state.events.deaths()
+        val counted = mutableSetOf<NpcId>()
         for (death in deaths) {
+            if (!counted.add(death.victim)) continue          // one problem per victim
+            if (death.victim.value in settled) continue        // the investigation is settled
             problems.add(
                 WorldProblem(
                     id = "problem_death_${death.victim.value}",
@@ -132,6 +142,26 @@ object ProceduralQuestEngine {
         return problems.sortedByDescending { it.severity }
     }
 
+    /**
+     * A living NPC that knows about the death: the guard captain if he saw it, else the first who heard. An
+     * investigation is asked for by someone who knows about it (G2).
+     */
+    private fun investigatorFor(state: WorldState, victimId: String): NpcId? {
+        val knowers = state.npcs.values
+            .filter { npc ->
+                npc.isAlive && npc.beliefs.all().any { belief ->
+                    when (val proposition = belief.proposition) {
+                        is Proposition.EntityKilledNpc -> proposition.victim.value == victimId
+                        is Proposition.NpcDied -> proposition.victim.value == victimId
+                        else -> false
+                    }
+                }
+            }
+            .map { it.id }
+            .sortedBy { it.value }
+        return knowers.firstOrNull { it.value == "guard_captain" } ?: knowers.firstOrNull()
+    }
+
     fun generateOpportunities(state: WorldState): List<QuestOpportunity> {
         val existingIds = state.activeQuests.map { it.id }.toSet()
         val generated = mutableListOf<QuestOpportunity>()
@@ -143,12 +173,15 @@ object ProceduralQuestEngine {
             when (problem.category) {
                 "HOMICIDE" -> {
                     val victimId = problem.id.removePrefix("problem_death_")
+                    // Only someone who knows about the death can ask for an investigation: the guard captain if he
+                    // saw it, else the first who heard. Nobody knowing means nobody asking (G2).
+                    val issuer = investigatorFor(state, victimId) ?: continue
                     generated.add(
                         QuestOpportunity(
                             id = questId,
                             title = "Investigate the Murder of $victimId",
                             description = "${problem.summary}. Bring justice or uncover the killer's motive.",
-                            issuer = NpcId("guard_captain").toEntityId(),
+                            issuer = issuer.toEntityId(),
                             target = problem.location.toEntityId(),
                             reward = 75f,
                             status = QuestStatus.AVAILABLE
@@ -406,7 +439,14 @@ object DefaultVillageFactory {
                     )
                 ),
                 factions = factionSet,
-                resources = ResourceState(coins = 50f, food = 15f, health = 100f)
+                resources = ResourceState(
+                    coins = 50f,
+                    food = 15f,
+                    health = 100f,
+                    // The merchant keeps stock: a trade can only move what the seller actually holds.
+                    items = if (idStr == "merchant") List(3) { ItemId("bread") } + List(6) { ItemId("goods") }
+                    else emptyList()
+                )
             )
         }
 

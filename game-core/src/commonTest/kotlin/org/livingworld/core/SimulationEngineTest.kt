@@ -315,20 +315,32 @@ class SimulationEngineTest {
 
     // --- Quest dispatch ---
 
-    // Current behaviour, may change: every death, even one with no killer, becomes a "murder" quest issued by the guard
-    // captain (even if the captain is the one who died), and the problem never resolves.
+    // A death becomes a public investigation only when someone living knows about it; the investigation is asked for
+    // by one of those knowers, and it resolves when the quest is completed.
     @Test
-    fun current_behaviour_any_death_dispatches_one_murder_quest_from_the_guard_captain() = runTest {
-        val killed = TestWorld(world(listOf(guard, baker))).apply { kill(guard, killer = null) }.state
+    fun a_death_someone_saw_produces_one_murder_quest_issued_by_a_living_knower() = runTest {
+        val killed = TestWorld(world(listOf(guard, baker)))
+            .apply { kill(guard, killer = null, witnesses = listOf(baker)) }.state
         val engine = SimulationEngine(DefaultWorldReducer(), Scripted { _, _ -> Intent.Rest })
         val after = engine.advance(killed, WorldDuration.hours(3))
         val quest = after.activeQuests.single()
         assertEquals("quest_death_guard_captain", quest.id)
         assertEquals("Investigate the Murder of guard_captain", quest.title)
-        assertEquals(guard.toEntityId(), quest.issuer)
+        assertEquals(
+            baker.toEntityId(), quest.issuer,
+            "the investigation must be asked for by someone who lives and knows about it"
+        )
         assertEquals(75f, quest.reward)
         val dispatched = after.events.all().filterIsInstance<GameEvent.OpportunityDispatched>().single()
         assertEquals(killed.events.deaths().single().id, dispatched.causalEventId)
+    }
+
+    @Test
+    fun a_death_nobody_saw_produces_no_public_quest() = runTest {
+        val killed = TestWorld(world(listOf(guard, baker))).apply { kill(guard, killer = null) }.state
+        val engine = SimulationEngine(DefaultWorldReducer(), Scripted { _, _ -> Intent.Rest })
+        val after = engine.advance(killed, WorldDuration.hours(3))
+        assertTrue(after.activeQuests.isEmpty(), "a murder nobody witnessed became a public quest")
     }
 
     // --- Rumor transmission ---

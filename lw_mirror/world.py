@@ -2,6 +2,7 @@ from dataclasses import dataclass, field, replace
 from typing import Any, Optional
 
 from . import events as ev
+from . import beliefs as bf
 from .f32 import f32, coerce_in, coerce_at_least
 from .factions import Faction, Leadership
 from .ids import PLAYER
@@ -93,7 +94,16 @@ def float_to_string(v):
 
 def derive_active_problems(state):
     problems = []
+    # An investigation that is done (or failed) is no longer an open problem.
+    settled = {q.id[len("quest_death_"):] for q in state.activeQuests
+               if q.id.startswith("quest_death_") and q.status in ("COMPLETED", "FAILED")}
+    counted = set()
     for death in state.events.of_type(ev.NpcKilled):
+        if death.victim in counted:
+            continue  # one problem per victim
+        counted.add(death.victim)
+        if death.victim in settled:
+            continue
         loc = death.location if death.location is not None else "village_square"
         problems.append(WorldProblem(f"problem_death_{death.victim}", "HOMICIDE", F(0.90), loc,
                                      f"Homicide of {death.victim} at {loc}"))
@@ -110,6 +120,23 @@ def derive_active_problems(state):
     return sorted(problems, key=lambda p: p.severity, reverse=True)  # stable descending
 
 
+def _investigator_for(state, victim):
+    """A living NPC that knows about the death: the guard captain if he saw it, else the first who heard."""
+    knowers = []
+    for npc in sorted(state.npcs.values(), key=lambda n: n.id):
+        if not npc.is_alive:
+            continue
+        for belief in npc.beliefs.all():
+            p = belief.proposition
+            if (isinstance(p, bf.EntityKilledNpc) and p.victim == victim) or \
+               (isinstance(p, bf.NpcDied) and p.victim == victim):
+                knowers.append(npc.id)
+                break
+    if "guard_captain" in knowers:
+        return "guard_captain"
+    return knowers[0] if knowers else None
+
+
 def generate_opportunities(state):
     existing = {q.id for q in state.activeQuests}
     generated = []
@@ -119,10 +146,14 @@ def generate_opportunities(state):
             continue
         if problem.category == "HOMICIDE":
             victim = problem.id[len("problem_death_"):]
+            # Only someone who knows about the death can ask for an investigation (G2).
+            issuer = _investigator_for(state, victim)
+            if issuer is None:
+                continue
             generated.append(QuestOpportunity(
                 quest_id, f"Investigate the Murder of {victim}",
                 f"{problem.summary}. Bring justice or uncover the killer's motive.",
-                ("npc", "guard_captain"), ("location", problem.location), 75.0, "AVAILABLE"))
+                ("npc", issuer), ("location", problem.location), 75.0, "AVAILABLE"))
         elif problem.category == "FACTION_WAR":
             generated.append(QuestOpportunity(
                 quest_id, "Broker Ceasefire in Oakhaven",
@@ -184,7 +215,8 @@ def market_village():
             traits=traits,
             goals=(Goal(f"survive_{id_}", "Provide for self and family", F(0.8), F(0.5)),),
             factions=fs,
-            resources=ResourceState(coins=50.0, food=15.0, health=100.0),
+            resources=ResourceState(coins=50.0, food=15.0, health=100.0,
+                                    items=(("bread",) * 3 + ("goods",) * 6) if id_ == "merchant" else ()),
         )
     iron_g = Faction(iron, "The Iron Guild",
                      members=("guildmaster_titus", "blacksmith_krag", "miner_derek", "merchant"),

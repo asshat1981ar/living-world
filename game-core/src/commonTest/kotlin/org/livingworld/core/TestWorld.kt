@@ -227,7 +227,14 @@ class TestWorld(
                         )
                     ),
                     factions = factionSet,
-                    resources = ResourceState(coins = 50f, food = 15f, health = 100f)
+                    resources = ResourceState(
+                        coins = 50f,
+                        food = 15f,
+                        health = 100f,
+                        // The merchant keeps stock: a trade can only move what the seller actually holds.
+                        items = if (idStr == "merchant") List(3) { ItemId("bread") } + List(6) { ItemId("goods") }
+                        else emptyList()
+                    )
                 )
             }
 

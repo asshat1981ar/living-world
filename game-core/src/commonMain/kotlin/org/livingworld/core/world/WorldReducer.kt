@@ -64,13 +64,50 @@ class DefaultWorldReducer : WorldReducer {
      */
     private fun isApplicable(state: WorldState, event: GameEvent): Boolean = when (event) {
         is GameEvent.NpcRoutineCompleted -> isNotDead(state, event.npc)
-        is GameEvent.TradeCompleted -> isNotDead(state, event.buyer) && isNotDead(state, event.seller)
+        is GameEvent.TradeCompleted -> tradeIsPossible(state, event)
+        is GameEvent.ItemStolen -> theftIsPossible(state, event)
         is GameEvent.RationPurchased -> isNotDead(state, event.buyer) && isNotDead(state, event.seller)
         is GameEvent.AllegianceChanged -> isNotDead(state, event.npc)
         is GameEvent.ShopInherited -> isNotDead(state, event.heir)
         is GameEvent.RumorTransmitted -> isNotDead(state, event.target)
         is GameEvent.NpcAttacked -> isNotDead(state, event.target)
         else -> true
+    }
+
+    /**
+     * A trade needs two parties that exist, a seller that holds the item and a buyer that can pay the price. Without
+     * this, a trade with an unknown seller destroyed the buyer's coins and a trade minted the seller's stock.
+     */
+    private fun tradeIsPossible(state: WorldState, event: GameEvent.TradeCompleted): Boolean {
+        if (event.price.isNaN() || event.price <= 0f) return false
+        val buyer = (event.buyer as? EntityId.Npc)?.id?.let { state.npcs[it] }
+        val seller = (event.seller as? EntityId.Npc)?.id?.let { state.npcs[it] }
+        val buyerIsPlayer = isPlayer(state, event.buyer)
+        val sellerIsPlayer = isPlayer(state, event.seller)
+        if (buyer == null && !buyerIsPlayer) return false
+        if (seller == null && !sellerIsPlayer) return false
+        if (buyer != null && !buyer.isAlive) return false
+        if (seller != null && !seller.isAlive) return false
+        val sellerHolds = if (seller != null) seller.resources.items.contains(event.item)
+        else sellerIsPlayer && state.player.inventory.contains(event.item)
+        if (!sellerHolds) return false
+        val buyerCanPay = if (buyer != null) buyer.resources.coins >= event.price
+        else buyerIsPlayer && state.player.coins >= event.price
+        return buyerCanPay
+    }
+
+    /** A theft needs a thief that exists and an owner that holds the item; the item moves to the thief. */
+    private fun theftIsPossible(state: WorldState, event: GameEvent.ItemStolen): Boolean {
+        val thief = (event.thief as? EntityId.Npc)?.id?.let { state.npcs[it] }
+        val thiefIsPlayer = isPlayer(state, event.thief)
+        if (thief == null && !thiefIsPlayer) return false
+        val owner = event.owner ?: return false
+        val ownerNpc = (owner as? EntityId.Npc)?.id?.let { state.npcs[it] }
+        val ownerIsPlayer = isPlayer(state, owner)
+        if (ownerNpc == null && !ownerIsPlayer) return false
+        val ownerHolds = if (ownerNpc != null) ownerNpc.resources.items.contains(event.item)
+        else ownerIsPlayer && state.player.inventory.contains(event.item)
+        return ownerHolds
     }
 
     /** An NPC that is in the world but dead cannot act; the player and unknown entities are not NPCs. */
@@ -245,6 +282,7 @@ class DefaultWorldReducer : WorldReducer {
     private fun applyTheft(state: WorldState, event: GameEvent.ItemStolen): WorldState {
         var nextNpcs = state.npcs
         var nextRelationships = state.relationships
+        var nextPlayer = state.player
 
         val theftProposition = if (event.thief is EntityId.Player) {
             Proposition.PlayerStole(event.item)
@@ -268,19 +306,34 @@ class DefaultWorldReducer : WorldReducer {
         }
 
         // The owner is looked up by kind, not by name: a player called "merchant" is not the merchant.
-        val ownerNpcId = (event.owner as? EntityId.Npc)?.id
-        val ownerNpc = ownerNpcId?.let { nextNpcs[it] }
-        if (ownerNpc != null) {
-            val updatedItems = ownerNpc.resources.items - event.item
-            val wasWitness = event.witnesses.contains(ownerNpc.id)
-            val updatedOwner = ownerNpc.copy(
-                resources = ownerNpc.resources.copy(items = updatedItems),
-                emotionalState = if (wasWitness) ownerNpc.emotionalState else ownerNpc.emotionalState.shifted(deltaSuspicion = 0.2f)
-            )
-            nextNpcs = nextNpcs + (ownerNpc.id to updatedOwner)
+        val owner = event.owner
+        when (owner) {
+            is EntityId.Npc -> {
+                val ownerNpc = nextNpcs[owner.id] ?: return state
+                val wasWitness = event.witnesses.contains(ownerNpc.id)
+                val updatedOwner = ownerNpc.copy(
+                    resources = ownerNpc.resources.copy(items = ownerNpc.resources.items - event.item),
+                    emotionalState = if (wasWitness) ownerNpc.emotionalState else ownerNpc.emotionalState.shifted(deltaSuspicion = 0.2f)
+                )
+                nextNpcs = nextNpcs + (ownerNpc.id to updatedOwner)
+            }
+            is EntityId.Player -> nextPlayer = nextPlayer.copy(inventory = nextPlayer.inventory - event.item)
+            else -> Unit
         }
 
-        return state.copy(npcs = nextNpcs, relationships = nextRelationships)
+        // The stolen item moves to the thief: a theft that does not move anything is not a theft.
+        when (val thief = event.thief) {
+            is EntityId.Npc -> {
+                val thiefNpc = nextNpcs[thief.id] ?: return state
+                nextNpcs = nextNpcs + (thiefNpc.id to thiefNpc.copy(
+                    resources = thiefNpc.resources.copy(items = thiefNpc.resources.items + event.item)
+                ))
+            }
+            is EntityId.Player -> nextPlayer = nextPlayer.copy(inventory = nextPlayer.inventory + event.item)
+            else -> Unit
+        }
+
+        return state.copy(npcs = nextNpcs, relationships = nextRelationships, player = nextPlayer)
     }
 
     /** A witness sees the theft, judges the thief opportunistic, remembers it and grows angry and suspicious. */
@@ -345,8 +398,8 @@ class DefaultWorldReducer : WorldReducer {
             eventId = event.id
         )
 
-        val sourceNpcId = (event.source as? EntityId.Npc)?.id ?: NpcId(event.source.identifier)
-        val sourceNpc = state.npcs[sourceNpcId]
+        val sourceNpcId = (event.source as? EntityId.Npc)?.id
+        val sourceNpc = sourceNpcId?.let { state.npcs[it] }
         val finalNpcs = if (sourceNpc != null) {
             val experience = if (event.deltaTrust >= 0f && event.deltaResentment <= 0f) {
                 RelationshipExperience.COOPERATION
@@ -405,15 +458,15 @@ class DefaultWorldReducer : WorldReducer {
         val sellerNpc = sellerNpcId?.let { nextNpcs[it] }
 
         // Coins are conserved: the seller is credited only what the buyer actually paid.
-        var paid = 0f
+        // The pre-check already proved that both parties exist, that the seller holds the item and that the buyer
+        // can pay, so the price moves in full.
+        var paid = event.price
         if (buyerNpc != null) {
-            paid = minOf(event.price, buyerNpc.resources.coins)
             val nextItems = buyerNpc.resources.items + event.item
             nextNpcs = nextNpcs + (buyerNpc.id to buyerNpc.copy(
                 resources = buyerNpc.resources.copy(coins = buyerNpc.resources.coins - paid, items = nextItems)
             ))
         } else if (isPlayer(state, event.buyer)) {
-            paid = minOf(event.price, nextPlayer.coins)
             nextPlayer = nextPlayer.copy(
                 coins = nextPlayer.coins - paid,
                 inventory = nextPlayer.inventory + event.item,
@@ -492,13 +545,25 @@ class DefaultWorldReducer : WorldReducer {
         )
         // The village grants the new shopkeeper a start-up purse from the treasury (limited to what it holds).
         val grant = minOf(25.0f, state.economy.treasury).coerceAtLeast(0f)
+        // The shop's stock goes with the shop: the new shopkeeper sells what the old one left behind.
+        val predecessor = state.npcs[event.predecessor]
+        val inheritedItems = predecessor?.resources?.items ?: emptyList()
+        var nextNpcs = state.npcs
+        if (predecessor != null && inheritedItems.isNotEmpty()) {
+            nextNpcs = nextNpcs + (predecessor.id to predecessor.copy(
+                resources = predecessor.resources.copy(items = predecessor.resources.items - inheritedItems)
+            ))
+        }
         val updatedHeir = heir.copy(
             identity = heir.identity.copy(occupation = "Shopkeeper (${event.shopName})"),
-            resources = heir.resources.copy(coins = heir.resources.coins + grant),
+            resources = heir.resources.copy(
+                coins = heir.resources.coins + grant,
+                items = heir.resources.items + inheritedItems
+            ),
             beliefs = heir.beliefs.addOrUpdate(inheritanceBelief)
         )
         return state.copy(
-            npcs = state.npcs + (heir.id to updatedHeir),
+            npcs = nextNpcs + (heir.id to updatedHeir),
             economy = state.economy.copy(treasury = state.economy.treasury - grant)
         )
     }

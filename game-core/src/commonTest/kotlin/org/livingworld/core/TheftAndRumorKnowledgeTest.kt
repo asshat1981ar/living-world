@@ -44,6 +44,11 @@ class TheftAndRumorKnowledgeTest {
         val player = EntityId.Player("player")
         val sword = ItemId("iron_sword")
         val witness = NpcId("guard_captain")
+        val merchant = world.npc(NpcId("merchant"))
+        // A theft needs an owner that holds the item.
+        world.state = world.state.copy(npcs = world.state.npcs + (merchant.id to merchant.copy(
+            resources = merchant.resources.copy(items = merchant.resources.items + sword)
+        )))
 
         world.steal(
             thief = player,

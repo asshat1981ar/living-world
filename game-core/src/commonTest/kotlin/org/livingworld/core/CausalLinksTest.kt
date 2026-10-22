@@ -19,7 +19,8 @@ class CausalLinksTest {
     @Test
     fun murder_quest_points_at_the_killing() = runTest {
         val world = TestWorld.create()
-        val kill = world.kill(NpcId("apprentice"), killer = player)
+        // A witness knows about it, so the village can ask for an investigation.
+        val kill = world.kill(NpcId("apprentice"), killer = player, witnesses = listOf(NpcId("guard_captain")))
 
         world.state = world.simulationEngine.tick(world.state)
 
@@ -44,9 +45,17 @@ class CausalLinksTest {
     @Test
     fun theft_belief_links_to_the_matching_theft() {
         val world = TestWorld.create()
-        val first = world.steal(player, ItemId("iron_sword"))
-        val second = world.steal(player, ItemId("iron_sword"))
-        world.steal(player, ItemId("silver_ring"))
+        val merchant = world.npc(NpcId("merchant"))
+        // A theft needs an owner that holds the item.
+        world.state = world.state.copy(npcs = world.state.npcs + (merchant.id to merchant.copy(
+            resources = merchant.resources.copy(
+                items = listOf(ItemId("iron_sword"), ItemId("iron_sword"), ItemId("silver_ring"))
+            )
+        )))
+        val owner = NpcId("merchant").toEntityId()
+        val first = world.steal(player, ItemId("iron_sword"), owner = owner)
+        val second = world.steal(player, ItemId("iron_sword"), owner = owner)
+        world.steal(player, ItemId("silver_ring"), owner = owner)
 
         val origin = CausalLinks.originOf(world.state.events, Proposition.PlayerStole(ItemId("iron_sword")))
         assertEquals(second.id, origin, "most recent matching theft wins")

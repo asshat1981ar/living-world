@@ -43,16 +43,18 @@ class EconomyAndQuestTest {
         assertEquals(QuestStatus.AVAILABLE, state.activeQuests.first().status)
 
         // Complete scarcity quest via TradeCompleted (RT-16)
+        // The player sells the bread, so they have to hold it.
         val coinsBefore = state.player.coins
+        val withBread = state.copy(player = state.player.copy(inventory = state.player.inventory + ItemId("bread")))
         val tradeEv = GameEvent.TradeCompleted(
-            id = state.events.nextId(),
-            time = state.time,
+            id = withBread.events.nextId(),
+            time = withBread.time,
             buyer = NpcId("apprentice").toEntityId(),
-            seller = state.player.id,
+            seller = withBread.player.id,
             item = ItemId("bread"),
             price = 9f
         )
-        state = reducer.apply(state, tradeEv)
+        state = reducer.apply(withBread, tradeEv)
         assertEquals(QuestStatus.COMPLETED, state.activeQuests.first().status)
         assertTrue(state.player.coins > coinsBefore + 9f, "RT-16: Player must receive quest reward upon completing scarcity trade")
     }

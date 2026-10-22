@@ -419,15 +419,19 @@ class WorldReducerTest {
         assertTrue(after.npc(merchant).resources.items.isEmpty())
     }
 
-    // Current behaviour, may change: stealing from the player takes nothing from the player's inventory, because the
-    // owner is only looked up among NPCs (an NpcId("player") that does not exist).
+    // A theft moves the item: from the owner's hands to the thief's.
     @Test
-    fun current_behaviour_theft_from_the_player_leaves_the_player_inventory_untouched() {
+    fun a_theft_moves_the_item_from_the_owner_to_the_thief() {
         val before = world()
-        val after = before.apply { id, t ->
+        val withSword = before.copy(player = before.player.copy(inventory = listOf(ItemId("iron_sword"))))
+        val after = withSword.apply { id, t ->
             GameEvent.ItemStolen(id, t, merchant.toEntityId(), ItemId("iron_sword"), EntityId.Player(), witnesses = emptyList())
         }
-        assertEquals(listOf(ItemId("iron_sword")), after.player.inventory)
+        assertEquals(emptyList(), after.player.inventory, "the stolen item stayed with the victim")
+        assertTrue(
+            after.npc(merchant).resources.items.contains(ItemId("iron_sword")),
+            "the thief did not get the stolen item"
+        )
     }
 
     // --- NpcKilled (faction side; beliefs and grief are covered in DeathCascadeTest) ---

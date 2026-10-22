@@ -1,4 +1,6 @@
 """TurmoilScenario.seed"""
+from dataclasses import replace
+
 from . import events as ev
 from .f32 import f32
 from . import reducer
@@ -13,6 +15,12 @@ def turmoil_seed(start):
     world = reducer.apply(world, ev.NpcKilled(
         id=world.events.next_id(), time=world.time, victim="farmer_elena", killer=None, witnesses=(),
         location=world.npc("farmer_elena").identity.currentLocation, motive="Scenario: found dead"))
+    # The blacksmith owns the blade, so the theft actually moves something.
+    smith = world.npc("blacksmith_krag")
+    world = replace(world, npcs=dict(world.npcs, **{
+        "blacksmith_krag": replace(
+            smith, resources=replace(smith.resources, items=smith.resources.items + ("iron_sword",)))
+    }))
     return reducer.apply(world, ev.ItemStolen(
         id=world.events.next_id(), time=world.time, thief=("npc", "miner_derek"), item="iron_sword",
         owner=("npc", "blacksmith_krag"), witnesses=("herbalist_lyra",),

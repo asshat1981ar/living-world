@@ -16,11 +16,87 @@ def _belief(prop, conf, source, rel, at):
 
 def apply(state, event):
     """DefaultWorldReducer.apply"""
-    ledger = state.events.record(event) if state.events.find(event.id) is None else state.events
+    # Applying an event that is already in the ledger changes nothing, and an event that cannot happen (the dead do
+    # not trade, a seller without stock cannot sell) is not recorded at all.
+    if state.events.find(event.id) is not None:
+        return state
+    if not _is_applicable(state, event):
+        return state
+    ledger = state.events.record(event)
     next_time = event.time if event.time > state.time else state.time
     base = replace(state, time=next_time, events=ledger)
     handler = _HANDLERS[type(event)]
     return handler(base, event)
+
+
+def _not_dead(state, npc_id):
+    npc = state.npcs.get(npc_id)
+    return npc is None or npc.is_alive
+
+
+def _is_player(state, entity):
+    """The player is the player: an NPC that happens to share its name is not."""
+    return entity is not None and entity[0] == "player" and entity[1] == state.player.id[1]
+
+
+def _is_applicable(state, event):
+    if isinstance(event, ev.NpcRoutineCompleted):
+        return _not_dead(state, event.npc)
+    if isinstance(event, ev.TradeCompleted):
+        return _trade_possible(state, event)
+    if isinstance(event, ev.ItemStolen):
+        return _theft_possible(state, event)
+    if isinstance(event, ev.RationPurchased):
+        return _not_dead(state, event.buyer) and _not_dead(state, event.seller)
+    if isinstance(event, ev.AllegianceChanged):
+        return _not_dead(state, event.npc)
+    if isinstance(event, ev.ShopInherited):
+        return _not_dead(state, event.heir)
+    if isinstance(event, ev.RumorTransmitted):
+        return _not_dead(state, event.target)
+    if isinstance(event, ev.NpcAttacked):
+        return _not_dead(state, event.target)
+    return True
+
+
+def _trade_possible(state, event):
+    """Two parties that exist, a seller that holds the item and a buyer that can pay."""
+    if event.price != event.price or event.price <= 0.0:
+        return False
+    buyer = state.npcs.get(event.buyer[1]) if event.buyer[0] == "npc" else None
+    seller = state.npcs.get(event.seller[1]) if event.seller[0] == "npc" else None
+    buyer_is_player = _is_player(state, event.buyer)
+    seller_is_player = _is_player(state, event.seller)
+    if buyer is None and not buyer_is_player:
+        return False
+    if seller is None and not seller_is_player:
+        return False
+    if buyer is not None and not buyer.is_alive:
+        return False
+    if seller is not None and not seller.is_alive:
+        return False
+    seller_holds = (event.item in seller.resources.items) if seller is not None else (
+        seller_is_player and event.item in state.player.inventory)
+    if not seller_holds:
+        return False
+    buyer_can_pay = (buyer.resources.coins >= event.price) if buyer is not None else (
+        buyer_is_player and state.player.coins >= event.price)
+    return buyer_can_pay
+
+
+def _theft_possible(state, event):
+    """A thief that exists and an owner that holds the item."""
+    thief = state.npcs.get(event.thief[1]) if event.thief[0] == "npc" else None
+    if thief is None and not _is_player(state, event.thief):
+        return False
+    if event.owner is None:
+        return False
+    owner = state.npcs.get(event.owner[1]) if event.owner[0] == "npc" else None
+    if owner is None and not _is_player(state, event.owner):
+        return False
+    owner_holds = (event.item in owner.resources.items) if owner is not None else (
+        _is_player(state, event.owner) and event.item in state.player.inventory)
+    return owner_holds
 
 
 def _modify(rels, frm, to, dt=0.0, da=0.0, dr=0.0, dfear=0.0, dres=0.0, event_id=None):
@@ -144,7 +220,18 @@ def _theft(state, event):
             owner, resources=replace(owner.resources, items=tuple(items)),
             emotionalState=owner.emotionalState if was_witness else owner.emotionalState.shifted(deltaSuspicion=F(0.2)))
         next_npcs = _with(next_npcs, owner.id, updated_owner)
-    return replace(state, npcs=next_npcs, relationships=rels)
+    player = state.player
+    if event.owner is not None and _is_player(state, event.owner):
+        player = replace(player, inventory=_remove_first(player.inventory, event.item))
+    # The stolen item moves to the thief: a theft that moves nothing is not a theft.
+    if event.thief[0] == "npc":
+        thief = next_npcs.get(event.thief[1])
+        if thief is not None:
+            next_npcs = _with(next_npcs, thief.id, replace(thief, resources=replace(
+                thief.resources, items=thief.resources.items + (event.item,))))
+    else:
+        player = replace(player, inventory=player.inventory + (event.item,))
+    return replace(state, npcs=next_npcs, relationships=rels, player=player)
 
 
 def _rumor(state, event):
@@ -206,31 +293,37 @@ def _remove_first(items, x):
     return tuple(items)
 
 
+def _remove_all(items, gone):
+    """Remove every occurrence of the items in `gone` (the shop's stock)."""
+    out = list(items)
+    for g in gone:
+        while g in out:
+            out.remove(g)
+    return tuple(out)
+
+
 def _trade(state, event):
     next_npcs = state.npcs
     player = state.player
-    buyer_id = event.buyer[1]
-    seller_id = event.seller[1]
-    buyer = next_npcs.get(buyer_id)
-    seller = next_npcs.get(seller_id)
-    paid = 0.0
+    buyer = next_npcs.get(event.buyer[1]) if event.buyer[0] == "npc" else None
+    seller = next_npcs.get(event.seller[1]) if event.seller[0] == "npc" else None
+    # The pre-check already proved that both parties exist, that the seller holds the item and that the buyer can
+    # pay, so the price moves in full.
+    paid = event.price
     if buyer is not None:
-        paid = min(event.price, buyer.resources.coins)
         next_npcs = _with(next_npcs, buyer.id, replace(buyer, resources=replace(
             buyer.resources, coins=F(buyer.resources.coins - paid), items=buyer.resources.items + (event.item,))))
-    elif event.buyer[0] == "player" or event.buyer[1] == state.player.id[1]:
-        paid = min(event.price, player.coins)
+    elif _is_player(state, event.buyer):
         player = replace(player, coins=F(player.coins - paid), inventory=player.inventory + (event.item,),
                          historicalActions=player.historicalActions + (event.id,))
     if seller is not None:
         next_npcs = _with(next_npcs, seller.id, replace(seller, resources=replace(
             seller.resources, coins=F(seller.resources.coins + paid), items=_remove_first(seller.resources.items, event.item))))
-    elif event.seller[0] == "player" or event.seller[1] == state.player.id[1]:
+    elif _is_player(state, event.seller):
         player = replace(player, coins=F(player.coins + paid), inventory=_remove_first(player.inventory, event.item),
                          historicalActions=player.historicalActions + (event.id,))
 
-    player_involved = (event.buyer[0] == "player" or event.seller[0] == "player"
-                       or event.buyer[1] == state.player.id[1] or event.seller[1] == state.player.id[1])
+    player_involved = _is_player(state, event.buyer) or _is_player(state, event.seller)
     bonus = 0.0
     quests = []
     for q in state.activeQuests:
@@ -258,11 +351,18 @@ def _shop_inherited(state, event):
         return state
     belief = _belief(bf.ShopInheritedProp(event.heir, event.shopName), 1.0, bf.DirectObservation(), 1.0, event.time)
     grant = max(min(25.0, state.economy.treasury), 0.0)  # start-up purse from the treasury
+    # The shop's stock goes with the shop: the new shopkeeper sells what the old one left behind.
+    predecessor = state.npcs.get(event.predecessor)
+    inherited = predecessor.resources.items if predecessor is not None else ()
+    npcs = state.npcs
+    if predecessor is not None and inherited:
+        npcs = _with(npcs, predecessor.id, replace(
+            predecessor, resources=replace(predecessor.resources, items=_remove_all(predecessor.resources.items, inherited))))
     updated = replace(
         heir, identity=replace(heir.identity, occupation=f"Shopkeeper ({event.shopName})"),
-        resources=replace(heir.resources, coins=F(heir.resources.coins + grant)),
+        resources=replace(heir.resources, coins=F(heir.resources.coins + grant), items=heir.resources.items + inherited),
         beliefs=heir.beliefs.add_or_update(belief))
-    return replace(state, npcs=_with(state.npcs, heir.id, updated),
+    return replace(state, npcs=_with(npcs, heir.id, updated),
                    economy=replace(state.economy, treasury=F(state.economy.treasury - grant)))
 
 
