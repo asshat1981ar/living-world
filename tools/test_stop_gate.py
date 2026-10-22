@@ -88,6 +88,43 @@ class StopGateTests(unittest.TestCase):
         self.assertEqual("block", out["decision"])
         self.assertIn("determinism", out["reason"])
 
+    # The pre-push gate (decide) must not remember "green" for code whose G8/golden tier did not pass. It used to write
+    # the marker before that tier ran, so a blocked push went through when retried (demonstrated in the 2026-10-22 review).
+    def test_a_blocked_push_is_blocked_again_when_retried_on_the_same_code(self):
+        first = self.decide({}, True, self.checks(det=FAIL), self.state)
+        self.assertEqual("block", first["decision"])
+        self.calls.clear()
+        second = self.decide({}, True, self.checks(det=FAIL), self.state)
+        self.assertEqual("block", second["decision"], "the retry of a blocked push must not be allowed")
+        self.assertIn("det", self.calls, "the determinism tier must run again on the retry")
+
+    def test_a_determinism_infra_failure_is_retried_on_the_next_push(self):
+        first = self.decide({}, True, self.checks(det=INFRA), self.state)
+        self.assertIn("could not run", first["systemMessage"])
+        self.calls.clear()
+        second = self.decide({}, True, self.checks(det=OK), self.state)
+        self.assertIsNone(second)
+        self.assertEqual(["inv", "tools", "det"], self.calls, "only the determinism tier should have been repeated")
+        self.assertEqual("d1", self.det_state.read_text().strip())
+
+    def test_a_passing_push_is_remembered_so_the_next_one_is_cheap(self):
+        self.assertIsNone(self.decide({}, True, self.checks(), self.state))
+        self.calls.clear()
+        self.assertIsNone(self.decide({}, True, self.checks(kotlin=FAIL, det=FAIL), self.state))
+        self.assertEqual(["inv", "tools"], self.calls, "unchanged code that already passed should skip both slow tiers")
+
+    def test_new_code_after_a_pass_runs_both_slow_tiers_again(self):
+        self.assertIsNone(self.decide({}, True, self.checks(digest="d1"), self.state))
+        self.calls.clear()
+        self.assertIsNone(self.decide({}, True, self.checks(digest="d2"), self.state))
+        self.assertIn("kotlin", self.calls)
+        self.assertIn("det", self.calls)
+
+    def test_a_kotlin_infra_failure_does_not_mark_anything_green(self):
+        self.decide({}, True, self.checks(kotlin=INFRA), self.state)
+        self.assertFalse(self.state.exists())
+        self.assertFalse(self.det_state.exists())
+
     def test_a_determinism_infra_failure_only_warns(self):
         out = self.decide({}, True, self.checks(det=INFRA), self.state)
         self.assertNotIn("decision", out)

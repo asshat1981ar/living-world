@@ -106,11 +106,24 @@ def decide(data: dict, run_remote: bool, checks=None, state: Path = STATE,
     if run_remote:
         digest = checks.get("digest", kotlin_digest)()
         last = state.read_text().strip() if state.is_file() else ""
-        if digest != last:
-            o = checks["kotlin"]()
-            if o.ok:
-                state.parent.mkdir(parents=True, exist_ok=True)
-                state.write_text(digest + "\n")
+        last_det = det_state.read_text().strip() if det_state.is_file() else ""
+        # Two markers, one per slow tier, and a tier is skipped only when ITS marker matches. The determinism marker used
+        # to be written but never read, and the Kotlin one was written before the determinism tier ran, so a push blocked
+        # by a real G8/golden failure was allowed on retry (found by the 2026-10-22 review of the dev setup).
+        if digest != last or digest != last_det:
+            kotlin_green = digest == last
+            if not kotlin_green:
+                o = checks["kotlin"]()
+                if o.ok:
+                    state.parent.mkdir(parents=True, exist_ok=True)
+                    state.write_text(digest + "\n")
+                    kotlin_green = True
+                elif o.infra:
+                    last_line = o.output.strip().splitlines()[-1][-300:] if o.output.strip() else "no output"
+                    warnings.append(f"stop gate: Kotlin check on awsbox could not run (not blocking): {last_line}")
+                else:
+                    return _block("kotlin (./gradlew check on awsbox)", o.output)
+            if kotlin_green:
                 # The pre-push gate also proves G8 and the goldens: without this tier a kernel change could be
                 # pushed with the goldens no longer matching.
                 det = checks.get("determinism", determinism_check)()
@@ -122,11 +135,6 @@ def decide(data: dict, run_remote: bool, checks=None, state: Path = STATE,
                                     f"{det.output.strip().splitlines()[-1][-200:]}")
                 else:
                     return _block("determinism and the goldens (G8)", det.output)
-            elif o.infra:
-                last_line = o.output.strip().splitlines()[-1][-300:] if o.output.strip() else "no output"
-                warnings.append(f"stop gate: Kotlin check on awsbox could not run (not blocking): {last_line}")
-            else:
-                return _block("kotlin (./gradlew check on awsbox)", o.output)
     return {"systemMessage": "\n".join(warnings)} if warnings else None
 
 
