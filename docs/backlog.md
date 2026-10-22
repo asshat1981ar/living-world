@@ -22,9 +22,6 @@ log and the commits). The first items need no approval and no golden re-record.
 
 **W2 leftovers**
 
-- [ ] **A golden scenario for uncovered kernel paths** M. Allegiance, flee, faction war, NPC-to-NPC trades and
-      `EntitiesMet` are still unexercised by any golden, and the mirror ports of those paths are unverified. Adds a
-      fourth scenario (a new golden file, not a re-record).
 **W3 — test depth**
 
 - [x] **Replay and soak compare the whole state** M. Factions, relationships, economy, quests, the player and the
@@ -76,6 +73,10 @@ log and the commits). The first items need no approval and no golden re-record.
 
 ## Done
 
+- [x] **A golden scenario for uncovered kernel paths** M. The `schism` scenario seeds a faction war, two allegiance
+      changes, two meetings, an NPC-to-NPC trade and a frightened wounded NPC; event and state goldens are new files
+      (nothing re-recorded) and `lw_mirror` matched both on the first run, so those ports are verified. The engine never
+      emits the first four on its own: that is a separate gap (no decision candidate for allegiance, war or NPC trades).
 - [x] **A separate state dump (dump v2)** M. `CanonicalStateDump` (desktopApp) prints belief content, memories, items,
       traits, goals, emotions, factions, quests and the player; `tests/golden/<scenario>-10d.state.txt.gz` holds the four
       reference dumps, `lw_mirror/state_dump.py` reproduces them byte for byte, and `verify.py`, the stop gate and CI

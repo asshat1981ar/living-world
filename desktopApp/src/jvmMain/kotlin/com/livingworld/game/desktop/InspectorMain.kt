@@ -34,7 +34,8 @@ fun main(args: Array<String>) = runBlocking {
         "turmoil" -> world = TurmoilScenario.seed(world)
         "feud" -> world = TurmoilScenario.seedFeud(world)
         "famine" -> world = TurmoilScenario.seedFamine(world)
-        else -> require(scenario == "default") { "unknown scenario '$scenario' (default, turmoil, feud, famine)" }
+        "schism" -> world = TurmoilScenario.seedSchism(world)
+        else -> require(scenario == "default") { "unknown scenario '$scenario' (default, turmoil, feud, famine, schism)" }
     }
 
     val startNanos = System.nanoTime()

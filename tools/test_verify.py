@@ -11,11 +11,12 @@ spec.loader.exec_module(verify)
 
 
 class VerifyTests(unittest.TestCase):
-    def test_one_remote_script_runs_gradle_and_all_four_goldens(self):
+    def test_one_remote_script_runs_gradle_and_all_five_goldens(self):
         script = verify.remote_script("GRADLE", "check", goldens=True)
         self.assertIn("GRADLE check", script)
-        for name in ("default", "turmoil", "feud", "famine"):
+        for name in ("default", "turmoil", "feud", "famine", "schism"):
             self.assertIn(f"--golden=tests/golden/{name}-10d.txt.gz", script)
+            self.assertIn(f"--state-golden=tests/golden/{name}-10d.state.txt.gz", script)
             self.assertIn(f"VERIFY golden-{name}", script)
         self.assertIn("--scenario=turmoil", script)
         self.assertNotIn("golden", verify.remote_script("GRADLE", "check", goldens=False))
@@ -55,7 +56,7 @@ class VerifyTests(unittest.TestCase):
             verify._local, verify.local_golden = original_local, original_golden
             verify.local_toolchain_missing = original_missing
         self.assertIn("gradle check", calls)
-        self.assertEqual(["golden default", "golden turmoil", "golden feud", "golden famine"],
+        self.assertEqual(["golden default", "golden turmoil", "golden feud", "golden famine", "golden schism"],
                          [c for c in calls if c.startswith("golden ")])
 
     def test_local_mode_is_blocked_when_the_toolchain_is_missing(self):

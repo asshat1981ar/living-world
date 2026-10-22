@@ -44,6 +44,36 @@ def famine_seed(start):
         economy=replace(world.economy, treasury=f32(0.0)))
 
 
+def schism_seed(start):
+    """TurmoilScenario.seedSchism"""
+    world = start
+    world = reducer.apply(world, ev.FactionHostilityDeclared(
+        id=world.events.next_id(), time=world.time, declaringFaction="iron_guild", targetFaction="verdant_order",
+        reason="Scenario: a dispute over the mine", witnesses=("elder_rowan",)))
+    for defector in ("herbalist_lyra", "elder_rowan"):
+        world = reducer.apply(world, ev.AllegianceChanged(
+            id=world.events.next_id(), time=world.time, npc=defector, oldFaction="verdant_order",
+            newFaction="iron_guild", reason="Scenario: sided with the guild"))
+    world = reducer.apply(world, ev.EntitiesMet(
+        id=world.events.next_id(), time=world.time, entityA=("npc", "baker_milo"), entityB=("npc", "farmer_giles"),
+        location="market"))
+    world = reducer.apply(world, ev.EntitiesMet(
+        id=world.events.next_id(), time=world.time, entityA=("npc", "apprentice"), entityB=("npc", "merchant"),
+        location="market"))
+    smith = world.npc("blacksmith_krag")
+    world = replace(world, npcs=dict(world.npcs, **{
+        "blacksmith_krag": replace(
+            smith, resources=replace(smith.resources, items=smith.resources.items + ("iron_sword",)))
+    }))
+    world = reducer.apply(world, ev.TradeCompleted(
+        id=world.events.next_id(), time=world.time, buyer=("npc", "baker_milo"), seller=("npc", "blacksmith_krag"),
+        item="iron_sword", price=f32(12.0), witnesses=("merchant",)))
+    tanner = world.npc("tanner_garth")
+    return replace(world, npcs=dict(world.npcs, tanner_garth=replace(
+        tanner, resources=replace(tanner.resources, health=f32(20.0)),
+        emotionalState=replace(tanner.emotionalState, fear=f32(0.8)))))
+
+
 def feud_seed(start):
     """TurmoilScenario.seedFeud"""
     return reducer.apply(start, ev.RelationshipShifted(

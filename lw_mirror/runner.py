@@ -1,7 +1,7 @@
 from . import dump as _dump
 from . import engine
 from . import state_dump as _state_dump
-from .scenarios import famine_seed, feud_seed, turmoil_seed
+from .scenarios import famine_seed, feud_seed, schism_seed, turmoil_seed
 from .world import market_village
 from .worldtime import TICKS_PER_DAY
 
@@ -14,8 +14,10 @@ def _final_world(scenario, days):
         world = feud_seed(world)
     elif scenario == "famine":
         world = famine_seed(world)
+    elif scenario == "schism":
+        world = schism_seed(world)
     elif scenario != "default":
-        raise ValueError(f"unknown scenario '{scenario}' (default, turmoil, feud, famine)")
+        raise ValueError(f"unknown scenario '{scenario}' (default, turmoil, feud, famine, schism)")
     return engine.advance(world, days * TICKS_PER_DAY)
 
 

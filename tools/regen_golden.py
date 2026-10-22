@@ -16,7 +16,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SCENARIOS = {"default": "", "turmoil": " --scenario=turmoil", "feud": " --scenario=feud",
-             "famine": " --scenario=famine"}
+             "famine": " --scenario=famine", "schism": " --scenario=schism"}
 DAYS = 10
 
 

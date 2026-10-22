@@ -172,7 +172,7 @@ GOLDEN_RUNS = tuple(
     (f"golden {name}", f"10 0{extra} --golden=tests/golden/{name}-10d.txt.gz "
                        f"--state-golden=tests/golden/{name}-10d.state.txt.gz")
     for name, extra in (("default", ""), ("turmoil", " --scenario=turmoil"), ("feud", " --scenario=feud"),
-                        ("famine", " --scenario=famine"))
+                        ("famine", " --scenario=famine"), ("schism", " --scenario=schism"))
 )
 
 

@@ -1,7 +1,9 @@
 package com.livingworld.game.desktop
 
 import org.livingworld.core.events.GameEvent
+import org.livingworld.core.ids.FactionId
 import org.livingworld.core.ids.ItemId
+import org.livingworld.core.ids.LocationId
 import org.livingworld.core.ids.NpcId
 import org.livingworld.core.world.DefaultWorldReducer
 import org.livingworld.core.world.WorldState
@@ -66,6 +68,56 @@ object TurmoilScenario {
             npcs = world.npcs + (merchant.id to merchant.copy(resources = merchant.resources.copy(coins = merchant.resources.coins + moved))),
             economy = world.economy.copy(treasury = 0f)
         )
+    }
+
+    /**
+     * A schism: the guild declares hostility toward the order, the order's successor and then its leader switch sides
+     * (the faction ends up leaderless), two NPCs meet (one pair is strangers, one already has a history), the blacksmith
+     * sells a blade to the baker, and the tanner starts wounded and terrified. The engine never produces an allegiance
+     * change, a faction war, a meeting or an NPC-to-NPC trade on its own, so these events are seeded; the tanner takes
+     * the engine's survival rule (Flee). It exists so a golden holds those reducer branches and the mirror's ports.
+     */
+    fun seedSchism(start: WorldState): WorldState {
+        val reducer = DefaultWorldReducer()
+        var world = start
+        fun next() = world.events.nextId()
+
+        world = reducer.apply(world, GameEvent.FactionHostilityDeclared(
+            id = next(), time = world.time, declaringFaction = FactionId("iron_guild"),
+            targetFaction = FactionId("verdant_order"), reason = "Scenario: a dispute over the mine",
+            witnesses = listOf(NpcId("elder_rowan"))
+        ))
+        for (defector in listOf("herbalist_lyra", "elder_rowan")) {
+            world = reducer.apply(world, GameEvent.AllegianceChanged(
+                id = next(), time = world.time, npc = NpcId(defector), oldFaction = FactionId("verdant_order"),
+                newFaction = FactionId("iron_guild"), reason = "Scenario: sided with the guild"
+            ))
+        }
+        // Strangers (a fresh edge) and the apprentice/merchant pair (an edge with a history, which must be kept).
+        world = reducer.apply(world, GameEvent.EntitiesMet(
+            id = next(), time = world.time, entityA = NpcId("baker_milo").toEntityId(),
+            entityB = NpcId("farmer_giles").toEntityId(), location = LocationId("market")
+        ))
+        world = reducer.apply(world, GameEvent.EntitiesMet(
+            id = next(), time = world.time, entityA = NpcId("apprentice").toEntityId(),
+            entityB = NpcId("merchant").toEntityId(), location = LocationId("market")
+        ))
+
+        val smith = world.npc(NpcId("blacksmith_krag"))
+        world = world.copy(npcs = world.npcs + (smith.id to smith.copy(
+            resources = smith.resources.copy(items = smith.resources.items + ItemId("iron_sword"))
+        )))
+        world = reducer.apply(world, GameEvent.TradeCompleted(
+            id = next(), time = world.time, buyer = NpcId("baker_milo").toEntityId(),
+            seller = NpcId("blacksmith_krag").toEntityId(), item = ItemId("iron_sword"), price = 12f,
+            witnesses = listOf(NpcId("merchant"))
+        ))
+
+        val tanner = world.npc(NpcId("tanner_garth"))
+        return world.copy(npcs = world.npcs + (tanner.id to tanner.copy(
+            resources = tanner.resources.copy(health = 20f),
+            emotionalState = tanner.emotionalState.copy(fear = 0.8f)
+        )))
     }
 
     /** A grudge between a vengeful miner and the blacksmith: drives the attack, duel, flee, kill and witness paths. */
