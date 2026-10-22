@@ -1,13 +1,18 @@
 {
-  "project": "living-world-v6",
-  "timestamp": "2026-10-13T14:05:00Z",
-  "status": "baseline",
+  "project": "living-world-v17",
+  "timestamp": "2026-10-22T00:00:00Z",
+  "status": "accepted-with-justification",
   "gates": {
-    "astChurn": "n/a (no change yet)",
-    "mirrorMatch": "n/a",
-    "hygiene": "policy loaded",
-    "isolation": "passed (no new process.env / external deps introduced)"
+    "astChurn": "total LOC +37.2% vs v16 (10,841 -> 14,872); decision density -6.5% (0.0673 -> 0.0629)",
+    "mirrorMatch": "pass: lw_mirror matches the Kotlin event and state dumps for default, turmoil, feud, famine, schism",
+    "hygiene": "pass: no secrets, no tracked build artifacts, 1 TODO, no stashes; invariants 0 errors / 6 known @JvmInline warnings",
+    "isolation": "passed (no dependency changes)"
   },
-  "reasons": ["Initial baseline after forensic + C4 execution"],
-  "next": "Any AI code change must pass all four gates before Drive upload"
+  "reasons": [
+    "Drift rule: total LOC grew more than 5%, justified. lw_mirror (new Python oracle) +2,210; tests +1,780 (2,381 -> 4,161); production code +20.9% (6,392 -> 7,730): game-core +830 (event validator, state digest, closed economy, starvation, emergent politics), androidApp +731 (one shared world), desktopApp +229 (scenarios, dumps); offset by game-ai -523 (GGUF/Hugging Face removal) and 1,347 lines of legacy code deleted.",
+    "Decision density fell 6.5%, an improvement, not a regression.",
+    "Hotspot growth >5% is in the kernel files that gained behaviour: NpcDecisionEngine +82% (1,025 -> 1,869), WorldState +68%, SaveManager +62%, SimulationEngine +42%, WorldReducer +26% (5,566, the largest hotspot): next refactor candidates.",
+    "verify.py exit 0 on the merged tree (Gradle check, five event+state goldens, invariants, 108 tool tests, 4 skipped)."
+  ],
+  "next": "Refactor NpcDecisionEngine.generateCandidates (section-per-function) before adding stage-2 NPC trade; WorldReducer next."
 }
