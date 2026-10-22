@@ -687,7 +687,7 @@ W0 can be prepared in parallel with W1 but should land first, because it is what
 | C1.4 `WorldInvariants` | done | `3e6f2fa` |
 | C1.5 save gate | done — the world's own rules, a required digest and metadata cross-checks | `240a342` |
 | C1.6 replay refuses a repeated id | done | `240a342` |
-| C1.7 90-day fingerprint test | done — the documented fingerprint is now a test, not a sentence in a file | `e1c0f4a` |
+| C1.7 90-day fingerprint test | done — the documented fingerprint is now a test, not a sentence in a file | `6a82338` |
 | C1.1 `EventValidator` | **deferred to W2**: the pre-conditions are only worth enforcing once the stock and life rules exist (W2), and the reducer now refuses the dead cases directly. Throwing in the reducer before that would break tests that deliberately apply odd events. | — |
 
 **W1 exit gate (verified 2026-10-22):** the three goldens are byte-identical, the 90-day fingerprint is unchanged, the
