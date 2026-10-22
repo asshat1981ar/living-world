@@ -41,6 +41,36 @@ class VerifyTests(unittest.TestCase):
         finally:
             verify._local = original
 
+    def test_local_mode_runs_gradle_and_the_three_goldens(self):
+        calls: list[str] = []
+        original_local, original_golden = verify._local, verify.local_golden
+        original_missing = verify.local_toolchain_missing
+        try:
+            verify.local_toolchain_missing = lambda: []
+            verify._local = lambda name, cmd: (calls.append(name) or (name, True, []))
+            verify.local_golden = lambda name, args, root=verify.ROOT: (
+                calls.append("golden " + name) or ("golden " + name, True, []))
+            self.assertEqual(0, verify.main(["--local"]))
+        finally:
+            verify._local, verify.local_golden = original_local, original_golden
+            verify.local_toolchain_missing = original_missing
+        self.assertIn("gradle check", calls)
+        self.assertEqual(["golden default", "golden turmoil", "golden feud"],
+                         [c for c in calls if c.startswith("golden ")])
+
+    def test_local_mode_is_blocked_when_the_toolchain_is_missing(self):
+        original = verify.local_toolchain_missing
+        try:
+            verify.local_toolchain_missing = lambda: ["a JDK"]
+            self.assertEqual(2, verify.main(["--local"]))
+        finally:
+            verify.local_toolchain_missing = original
+
+    def test_golden_verdict_reads_the_output_line(self):
+        self.assertTrue(verify.golden_verdict("Golden          : OK (5117 lines)"))
+        self.assertFalse(verify.golden_verdict("Golden          : MISMATCH at line 6: expected [a] actual [b]"))
+        self.assertFalse(verify.golden_verdict("no golden line here"))
+
 
 if __name__ == "__main__":
     unittest.main()
