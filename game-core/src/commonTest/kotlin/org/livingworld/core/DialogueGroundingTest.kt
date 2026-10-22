@@ -51,6 +51,19 @@ class DialogueGroundingTest {
     }
 
     @Test
+    fun an_invented_lowercase_sentence_is_rejected() {
+        val facts = DialogueGrounding.speakableFacts(listOf(belief(theft, 0.9f, KnowledgeSource.DirectObservation)))
+        assertFalse(
+            GroundingCheck.isGrounded("alden poisoned the well and plans to blame the miller", facts),
+            "an invented lower-case sentence passed the grounding check"
+        )
+        assertTrue(
+            GroundingCheck.isGrounded("I saw it myself: PlayerStole(iron_sword).", facts),
+            "a line that only uses the words of the facts was rejected"
+        )
+    }
+
+    @Test
     fun grounding_check_rejects_invented_names_and_numbers_and_accepts_grounded_lines() {
         val facts = DialogueGrounding.speakableFacts(listOf(belief(theft, 0.9f, KnowledgeSource.DirectObservation)))
         assertTrue(GroundingCheck.isGrounded("Well met, traveler. I saw it myself: PlayerStole(iron_sword).", facts))
