@@ -47,13 +47,18 @@ def famine_seed(start):
 def schism_seed(start):
     """TurmoilScenario.seedSchism"""
     world = start
-    world = reducer.apply(world, ev.FactionHostilityDeclared(
-        id=world.events.next_id(), time=world.time, declaringFaction="iron_guild", targetFaction="verdant_order",
-        reason="Scenario: a dispute over the mine", witnesses=("elder_rowan",)))
     for defector in ("herbalist_lyra", "elder_rowan"):
         world = reducer.apply(world, ev.AllegianceChanged(
             id=world.events.next_id(), time=world.time, npc=defector, oldFaction="verdant_order",
             newFaction="iron_guild", reason="Scenario: sided with the guild"))
+    world = reducer.apply(world, ev.NpcKilled(
+        id=world.events.next_id(), time=world.time, victim="miner_derek", killer=("npc", "farmer_giles"),
+        witnesses=("guildmaster_titus",), location=world.npc("miner_derek").identity.currentLocation,
+        motive="Scenario: a quarrel at the mine"))
+    world = reducer.apply(world, ev.RelationshipShifted(
+        id=world.events.next_id(), time=world.time, source=("npc", "blacksmith_krag"), target=("npc", "guildmaster_titus"),
+        deltaTrust=f32(-0.5), deltaAffection=f32(-0.3), deltaRespect=f32(0.0), deltaFear=f32(0.0),
+        deltaResentment=f32(0.9), reason="Scenario: a broken promise"))
     world = reducer.apply(world, ev.EntitiesMet(
         id=world.events.next_id(), time=world.time, entityA=("npc", "baker_milo"), entityB=("npc", "farmer_giles"),
         location="market"))

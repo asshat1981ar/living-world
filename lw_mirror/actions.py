@@ -50,6 +50,14 @@ class ChangeAllegiance:
 
 
 @dataclass(frozen=True)
+class DeclareHostility:
+    declaring: str
+    target: str
+    victim: str
+    reason: str
+
+
+@dataclass(frozen=True)
 class Attack:
     target: str
     reason: str
@@ -87,6 +95,16 @@ def validate(intent, confidence, npc, world):
             return "Price must be positive and within bounded economy limits"
     elif isinstance(intent, ChangeAllegiance):
         if intent.newFaction not in world.factions:
+            return "Target faction does not exist"
+    elif isinstance(intent, DeclareHostility):
+        declaring = world.factions.get(intent.declaring)
+        if declaring is None:
+            return "Declaring faction does not exist"
+        if declaring.leadership.leader != npc.id:
+            return "Only the leader can declare hostility for the faction"
+        if intent.target == intent.declaring:
+            return "A faction cannot declare hostility on itself"
+        if intent.target not in world.factions:
             return "Target faction does not exist"
     elif isinstance(intent, InheritShop):
         deceased = world.npcs.get(intent.deceased)

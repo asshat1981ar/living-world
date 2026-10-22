@@ -11,6 +11,8 @@ F = f32
 RUMOR_BASE_UTILITY = F(0.3)
 RUMOR_NEWS_WEIGHT = F(0.4)
 RUMOR_FADE_PER_DAY = F(0.25)
+DEFECTION_UTILITY = F(0.65)
+WAR_UTILITY = F(0.8)
 MEMORY_RECALL_LIMIT = 8
 _DAY_F = F(TICKS_PER_DAY)
 
@@ -123,7 +125,57 @@ def generate_candidates(npc, world):
         if rel.resentment > F(0.7) or rel.trust < F(-0.6):
             cands.append(Candidate(ac.Attack(other.id, "Simmering resentment erupted into violence"),
                                    [F(0.6)], risks=[(F(0.5), F(0.9))]))
+    _politics(npc, world, cands)
     return cands
+
+
+def _leader_is_bearable(npc, faction, world):
+    leader = faction.leadership.leader
+    if leader is None:
+        return True
+    rel = world.relationships.get(("npc", npc.id), ("npc", leader))
+    return rel.resentment <= F(0.3) and rel.trust >= 0.0
+
+
+def _politics(npc, world, cands):
+    """Defection and war; both read only what the NPC itself feels (its own edges) or believes (G2)."""
+    home = world.factions.get(npc.factions[0]) if npc.factions else None
+    home_leader = home.leadership.leader if home is not None else None
+    if home is not None and home_leader is not None and home_leader != npc.id:
+        faith = world.relationships.get(("npc", npc.id), ("npc", home_leader))
+        if faith.resentment > F(0.7) or faith.trust < F(-0.6):
+            refuge = None
+            for f in sorted(world.factions.values(), key=lambda f: f.id):
+                if f.id != home.id and f.id not in npc.factions and _leader_is_bearable(npc, f, world):
+                    refuge = f
+                    break
+            if refuge is not None:
+                cands.append(Candidate(ac.ChangeAllegiance(refuge.id, f"Lost faith in {home_leader}"),
+                                       [DEFECTION_UTILITY]))
+    factions = sorted(world.factions.values(), key=lambda f: f.id)
+    for faction in factions:
+        if faction.leadership.leader != npc.id:
+            continue
+        for rival in factions:
+            if rival.id == faction.id or rival.id in faction.enemies:
+                continue
+            grievance = None
+            for b in npc.beliefs.all():
+                if b.confidence < F(0.5):
+                    continue
+                p = b.proposition
+                if not isinstance(p, bf.EntityKilledNpc):
+                    continue
+                killer = p.killer[1] if p.killer[0] == "npc" else None
+                victim = world.npcs.get(p.victim)
+                ours = p.victim in faction.members or (victim is not None and faction.id in victim.factions)
+                if ours and killer is not None and killer in rival.members:
+                    if grievance is None or p.describe() < grievance.describe():
+                        grievance = p
+            if grievance is not None:
+                cands.append(Candidate(
+                    ac.DeclareHostility(faction.id, rival.id, grievance.victim, f"Retaliation: {grievance.describe()}"),
+                    [WAR_UTILITY]))
 
 
 def is_survival_override(npc):

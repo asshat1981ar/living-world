@@ -299,6 +299,17 @@ class SimulationEngine(
                 )
                 reducer.apply(state, changeEvent)
             }
+            is Intent.DeclareHostility -> {
+                val warEvent = GameEvent.FactionHostilityDeclared(
+                    id = eventId,
+                    time = time,
+                    causalEventId = CausalLinks.deathOf(state.events, intent.victim, time) ?: cause,
+                    declaringFaction = intent.declaring,
+                    targetFaction = intent.target,
+                    reason = intent.reason
+                )
+                reducer.apply(state, warEvent)
+            }
             is Intent.Attack -> executeAttack(state, npc, intent, eventId, cause)
             is Intent.InheritShop -> {
                 val inheritEvent = GameEvent.ShopInherited(

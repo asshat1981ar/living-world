@@ -54,6 +54,15 @@ sealed interface Intent {
         override val description: String get() = "Switch allegiance to ${newFaction.value} ($reason)"
     }
 
+    /**
+     * A faction's leader takes it to war with [target]; [declaring] must be a faction the NPC leads. [victim] is the
+     * member whose killing is avenged, so the declaration can name that killing as its cause (G6).
+     */
+    @Serializable
+    data class DeclareHostility(val declaring: FactionId, val target: FactionId, val victim: NpcId, val reason: String) : Intent {
+        override val description: String get() = "Declare hostility from ${declaring.value} to ${target.value} ($reason)"
+    }
+
     @Serializable
     data class Attack(val target: NpcId, val reason: String) : Intent {
         override val description: String get() = "Attack ${target.value} ($reason)"
@@ -136,6 +145,7 @@ class DefaultActionValidator : ActionValidator {
             is Intent.ShareRumor -> validateShareRumor(action, npc, world)
             is Intent.ChangePrice -> validateChangePrice(action)
             is Intent.ChangeAllegiance -> validateChangeAllegiance(action, world)
+            is Intent.DeclareHostility -> validateDeclareHostility(action, npc, world)
             is Intent.InheritShop -> validateInheritShop(action, world)
             is Intent.Rest, is Intent.Flee -> null
         }
@@ -213,6 +223,19 @@ class DefaultActionValidator : ActionValidator {
     private fun validateChangeAllegiance(action: Intent.ChangeAllegiance, world: WorldState): Throwable? {
         if (!world.factions.containsKey(action.newFaction)) {
             return IllegalStateException("Target faction ${action.newFaction.value} does not exist")
+        }
+        return null
+    }
+
+    private fun validateDeclareHostility(action: Intent.DeclareHostility, npc: Npc, world: WorldState): Throwable? {
+        val declaring = world.factions[action.declaring]
+            ?: return IllegalStateException("Declaring faction ${action.declaring.value} does not exist")
+        if (declaring.leadership.leader != npc.id) {
+            return IllegalStateException("Only the leader of ${action.declaring.value} can declare hostility for it")
+        }
+        if (action.target == action.declaring) return IllegalStateException("A faction cannot declare hostility on itself")
+        if (!world.factions.containsKey(action.target)) {
+            return IllegalStateException("Target faction ${action.target.value} does not exist")
         }
         return null
     }

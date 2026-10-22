@@ -28,6 +28,9 @@ log and the commits). The first items need no approval and no golden re-record.
       names one faction by its display name and the other by its raw id ("Open hostility between The Iron Guild and
       verdant_order", visible in `schism-10d.state.txt.gz`); fixing it re-records the goldens (`golden`), so pin it with a
       `current_behaviour_*` test first. (c) `golden_verdict`/`golden_check` match the prefix `OK`; match `OK (<n> lines)`.
+- [ ] **Emergent politics, stage 2: NPC-to-NPC trade** `[ask]` `golden` L. Villagers still only trade with the player;
+      an NPC choice to sell stock to a hungry or needy neighbour changes the closed economy and the default fingerprint
+      (re-tune against the 90-day run first, as the closed-economy entry in CLAUDE.md did).
 **W3 — test depth**
 
 - [x] **Replay and soak compare the whole state** M. Factions, relationships, economy, quests, the player and the
@@ -79,6 +82,9 @@ log and the commits). The first items need no approval and no golden re-record.
 
 ## Done
 
+- [x] **Emergent politics, stage 1** L `golden`. Defection and war declaration are NPC choices read from the NPC's own
+      feelings and beliefs (CLAUDE.md "Emergent politics"); the schism golden was re-recorded (engine-produced war and
+      defection), the other four goldens and the default fingerprint did not move; `lw_mirror` matches byte for byte.
 - [x] **A golden scenario for uncovered kernel paths** M. The `schism` scenario seeds a faction war, two allegiance
       changes, two meetings, an NPC-to-NPC trade and a frightened wounded NPC; event and state goldens are new files
       (nothing re-recorded) and `lw_mirror` matched both on the first run, so those ports are verified. The engine never
