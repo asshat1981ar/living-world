@@ -27,6 +27,23 @@ def turmoil_seed(start):
         location=world.npc("blacksmith_krag").identity.currentLocation))
 
 
+def famine_seed(start):
+    """TurmoilScenario.seedFamine"""
+    world = start
+    moved = world.economy.treasury
+    for npc_id in ("blacksmith_krag", "tanner_garth"):
+        npc = world.npc(npc_id)
+        moved = f32(moved + npc.resources.coins)
+        world = replace(world, npcs=dict(world.npcs, **{npc_id: replace(
+            npc, resources=replace(npc.resources, food=f32(0.0), coins=f32(0.0), health=f32(20.0)))}))
+    merchant = world.npc("merchant")
+    return replace(
+        world,
+        npcs=dict(world.npcs, merchant=replace(
+            merchant, resources=replace(merchant.resources, coins=f32(merchant.resources.coins + moved)))),
+        economy=replace(world.economy, treasury=f32(0.0)))
+
+
 def feud_seed(start):
     """TurmoilScenario.seedFeud"""
     return reducer.apply(start, ev.RelationshipShifted(

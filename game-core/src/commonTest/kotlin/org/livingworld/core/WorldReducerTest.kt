@@ -303,7 +303,7 @@ class WorldReducerTest {
         val r = after.npc(baker).resources
         assertEquals(100f, r.health)
         assertEquals(0f, r.coins)
-        assertEquals(0.5f, r.food)
+        assertEquals(0f, r.food)  // food can run out; starving is the engine's business (StarvationTest)
     }
 
     @Test

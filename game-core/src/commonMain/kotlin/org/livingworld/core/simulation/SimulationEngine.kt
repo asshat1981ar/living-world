@@ -58,7 +58,7 @@ class SimulationEngine(
             current = executeValidatedAction(current, freshNpc, action, cause)
         }
 
-        if (current.time.day > state.time.day) current = collectUpkeep(current)
+        if (current.time.day > state.time.day) current = starveTheHungry(collectUpkeep(current))
 
         // Sprint 5 & RT-15: Evaluate emergent crises and dispatch non-duplicate QuestOpportunities
         current = dispatchEmergentOpportunities(current)
@@ -126,6 +126,15 @@ class SimulationEngine(
                 location = npc.identity.currentLocation,
                 deltaCoins = -DAILY_UPKEEP
             ))
+        }
+        return current
+    }
+
+    /** Once a day every living NPC with no food takes [STARVATION_DAMAGE]; a fatal hit is recorded as a death. */
+    private fun starveTheHungry(state: WorldState): WorldState {
+        var current = state
+        for (npc in current.npcs.values.filter { it.isAlive && it.resources.food <= 0f }.sortedBy { it.id.value }) {
+            current = StarvationEvents.apply(reducer, current, npc.id, STARVATION_DAMAGE)
         }
         return current
     }
@@ -351,6 +360,7 @@ class SimulationEngine(
     companion object {
         const val WORK_WAGE = 0.25f
         const val DAILY_UPKEEP = 3f
+        const val STARVATION_DAMAGE = 30f
         const val RATION_FOOD = 8f
         const val RATION_PRICE = 3f
         const val RATION_TAX = 1f

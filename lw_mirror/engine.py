@@ -17,6 +17,7 @@ _ACTIVE_PHASES = ("MORNING", "MIDDAY", "AFTERNOON")
 # SimulationEngine companion constants
 WORK_WAGE = 0.25
 DAILY_UPKEEP = 3.0
+STARVATION_DAMAGE = 30.0
 RATION_FOOD = 8.0
 RATION_PRICE = 3.0
 RATION_TAX = 1.0
@@ -47,7 +48,7 @@ def tick(state, step):
         action = decision.decide(fresh, current)
         current = execute(current, fresh, action)
     if current.time // worldtime.TICKS_PER_DAY > state.time // worldtime.TICKS_PER_DAY:
-        current = collect_upkeep(current)
+        current = starve_the_hungry(collect_upkeep(current))
     return dispatch_opportunities(current)
 
 
@@ -58,6 +59,29 @@ def collect_upkeep(state):
             id=current.events.next_id(), time=current.time, npc=npc.id, routineType="UPKEEP",
             location=npc.identity.currentLocation, deltaCoins=F(-DAILY_UPKEEP)))
     return current
+
+
+def starve_the_hungry(state):
+    """Once a day every living NPC with no food takes STARVATION_DAMAGE; a fatal hit is recorded as a death."""
+    current = state
+    for npc in sorted((n for n in current.npcs.values() if n.is_alive and n.resources.food <= 0.0), key=lambda n: n.id):
+        current = _starve(current, npc.id)
+    return current
+
+
+def _starve(state, npc_id):
+    npc = state.npcs.get(npc_id)
+    if npc is None or not npc.is_alive or npc.resources.food > 0.0:
+        return state
+    hit = ev.NpcRoutineCompleted(id=state.events.next_id(), time=state.time, npc=npc_id, routineType="STARVE",
+                                 location=npc.identity.currentLocation, deltaHealth=F(-STARVATION_DAMAGE))
+    after = reducer.apply(state, hit)
+    starved = after.npcs.get(npc_id)
+    if starved is None or starved.resources.health > 0.0 or not starved.identity.isAlive:
+        return after
+    kill = ev.NpcKilled(id=after.events.next_id(), time=state.time, victim=npc_id, killer=None, witnesses=(),
+                        causalEventId=hit.id, location=npc.identity.currentLocation, motive="Starvation")
+    return reducer.apply(after, kill)
 
 
 def buy_rations_if_hungry(state, buyer_id):

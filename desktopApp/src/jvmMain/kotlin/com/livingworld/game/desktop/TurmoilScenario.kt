@@ -45,6 +45,29 @@ object TurmoilScenario {
         return reducer.apply(world, theft)
     }
 
+    /**
+     * A famine: the treasury is empty (so no wages are paid on day 0) and two non-producers start with no food, no coins
+     * and poor health, so they cannot buy rations before the first day boundary. The money (the treasury and their
+     * purses) goes to the merchant, so the economy stays closed. It exists so the golden covers the STARVE routine and
+     * the death it causes, which the fed default village never reaches.
+     */
+    fun seedFamine(start: WorldState): WorldState {
+        var world = start
+        var moved = world.economy.treasury
+        for (id in listOf("blacksmith_krag", "tanner_garth")) {
+            val npc = world.npc(NpcId(id))
+            moved += npc.resources.coins
+            world = world.copy(npcs = world.npcs + (npc.id to npc.copy(
+                resources = npc.resources.copy(food = 0f, coins = 0f, health = 20f)
+            )))
+        }
+        val merchant = world.npc(NpcId("merchant"))
+        return world.copy(
+            npcs = world.npcs + (merchant.id to merchant.copy(resources = merchant.resources.copy(coins = merchant.resources.coins + moved))),
+            economy = world.economy.copy(treasury = 0f)
+        )
+    }
+
     /** A grudge between a vengeful miner and the blacksmith: drives the attack, duel, flee, kill and witness paths. */
     fun seedFeud(start: WorldState): WorldState {
         val grudge = GameEvent.RelationshipShifted(

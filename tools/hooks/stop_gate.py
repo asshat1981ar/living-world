@@ -172,6 +172,7 @@ GOLDEN_RUNS = (
     ("golden default", "10 0 --golden=tests/golden/default-10d.txt.gz"),
     ("golden turmoil", "10 0 --scenario=turmoil --golden=tests/golden/turmoil-10d.txt.gz"),
     ("golden feud", "10 0 --scenario=feud --golden=tests/golden/feud-10d.txt.gz"),
+    ("golden famine", "10 0 --scenario=famine --golden=tests/golden/famine-10d.txt.gz"),
 )
 
 

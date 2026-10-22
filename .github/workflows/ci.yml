@@ -59,7 +59,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p build/golden-logs
-          for s in default turmoil feud; do
+          for s in default turmoil feud famine; do
             extra=""
             if [ "$s" != "default" ]; then extra="--scenario=$s"; fi
             log="build/golden-logs/$s.log"

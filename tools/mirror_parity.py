@@ -47,7 +47,7 @@ def compare(expected: list[str], actual: list[str], context: int) -> str | None:
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--scenario", choices=["default", "turmoil", "feud"])
+    ap.add_argument("--scenario", choices=["default", "turmoil", "feud", "famine"])
     ap.add_argument("--context", type=int, default=2)
     args = ap.parse_args(argv)
 

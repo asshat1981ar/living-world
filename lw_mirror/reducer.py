@@ -472,7 +472,7 @@ def _routine(state, event):
         shift = min(event.deltaCoins, coerce_at_least(state.economy.treasury, 0.0))
     else:
         shift = -min(-event.deltaCoins, npc.resources.coins)
-    food = coerce_in(F(npc.resources.food + event.deltaFood), F(0.5), 100.0)
+    food = coerce_in(F(npc.resources.food + event.deltaFood), F(0.0), 100.0)
     updated = replace(npc, resources=replace(npc.resources, health=health, coins=F(npc.resources.coins + shift), food=food),
                       emotionalState=npc.emotionalState.shifted(deltaFear=event.deltaFear))
     next_npcs = _with(state.npcs, npc.id, updated)

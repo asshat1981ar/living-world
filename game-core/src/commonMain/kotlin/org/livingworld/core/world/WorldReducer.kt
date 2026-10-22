@@ -598,7 +598,7 @@ class DefaultWorldReducer : WorldReducer {
         // Coins are a transfer with the treasury (wage in, upkeep out), limited by what the paying side has.
         val coinShift = if (event.deltaCoins >= 0f) minOf(event.deltaCoins, state.economy.treasury.coerceAtLeast(0f))
             else -minOf(-event.deltaCoins, npc.resources.coins)
-        val nextFood = (npc.resources.food + event.deltaFood).coerceIn(0.5f, 100f)
+        val nextFood = (npc.resources.food + event.deltaFood).coerceIn(0f, 100f)
         val updatedNpc = npc.copy(
             resources = npc.resources.copy(health = nextHealth, coins = npc.resources.coins + coinShift, food = nextFood),
             emotionalState = npc.emotionalState.shifted(deltaFear = event.deltaFear)

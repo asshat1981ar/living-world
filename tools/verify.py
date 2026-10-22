@@ -27,6 +27,7 @@ GOLDENS = {
     "default": "10 0",
     "turmoil": "10 0 --scenario=turmoil",
     "feud": "10 0 --scenario=feud",
+    "famine": "10 0 --scenario=famine",
 }
 
 
