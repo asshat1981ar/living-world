@@ -233,6 +233,21 @@ class NpcRoutineCompleted:
 
 
 @dataclass(**_kw)
+class PlayerAttacked:
+    id: int
+    time: int
+    attacker: str
+    damage: float
+    location: str
+    witnesses: tuple = ()
+    causalEventId: Optional[int] = None
+
+    @property
+    def actors(self):
+        return (("npc", self.attacker), ("player", "player"))
+
+
+@dataclass(**_kw)
 class PlayerMoved:
     id: int
     time: int

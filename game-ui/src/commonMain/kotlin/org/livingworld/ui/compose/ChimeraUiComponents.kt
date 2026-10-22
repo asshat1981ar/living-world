@@ -104,6 +104,9 @@ data class TacticalDuelCanvasState(
     val opponentName: String,
     val opponentHealthPercent: Float,
     val opponentIsDeceased: Boolean,
+    /** The player's wounds: a duel can be lost. */
+    val playerHealthPercent: Float = 1f,
+    val playerIsDefeated: Boolean = false,
     val playerStance: CombatStance,
     val opponentStance: CombatStance,
     val playerStanceSprite: SpriteRef?,
@@ -265,11 +268,15 @@ object ChimeraUiLayoutEngine {
         val uiPlayerStance = TacticalDuelVisualAdapter.toUiStance(playerStance)
         val uiOppStance = TacticalDuelVisualAdapter.toUiStance(opponentStance)
 
+        val playerHealthPct = (world.player.health / 100f).coerceIn(0f, 1f)
+
         return TacticalDuelCanvasState(
             opponentId = opponentId,
             opponentName = opponent?.identity?.name ?: opponentId.value,
             opponentHealthPercent = oppHealthPct,
             opponentIsDeceased = opponent == null || !opponent.isAlive,
+            playerHealthPercent = playerHealthPct,
+            playerIsDefeated = world.player.health <= 0f,
             playerStance = uiPlayerStance,
             opponentStance = uiOppStance,
             playerStanceSprite = manifest.resolveCombatStance(isPlayer = true, stance = uiPlayerStance, wounded = false),

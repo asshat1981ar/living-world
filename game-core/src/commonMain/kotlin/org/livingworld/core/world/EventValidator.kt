@@ -104,6 +104,11 @@ object EventValidator {
                     out += "the second party ${event.entityB.identifier} is not in the world"
                 }
             }
+            is GameEvent.PlayerAttacked -> {
+                if (state.npcs[event.attacker] == null) {
+                    out += "the attacker ${event.attacker.value} is not in the world"
+                }
+            }
             is GameEvent.PlayerMoved -> {
                 if (state.locations[event.to] == null) {
                     out += "the place ${event.to.value} does not exist"

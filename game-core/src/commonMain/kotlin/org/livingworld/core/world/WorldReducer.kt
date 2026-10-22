@@ -54,6 +54,7 @@ class DefaultWorldReducer : WorldReducer {
             is GameEvent.NpcAttacked -> applyNpcAttacked(baseState, event)
             is GameEvent.NpcRoutineCompleted -> applyRoutineCompleted(baseState, event)
             is GameEvent.PlayerMoved -> applyPlayerMoved(baseState, event)
+            is GameEvent.PlayerAttacked -> applyPlayerAttacked(baseState, event)
             is GameEvent.OpportunityDispatched -> applyOpportunityDispatched(baseState, event)
         }
     }
@@ -575,6 +576,14 @@ class DefaultWorldReducer : WorldReducer {
             relationships = updatedRels
         )
     }
+
+    /** The player is hit: the wounds are in the world, so a duel can be lost. */
+    private fun applyPlayerAttacked(state: WorldState, event: GameEvent.PlayerAttacked): WorldState =
+        state.copy(
+            player = state.player.copy(
+                health = (state.player.health - event.damage).coerceIn(0f, 100f)
+            )
+        )
 
     /** The player moves: the world keeps the player where they are now, in the ledger. */
     private fun applyPlayerMoved(state: WorldState, event: GameEvent.PlayerMoved): WorldState =

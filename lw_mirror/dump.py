@@ -41,6 +41,8 @@ def line(e):
         body = [e.heir, e.predecessor, e.shopName]
     elif t is ev.FactionHostilityDeclared:
         body = [e.declaringFaction, e.targetFaction, e.reason]
+    elif t is ev.PlayerAttacked:
+        body = [e.attacker, e.location, f4(e.damage)]
     elif t is ev.PlayerMoved:
         body = [e.from_, e.to]
     elif t is ev.NpcRoutineCompleted:

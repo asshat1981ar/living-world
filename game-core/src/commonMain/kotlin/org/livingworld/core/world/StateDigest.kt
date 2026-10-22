@@ -142,6 +142,7 @@ object StateDigest {
         is GameEvent.NpcRoutineCompleted -> "NpcRoutineCompleted"
         is GameEvent.OpportunityDispatched -> "OpportunityDispatched"
         is GameEvent.PlayerMoved -> "PlayerMoved"
+        is GameEvent.PlayerAttacked -> "PlayerAttacked"
     }
 
     private fun emotions(state: EmotionalState): String = listOf(

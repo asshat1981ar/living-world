@@ -117,6 +117,8 @@ def _is_applicable(state, event):
             if entity[0] == "npc" and not _npc_exists(state, entity[1]):
                 return False
         return True
+    if isinstance(event, ev.PlayerAttacked):
+        return _npc_exists(state, event.attacker)
     if isinstance(event, ev.PlayerMoved):
         return event.to in state.locations
     if isinstance(event, ev.PriceAdjusted):
@@ -518,6 +520,10 @@ def _opportunity(state, event):
     return replace(state, activeQuests=state.activeQuests + (quest,))
 
 
+def _player_attacked(state, event):
+    return replace(state, player=replace(state.player, health=max(0.0, min(100.0, state.player.health - event.damage))))
+
+
 def _player_moved(state, event):
     return replace(state, player=replace(state.player, currentLocation=event.to))
 
@@ -538,4 +544,5 @@ _HANDLERS = {
     ev.NpcRoutineCompleted: _routine,
     ev.OpportunityDispatched: _opportunity,
     ev.PlayerMoved: _player_moved,
+    ev.PlayerAttacked: _player_attacked,
 }

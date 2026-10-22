@@ -81,6 +81,8 @@ class TacticalDuelViewModel(
         if (!opponent.isAlive || opponent.resources.health <= 0f) {
             return
         }
+        if (world.player.health <= 0f) return                        // you are already down
+        if (opponent.identity.currentLocation != world.player.currentLocation) return   // you must be there
 
         val playerProxyNpc = Npc(
             id = NpcId("player"),
@@ -94,7 +96,7 @@ class TacticalDuelViewModel(
             traits = listOf(Trait.BRAVE),
             resources = ResourceState(
                 coins = world.player.coins,
-                health = 100f,
+                health = world.player.health,
                 items = world.player.inventory
             )
         )
@@ -122,6 +124,26 @@ class TacticalDuelViewModel(
         )
         store.applyChain { current ->
             AttackEvents.apply(DefaultWorldReducer(), current, attackEvent, motive = "Defeated in tactical duel (${resolution.outcome.description})")
+        }
+
+        // The opponent fights back: a duel can be lost.
+        val afterBlow = store.state.value
+        val wounded = afterBlow.npcs[opponentId]
+        if (wounded != null && wounded.isAlive) {
+            val counter = TacticalCombatResolver.resolveExchange(
+                attacker = wounded,
+                defender = playerProxyNpc,
+                time = afterBlow.time
+            )
+            store.apply(
+                GameEvent.PlayerAttacked(
+                    id = afterBlow.events.nextId(),
+                    time = afterBlow.time,
+                    attacker = opponentId,
+                    damage = counter.finalDamage,
+                    location = afterBlow.player.currentLocation
+                )
+            )
         }
 
         val nextRound = _uiState.value.roundCount + 1
@@ -170,6 +192,13 @@ fun TacticalDuelScreen(
             Text(
                 text = "Opponent Health: ${(state.opponentHealthPercent * 100).toInt()}% ${if (state.opponentIsDeceased) "[DEFEATED]" else ""}",
                 color = Color.White,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 13.sp
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "Your Health: ${(state.playerHealthPercent * 100).toInt()}% ${if (state.playerIsDefeated) "[DEFEATED]" else ""}",
+                color = if (state.playerIsDefeated) ChimeraSpritePalette.ACCENT_CRIMSON.toComposeColor() else Color.White,
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 13.sp
             )

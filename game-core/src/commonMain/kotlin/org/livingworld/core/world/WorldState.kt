@@ -240,6 +240,8 @@ data class PlayerState(
     val id: EntityId.Player = EntityId.Player("player"),
     val currentLocation: LocationId,
     val coins: Float = 100f,
+    /** The player's wounds: a duel can be lost. */
+    val health: Float = 100f,
     val inventory: List<ItemId> = emptyList(),
     val skills: List<Skill> = emptyList(),
     val values: List<ValueScore> = emptyList(),

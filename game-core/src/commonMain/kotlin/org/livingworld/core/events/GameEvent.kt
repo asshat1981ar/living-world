@@ -342,6 +342,20 @@ sealed interface GameEvent {
     }
 
     @Serializable
+    data class PlayerAttacked(
+        override val id: EventId,
+        override val time: WorldTime,
+        val attacker: NpcId,
+        val damage: Float,
+        val location: LocationId,
+        override val witnesses: List<NpcId> = emptyList(),
+        override val causalEventId: EventId? = null
+    ) : GameEvent {
+        override val actors: List<EntityId> get() = listOf(attacker.toEntityId(), EntityId.Player("player"))
+        override val summary: String get() = "The player was struck by ${attacker.value} for $damage"
+    }
+
+    @Serializable
     data class PlayerMoved(
         override val id: EventId,
         override val time: WorldTime,

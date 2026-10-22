@@ -154,6 +154,22 @@ class ViewModelTests {
     }
 
     @Test
+    fun a_duel_can_be_lost() = runTest {
+        val vm = TacticalDuelViewModel(store, manifest, opponentId = NpcId("miner_derek"))
+        // The player is already wounded: the opponent's counter-blow finishes them.
+        val before = store.state.value
+        store.apply(
+            GameEvent.PlayerAttacked(
+                id = before.events.nextId(), time = before.time, attacker = NpcId("miner_derek"),
+                damage = 70f, location = before.player.currentLocation
+            )
+        )
+        repeat(10) { vm.executeDuelRound(TacticalStance.STRIKE) }
+        assertTrue("the player should be able to lose a duel", vm.uiState.value.playerIsDefeated)
+        assertEquals("the player's wounds are not in the world", 0f, vm.currentWorldState.player.health)
+    }
+
+    @Test
     fun every_screen_shares_one_world() = runTest {
         val shared = WorldStore(world)
         val inventory = InventoryViewModel(shared, manifest)
