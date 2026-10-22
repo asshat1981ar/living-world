@@ -65,15 +65,15 @@ class SaveManagerTest {
     }
 
     @Test
-    fun test_v1_legacy_raw_worldstate_migration_to_v3() {
+    fun test_v1_legacy_raw_worldstate_migration_to_the_current_schema() {
         val world = DefaultVillageFactory.marketVillage()
         val rawV1Json = SaveManager.serializeWorld(world)
 
         assertEquals(1, SaveSchemaMigrator.detectSchemaVersion(rawV1Json))
 
         val migrated = SaveManager.deserializeEnvelope(rawV1Json)
-        assertEquals(3, migrated.schemaVersion)
-        assertEquals(2, migrated.migrationHistory.size)
+        assertEquals(SaveEnvelope.CURRENT_SCHEMA_VERSION, migrated.schemaVersion)
+        assertEquals(3, migrated.migrationHistory.size)
         assertEquals(
             SaveManager.computeDeterministicFingerprint(world),
             migrated.deterministicDigestHex
@@ -81,7 +81,23 @@ class SaveManagerTest {
     }
 
     @Test
-    fun test_tampered_digest_rejected_on_v3_load() {
+    fun a_v3_envelope_migrates_to_typed_relationship_keys() {
+        val world = DefaultVillageFactory.marketVillage()
+        val asV3 = SaveManager.serializeEnvelope(world)
+            .replace("\"schemaVersion\": 4", "\"schemaVersion\": 3")
+            .replace("npc:", "")   // the old, untyped edge keys
+
+        val migrated = SaveManager.deserializeEnvelope(asV3)
+        assertEquals(SaveEnvelope.CURRENT_SCHEMA_VERSION, migrated.schemaVersion)
+        assertTrue(migrated.migrationHistory.any { it.startsWith("v3->v4") })
+        assertTrue(
+            migrated.worldState.relationships.allEdges().keys.all { it.contains(":") },
+            "the relationship keys were not typed: ${migrated.worldState.relationships.allEdges().keys}"
+        )
+    }
+
+    @Test
+    fun test_tampered_digest_rejected_on_load() {
         val world = DefaultVillageFactory.marketVillage()
         val encoded = SaveManager.serializeEnvelope(world)
         val tampered = encoded.replace(

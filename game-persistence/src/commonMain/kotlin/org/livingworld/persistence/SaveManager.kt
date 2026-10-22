@@ -9,6 +9,7 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import org.livingworld.core.events.GameEvent
 import org.livingworld.core.world.DefaultWorldReducer
+import org.livingworld.core.world.StateDigest
 import org.livingworld.core.world.WorldInvariants
 import org.livingworld.core.world.WorldReducer
 import org.livingworld.core.world.WorldState
@@ -24,7 +25,7 @@ data class SaveEnvelope(
     val migrationHistory: List<String> = emptyList()
 ) {
     companion object {
-        const val CURRENT_SCHEMA_VERSION = 3
+        const val CURRENT_SCHEMA_VERSION = 4
     }
 }
 
@@ -56,50 +57,88 @@ object SaveSchemaMigrator {
                 val legacyState = json.decodeFromString<WorldState>(rawJson)
                 SaveManager.validateWorldIntegrity(legacyState).getOrThrow()
                 val digest = SaveManager.computeDeterministicFingerprint(legacyState)
-                SaveEnvelope(
-                    schemaVersion = SaveEnvelope.CURRENT_SCHEMA_VERSION,
-                    savedAtTick = legacyState.time.tick,
-                    eventCount = legacyState.events.size,
-                    stateHash = SaveManager.stateHashOf(digest),
-                    deterministicDigestHex = digest,
-                    worldState = legacyState,
-                    migrationHistory = listOf("v1->v2: wrapped raw WorldState", "v2->v3: added deterministicDigestHex")
+                migrateV3ToV4(
+                    SaveEnvelope(
+                        schemaVersion = 3,
+                        savedAtTick = legacyState.time.tick,
+                        eventCount = legacyState.events.size,
+                        stateHash = SaveManager.stateHashOf(digest),
+                        deterministicDigestHex = digest,
+                        worldState = legacyState,
+                        migrationHistory = listOf("v1->v2: wrapped raw WorldState", "v2->v3: added deterministicDigestHex")
+                    )
                 )
             }
             2 -> {
                 val v2Envelope = json.decodeFromString<SaveEnvelope>(rawJson)
                 SaveManager.validateWorldIntegrity(v2Envelope.worldState).getOrThrow()
                 val digest = SaveManager.computeDeterministicFingerprint(v2Envelope.worldState)
-                v2Envelope.copy(
-                    schemaVersion = SaveEnvelope.CURRENT_SCHEMA_VERSION,
-                    eventCount = v2Envelope.worldState.events.size,
-                    savedAtTick = v2Envelope.worldState.time.tick,
-                    deterministicDigestHex = digest,
-                    migrationHistory = v2Envelope.migrationHistory + "v2->v3: computed deterministicDigestHex"
+                migrateV3ToV4(
+                    v2Envelope.copy(
+                        schemaVersion = 3,
+                        eventCount = v2Envelope.worldState.events.size,
+                        savedAtTick = v2Envelope.worldState.time.tick,
+                        deterministicDigestHex = digest,
+                        migrationHistory = v2Envelope.migrationHistory + "v2->v3: computed deterministicDigestHex"
+                    )
                 )
             }
-            else -> {
+            3 -> {
                 val v3Envelope = json.decodeFromString<SaveEnvelope>(rawJson)
-                SaveManager.validateWorldIntegrity(v3Envelope.worldState).getOrThrow()
-                // A v3 envelope must carry the digest of the world it holds; without it nothing is verified.
-                require(v3Envelope.deterministicDigestHex.isNotBlank()) {
+                migrateV3ToV4(v3Envelope)
+            }
+            else -> {
+                val envelope = json.decodeFromString<SaveEnvelope>(rawJson)
+                SaveManager.validateWorldIntegrity(envelope.worldState).getOrThrow()
+                // A current envelope must carry the digest of the world it holds; without it nothing is verified.
+                require(envelope.deterministicDigestHex.isNotBlank()) {
                     "SaveEnvelope has no deterministic digest, so its world cannot be verified"
                 }
-                val actualDigest = SaveManager.computeDeterministicFingerprint(v3Envelope.worldState)
-                require(actualDigest == v3Envelope.deterministicDigestHex) {
-                    "SaveEnvelope digest mismatch: expected ${v3Envelope.deterministicDigestHex}, got $actualDigest"
+                val actualDigest = SaveManager.computeDeterministicFingerprint(envelope.worldState)
+                require(actualDigest == envelope.deterministicDigestHex) {
+                    "SaveEnvelope digest mismatch: expected ${envelope.deterministicDigestHex}, got $actualDigest"
                 }
-                require(v3Envelope.eventCount == v3Envelope.worldState.events.size) {
-                    "SaveEnvelope says ${v3Envelope.eventCount} events but the world holds " +
-                        "${v3Envelope.worldState.events.size}"
+                require(envelope.eventCount == envelope.worldState.events.size) {
+                    "SaveEnvelope says ${envelope.eventCount} events but the world holds " +
+                        "${envelope.worldState.events.size}"
                 }
-                require(v3Envelope.savedAtTick == v3Envelope.worldState.time.tick) {
-                    "SaveEnvelope says tick ${v3Envelope.savedAtTick} but the world is at " +
-                        "${v3Envelope.worldState.time.tick}"
+                require(envelope.savedAtTick == envelope.worldState.time.tick) {
+                    "SaveEnvelope says tick ${envelope.savedAtTick} but the world is at " +
+                        "${envelope.worldState.time.tick}"
                 }
-                v3Envelope
+                envelope
             }
         }
+    }
+
+    /**
+     * v3 -> v4: relationship edges gain the kind of both parties (an NPC and a player may share a name), and the
+     * digest is recomputed with the full-state digest, which sees beliefs, items, the player and the quests.
+     */
+    private fun migrateV3ToV4(envelope: SaveEnvelope): SaveEnvelope {
+        val playerId = envelope.worldState.player.id.identifier
+        fun typed(part: String?): String {
+            if (part == null) return "-"
+            if (part.contains(':')) return part
+            return if (part == playerId) "player:$part" else "npc:$part"
+        }
+        val rewritten = envelope.worldState.relationships.allEdges().entries.associate { (key, rel) ->
+            val parts = key.split("->")
+            "${typed(parts.getOrNull(0))}->${typed(parts.getOrNull(1))}" to rel
+        }
+        val world = envelope.worldState.copy(
+            relationships = envelope.worldState.relationships.withEdges(rewritten)
+        )
+        val digest = SaveManager.computeDeterministicFingerprint(world)
+        return envelope.copy(
+            schemaVersion = SaveEnvelope.CURRENT_SCHEMA_VERSION,
+            savedAtTick = world.time.tick,
+            eventCount = world.events.size,
+            stateHash = SaveManager.stateHashOf(digest),
+            deterministicDigestHex = digest,
+            worldState = world,
+            migrationHistory = envelope.migrationHistory + "v3->v4: typed relationship keys, full-state digest"
+        )
     }
 }
 
@@ -112,48 +151,15 @@ object SaveManager {
     }
 
     /**
-     * Computes a platform-independent, deterministic FNV-1a 64-bit hex fingerprint of the complete
-     * authoritative WorldState covering NPCs, beliefs, factions, relationships, and economy (RT-12 hardened).
+     * A platform-independent, deterministic digest of the complete authoritative world: the NPCs with their beliefs,
+     * memories, items and feelings, the factions, the relationships, the economy, the places, the quests, the player
+     * and the shape of the ledger. The full-state digest (v2) replaced the old projection, which ignored exactly the
+     * parts that a behaviour change usually touches.
      */
+    fun computeDeterministicFingerprint(state: WorldState): String = StateDigest.of(state)
+
     /** Platform-independent 32-bit state hash: the low 32 bits of the FNV-1a digest (data-class hashCode() is not stable). */
     fun stateHashOf(digestHex: String): Int = digestHex.takeLast(8).toLong(16).toInt()
-
-    fun computeDeterministicFingerprint(state: WorldState): String {
-        val canonicalBuilder = StringBuilder()
-        canonicalBuilder.append("seed=").append(state.seed)
-        canonicalBuilder.append("|tick=").append(state.time.tick)
-        canonicalBuilder.append("|events=").append(state.events.size)
-        for ((npcId, npc) in state.npcs.entries.sortedBy { it.key.value }) {
-            canonicalBuilder.append("|npc=").append(npcId.value)
-                .append(":").append(npc.isAlive)
-                .append(":").append((npc.resources.health * 100).toInt())
-                .append(":").append((npc.resources.coins * 100).toInt())
-                .append(":").append((npc.resources.food * 100).toInt())
-                .append(":").append(npc.identity.occupation)
-                .append(":b=").append(npc.beliefs.all().size)
-                .append(":m=").append(npc.memories.size)
-        }
-        for ((factionId, faction) in state.factions.entries.sortedBy { it.key.value }) {
-            val enemiesSorted = faction.enemies.map { it.value }.sorted().joinToString(",")
-            canonicalBuilder.append("|fac=").append(factionId.value).append(":e=").append(enemiesSorted)
-        }
-        for ((edgeKey, rel) in state.relationships.allEdges().entries.sortedBy { it.key }) {
-            canonicalBuilder.append("|rel=").append(edgeKey)
-                .append(":").append((rel.overallSentiment * 100).toInt())
-        }
-        for ((item, price) in state.economy.itemPrices.entries.sortedBy { it.key }) {
-            canonicalBuilder.append("|item=").append(item).append(":").append((price * 100).toInt())
-        }
-
-        val payload = canonicalBuilder.toString()
-        var hash = -0x340d631b7bdddcdbL
-        val prime = 0x100000001b3L
-        for (ch in payload) {
-            hash = hash xor ch.code.toLong()
-            hash *= prime
-        }
-        return hash.toULong().toString(16).padStart(16, '0')
-    }
 
     fun serializeWorld(state: WorldState): String {
         validateWorldIntegrity(state).getOrThrow()
