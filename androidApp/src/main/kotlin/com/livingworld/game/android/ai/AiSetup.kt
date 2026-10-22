@@ -102,9 +102,39 @@ class ModelDownloader(
 ) {
     fun fileFor(model: ModelAssetDescriptor) = File(directory, model.targetFileName)
 
-    /** Present with the pinned size; the sha256 was checked when it was downloaded. */
-    fun isInstalled(model: ModelAssetDescriptor): Boolean =
-        fileFor(model).let { it.isFile && ModelIntegrity.sizeProblem(model, it.length()) == null }
+    /**
+     * Present *and* verified: the file must have the pinned size and the pinned digest. The digest is checked when
+     * the model is downloaded and re-checked whenever the file changed since; a stamp file keeps the common case
+     * free (hashing 345 MB on every launch would be a second of jank).
+     */
+    fun isInstalled(model: ModelAssetDescriptor): Boolean {
+        val file = fileFor(model)
+        if (!file.isFile || ModelIntegrity.sizeProblem(model, file.length()) != null) return false
+        val stamp = stampFile(model)
+        val fingerprint = "${file.length()}-${file.lastModified()}"
+        val recorded = stamp.takeIf { it.isFile }?.readText()?.trim()
+        if (recorded != null && recorded.substringAfter('|') == fingerprint) return true
+        val digest = sha256Of(file)
+        if (!ModelIntegrity.digestMatches(model, digest)) return false
+        runCatching { stamp.writeText("$digest|$fingerprint") }
+        return true
+    }
+
+    /** The file that remembers when this model was last verified. */
+    private fun stampFile(model: ModelAssetDescriptor) = File(directory, model.targetFileName + ".verified")
+
+    private fun sha256Of(file: File): String {
+        val digest = java.security.MessageDigest.getInstance("SHA-256")
+        file.inputStream().use { input ->
+            val buffer = ByteArray(1 shl 16)
+            while (true) {
+                val read = input.read(buffer)
+                if (read < 0) break
+                digest.update(buffer, 0, read)
+            }
+        }
+        return digest.digest().joinToString("") { "%02x".format(it.toInt() and 0xff) }
+    }
 
     fun delete(model: ModelAssetDescriptor) {
         fileFor(model).delete()

@@ -112,6 +112,9 @@ class OnDeviceChatModel(
         }
         service = null
         connecting = null
+        // A request that is still in flight must not wait for the full timeout: fail it now.
+        pending?.completeExceptionally(ModelProcessDied())
+        pending = null
     }
 
     private suspend fun bound(): Messenger {

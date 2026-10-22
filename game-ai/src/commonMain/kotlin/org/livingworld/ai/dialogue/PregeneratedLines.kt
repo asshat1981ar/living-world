@@ -47,8 +47,16 @@ class PregeneratedLines(private val voice: GroundedDialogueVoice, private val ca
 
     fun lineFor(request: LineRequest): String? = ready[keyOf(request)]
 
+    /**
+     * A line belongs to the NPC, the topic, the place and the facts the NPC can speak: the same question asked at
+     * another place, or after the NPC learned something, must not be answered with the old line.
+     *
+     * The relationship is deliberately not part of the key: the lines for the next turn are prepared before the last
+     * change of heart lands, so a key that included the feeling would make the freshest line unreachable.
+     */
     private fun keyOf(r: LineRequest): String =
         r.npc.id.value + "\u0000" + voice.sanitizePlayerText(r.topic) + "\u0000" +
+            r.location.value + "\u0000" +
             DialogueGrounding.speakableFacts(r.beliefs).joinToString("\u0001") { it.line }
 
     /** Drops the oldest entries; insertion-ordered collections keep this deterministic. */

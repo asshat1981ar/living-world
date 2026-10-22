@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The on-device model is 345 MB and is downloaded on demand; it must never be uploaded to a cloud backup.
+  The AI settings (a few flags) are small and are worth keeping.
+-->
+<full-backup-content>
+    <exclude domain="file" path="models/" />
+</full-backup-content>

@@ -84,7 +84,11 @@ class AiSetupTest {
         assertArrayEquals(body, file.readBytes())
         assertEquals(1000L, progress.last())
         assertTrue(downloader.isInstalled(asset))
-        assertEquals(listOf("m.litertlm"), tmp.root.list()!!.toList())
+        assertEquals(
+            "the model and the file that remembers it was verified",
+            setOf("m.litertlm", "m.litertlm.verified"),
+            tmp.root.list()!!.toSet()
+        )
     }
 
     @Test

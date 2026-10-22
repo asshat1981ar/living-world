@@ -42,6 +42,10 @@ data class AiUiState(
  * is downloaded once and verified. The model runs in its own process; a crash there turns the AI off with a notice.
  */
 class AiController(context: Context, private val dialogue: DialogueViewModel, private val scope: CoroutineScope) {
+
+    private companion object {
+        const val MAX_REDIRECTS = 5
+    }
     private val app = context.applicationContext
     private val settings = AiSettingsRepository(SharedPreferencesStore(app.getSharedPreferences("ai_settings", Context.MODE_PRIVATE)))
     private val downloader = ModelDownloader(File(app.filesDir, "models"), open = ::openHttps)
@@ -188,14 +192,39 @@ class AiController(context: Context, private val dialogue: DialogueViewModel, pr
 
     private fun seconds(ms: Long) = "%.1f s".format(ms / 1000.0)
 
+    /** Opens a model URL, following redirects only to hosts we trust. */
     private fun openHttps(url: String): InputStream {
-        val connection = URL(url).openConnection() as HttpURLConnection
-        connection.connectTimeout = 20_000
-        connection.readTimeout = 60_000
-        connection.instanceFollowRedirects = true
-        val status = connection.responseCode
-        if (status !in 200..299) throw IllegalStateException("Hugging Face returned HTTP $status")
-        return connection.inputStream
+        require(isAllowed(url)) { "refusing to download from $url" }
+        var current = url
+        repeat(MAX_REDIRECTS + 1) {
+            val connection = URL(current).openConnection() as HttpURLConnection
+            connection.connectTimeout = 20_000
+            connection.readTimeout = 60_000
+            connection.instanceFollowRedirects = false
+            val status = connection.responseCode
+            if (status in 300..399) {
+                val location = connection.getHeaderField("Location")
+                connection.disconnect()
+                if (location == null) throw IllegalStateException("redirect without a target")
+                val next = URL(URL(current), location).toString()
+                require(isAllowed(next)) { "refusing to follow a redirect to $next" }
+                current = next
+                return@repeat
+            }
+            if (status !in 200..299) {
+                connection.disconnect()
+                throw IllegalStateException("Hugging Face returned HTTP $status")
+            }
+            return connection.inputStream
+        }
+        throw IllegalStateException("too many redirects")
+    }
+
+    /** Only https on Hugging Face itself (or its CDN) may be fetched. */
+    private fun isAllowed(url: String): Boolean {
+        val parsed = URL(url)
+        return parsed.protocol == "https" &&
+            (parsed.host == "huggingface.co" || parsed.host.endsWith(".huggingface.co"))
     }
 }
 
