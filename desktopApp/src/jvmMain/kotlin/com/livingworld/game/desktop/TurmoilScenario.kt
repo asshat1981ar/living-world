@@ -30,6 +30,12 @@ object TurmoilScenario {
         )
         world = reducer.apply(world, found)
 
+        // The blacksmith owns the blade, so the theft actually moves something.
+        val smith = world.npc(NpcId("blacksmith_krag"))
+        world = world.copy(npcs = world.npcs + (smith.id to smith.copy(
+            resources = smith.resources.copy(items = smith.resources.items + ItemId("iron_sword"))
+        )))
+
         val theft = GameEvent.ItemStolen(
             id = world.events.nextId(), time = world.time,
             thief = NpcId("miner_derek").toEntityId(), item = ItemId("iron_sword"),
