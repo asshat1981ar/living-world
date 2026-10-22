@@ -1,27 +1,20 @@
-# Restart here — 2026-10-22 (end of the unattended session)
+# Restart here — 2026-10-22 (after the audit and the merges)
 
-  - Branch `cline/6cjpf2h3` is green at `1068f9f` (`verify.py` exit 0 before the last docs commit). Pushed up to `3b7be85`;
-    `2e049b6` (schism scenario) and `1068f9f` (gate fixes) are local only. CI did not start a run for the push (only the
-    old PR run exists): check `.github/workflows/ci.yml` triggers before relying on it.
-  - **In flight: emergent politics, stage 1**, parked on branch `wip/emergent-politics` (`0c9e13c`, not green, not merged).
-    It adds `Intent.DeclareHostility`, defection and war candidates in `NpcDecisionEngine` (thresholds copy `Attack`'s;
-    a defector needs a refuge whose leader it does not resent, so it cannot flip-flop; a leader needs a belief with
-    confidence >= 0.5 that a rival-faction member killed one of its members), and `EmergentPoliticsTest`.
-    **10 of 12 tests pass.** The two failures are the end-to-end ones (`the_war_is_declared_in_the_ledger_...` fails at
-    `EmergentPoliticsTest.kt:138`, `a_resentful_member_defects_in_the_ledger`): the candidate exists but a day of ticks
-    produced no single matching event. Read the test report first (`game-core/build/reports/tests` on awsbox) and check
-    whether another candidate outscored it or `advance` ran the NPC at all; do not guess.
-  - Still to do for stage 1, in order: fix those two tests; port to `lw_mirror` (`actions.py` intent + validator,
-    `decision.py` candidates in the same order and with the same f32 thresholds, `engine.py` executor); extend the
-    `schism` seed with a cross-faction killing and a resentful member so the engine path is under golden; run
-    `python3 -I tools/regen_golden.py`, then `python3 -I tools/mirror_parity.py`, then `python3 -I tools/verify.py`. The five
-    existing goldens and the default fingerprint `e6879917a1d38d09` should NOT move (the quiet village has no grievance
-    and no cross-faction killing); if any does, that is a finding, not something to re-record. Run `invariant-auditor`
-    and `ecc:code-reviewer` on the diff before merging.
-  - Stage 2 (emergent NPC-to-NPC trade) would retune the closed economy and move the default fingerprint: `[ask]` first.
-  - `docs/reports/env-tuning-2026-10-22.md` has the tooling proposals; the GateGuard exemption script was given to the
-    user to run (the permission layer blocks the agent from editing its own settings).
-  - Suggested first prompt: "Continue from docs/handoff/last.md: finish `wip/emergent-politics` stage 1."
+  - `cline/6cjpf2h3` and local `main` are the same commit (green: `verify.py` exit 0 with five event+state goldens, 0
+    invariant errors, 108 tool tests). `origin/main` is an ancestor, so a push is a fast-forward. **Nothing from this
+    session after `3b7be85` is pushed (17 commits); pushing needs the user's word.** CI did not start a run for the earlier
+    push (only the old PR run exists): check the workflow triggers in `.github/workflows/ci.yml` before relying on it.
+  - Done since the last brief: emergent politics stage 1 merged (defection + war declaration are NPC choices; schism golden
+    re-recorded, the other four goldens and the default fingerprint `e6879917a1d38d09` did not move; reviewed by
+    `invariant-auditor` and `ecc:code-reviewer`, all four findings fixed); local `main`'s `invariant_guard` fix merged in
+    (the G1/G8/G9 edit guard had been skipping every edit on this phone because of path aliasing); drift audit v17 accepted
+    with justification (`safety-gates/safety-gates-baseline.json`, `forensics/forensic-report-v17.json`).
+  - Next: (1) refactor `NpcDecisionEngine.generateCandidates` (hotspot +82%, now with a politics section) one section per
+    function, no behaviour change, goldens must not move; (2) `WorldReducer` (largest hotspot); (3) the adversarial
+    leftovers in `docs/backlog.md`; (4) stage 2, NPC-to-NPC trade, is `[ask]` (moves the default fingerprint).
+  - `docs/reports/env-tuning-2026-10-22.md` has the tooling proposals. The user applied the GateGuard exemption.
+  - `/ecc:configure-ecc` was started and is waiting on the user's two choices (scope user|project|local; hooks
+    off|minimal|standard|strict); nothing was changed.
 
 # Handoff — 2026-10-22 (unattended session)
 
