@@ -3,28 +3,31 @@ from . import beliefs as bf
 from . import events as ev
 
 
-def _last(ledger, pred):
+def _last(ledger, pred, at=None):
     for e in reversed(ledger.all()):
+        # A cause can only be in the past (G6).
+        if at is not None and e.time > at:
+            continue
         if pred(e):
             return e.id
     return None
 
 
-def death_of(ledger, victim):
-    return _last(ledger, lambda e: isinstance(e, ev.NpcKilled) and e.victim == victim)
+def death_of(ledger, victim, at=None):
+    return _last(ledger, lambda e: isinstance(e, ev.NpcKilled) and e.victim == victim, at)
 
 
-def origin_of(ledger, p):
+def origin_of(ledger, p, at=None):
     if isinstance(p, (bf.EntityKilledNpc, bf.NpcDied)):
-        return death_of(ledger, p.victim)
+        return death_of(ledger, p.victim, at)
     if isinstance(p, bf.PlayerStole):
-        return _last(ledger, lambda e: isinstance(e, ev.ItemStolen) and e.item == p.item)
+        return _last(ledger, lambda e: isinstance(e, ev.ItemStolen) and e.item == p.item, at)
     if isinstance(p, bf.EntityStoleItem):
-        return _last(ledger, lambda e: isinstance(e, ev.ItemStolen) and e.item == p.item and e.thief == p.thief)
+        return _last(ledger, lambda e: isinstance(e, ev.ItemStolen) and e.item == p.item and e.thief == p.thief, at)
     if isinstance(p, bf.PriceChanged):
-        return _last(ledger, lambda e: isinstance(e, ev.PriceAdjusted) and e.item == p.item)
+        return _last(ledger, lambda e: isinstance(e, ev.PriceAdjusted) and e.item == p.item, at)
     if isinstance(p, bf.ShopInheritedProp):
-        return _last(ledger, lambda e: isinstance(e, ev.ShopInherited) and e.heir == p.heir)
+        return _last(ledger, lambda e: isinstance(e, ev.ShopInherited) and e.heir == p.heir, at)
     return None
 
 

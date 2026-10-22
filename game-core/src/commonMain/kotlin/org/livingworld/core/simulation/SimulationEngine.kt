@@ -247,7 +247,7 @@ class SimulationEngine(
                     target = intent.target,
                     transmittedBelief = transmitted,
                     distortion = 0.1f,
-                    causalEventId = CausalLinks.originOf(state.events, intent.belief.proposition)
+                    causalEventId = CausalLinks.originOf(state.events, intent.belief.proposition, time)
                 )
                 reducer.apply(state, rumorEvent)
             }

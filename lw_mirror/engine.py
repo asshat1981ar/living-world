@@ -147,7 +147,7 @@ def execute(state, npc, intent):
         transmitted = transmit_belief(npc, target, intent.belief, time, state.relationships)
         e = ev.RumorTransmitted(id=event_id, time=time, source=npc.id, target=intent.target,
                                 transmittedBelief=transmitted, distortion=F(0.1),
-                                causalEventId=causal.origin_of(state.events, intent.belief.proposition))
+                                causalEventId=causal.origin_of(state.events, intent.belief.proposition, time))
         return reducer.apply(state, e)
     if isinstance(intent, ac.Trade):
         e = ev.TradeCompleted(id=event_id, time=time, buyer=intent.partner, seller=("npc", npc.id),
