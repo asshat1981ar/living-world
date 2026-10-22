@@ -7,6 +7,14 @@ the P0-P11 table in `docs/reports/system-health-2026-10-18.md` as the live queue
 Tags: size S/M/L · `golden` = changes simulation behaviour, so goldens are re-recorded and `lw_mirror` must match ·
 `[ask]` = needs the user's go-ahead first · `[human]` = needs the user's hands (a phone, a login).
 
+**Plan (2026-10-22).** The full fix-and-refactor plan for everything the recon (`docs/reports/recon-2026-10-22.md`) and
+the adversarial pass (`docs/reports/adversarial-2026-10-22.md`) found is `docs/refactor-plan-2026-10-22.md`: eight waves
+(W0 harness → W7 performance), 55 commits, a traceability matrix from every finding to the commit that closes it, and a
+paste-ready item list in its §6. Work the queue in that order; the plan fixes the ordering of the items below.
+Coverage of the items still listed here: "One shared world" → W4, "game-ai cleanups" → C0.8/C5.1, "A golden scenario
+for uncovered kernel paths" → C2.12, "P5 gameplay realism" → W6, "Toolchain" → C5.4, "MemoryStore copies its list on
+every add" → C7.2.
+
 ## Queue
 
 - [ ] **Push and let CI pass** `[ask]` S. Local commits are not on GitHub yet; the on-device AI commits have not been
