@@ -2,10 +2,15 @@
 
 ## `ci-android-sdk-36.patch`
 
-**What it does.** Makes CI install the Android SDK the project now compiles against: `platforms;android-36` and
+**What it does.** Makes CI install the Android SDK the project compiles against: `platforms;android-36` and
 `build-tools;36.0.0` instead of 34.
 
-**Why it is a patch.** The same reason as the patch above: the pushing App token has no `workflows` permission.
+**Why it is a patch.** The pushing App token has no `workflows` permission, so a push that touches
+`.github/workflows/ci.yml` is refused.
+
+**Whether it is needed.** Probably not: AGP downloads the missing platform itself ("Installing Android SDK Platform 36"),
+so the build works on a runner that only has SDK 34. Keep this patch as the fallback for a runner whose SDK licences are
+not accepted - if the CI run fails with "Failed to find target with hash string 'android-36'", apply it.
 
 **How to apply.**
 

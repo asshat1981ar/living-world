@@ -722,7 +722,7 @@ re-recorded again).
 |---|---|---|
 | Grounding v2 | **done** — every word of a reply must be known (the facts, the speaker and place, or a curated small-talk vocabulary), so an invented lower-case sentence is dropped and the kernel line is used | `d81eafd` |
 | `EventValidator` | **done** — one object holds the pre-conditions (the entities an event names must exist, the dead must not act, a trade needs a living seller that holds the item); the reducer and the Python mirror ask it the same question; an event that fails is not recorded at all | `578cff1` |
-| C5.4 toolchain | **done on `feature/toolchain-sdk36`** — Gradle 8.14.6 (sha256-pinned), AGP 8.13.0, compileSdk/targetSdk 36, Compose BOM 2026.06.01; the goldens and the 90-day fingerprint are unchanged, the APK builds, and CI needs `docs/patches/ci-android-sdk-36.patch` (the pushing token may not write workflow files) | — |
+| C5.4 toolchain | **done** — Gradle 8.14.6 (sha256-pinned), AGP 8.13.0, compileSdk/targetSdk 36, Compose BOM 2026.06.01. AGP downloads the missing platform 36 itself, so CI needs no workflow change (`docs/patches/ci-android-sdk-36.patch` stays as a fallback). The goldens and the 90-day fingerprint are unchanged | `799cde6` |
 
 **W1 exit gate (verified 2026-10-22):** the three goldens are byte-identical, the 90-day fingerprint is unchanged, the
 full local gate (`python3 -I tools/verify.py --local`) is green, and a 30-day world still saves through the hardened
