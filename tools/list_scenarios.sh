@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# Validate tests/golden/scenarios.json and print it for CI: the run length on the first line, then one scenario per line.
+# Any problem (unreadable file, missing key, empty list, a non-string, unsafe name, days not a whole number above zero)
+# exits non-zero and prints nothing, so a step that captures the output with set -e cannot go on with zero goldens.
+set -euo pipefail
+file=${1:-tests/golden/scenarios.json}
+
+jq -e '(.scenarios | type == "array") and (.scenarios | length > 0) and all(.scenarios[]; type == "string")' \
+  "$file" > /dev/null
+days=$(jq -er '.days | numbers | select(. > 0 and . == floor)' "$file")
+names=$(jq -r '.scenarios[]' "$file")
+
+# Names reach the shell and the Gradle arguments: plain words only.
+while IFS= read -r name; do
+  [[ "$name" =~ ^[a-z][a-z0-9_]*$ ]] || { echo "bad scenario name: $name" >&2; exit 1; }
+done <<< "$names"
+
+printf '%s\n%s\n' "$days" "$names"

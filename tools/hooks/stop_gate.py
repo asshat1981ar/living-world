@@ -169,17 +169,30 @@ DETERMINISM_SCENARIOS = (("default", "{days} 0"), ("turmoil", "15 0 --scenario=t
 
 # (label, runner args): the Kotlin run must reproduce its checked-in golden dump, which the Python mirror is also held to.
 # The scenario list lives in tests/golden/scenarios.json (one source for verify, the stop gate, regen, parity and CI).
-_SCENARIOS = json.loads((Path(__file__).resolve().parents[2] / "tests" / "golden" / "scenarios.json").read_text())
+# An unreadable file must BLOCK, not crash: a hook that raises exits 1, which Claude Code treats as non-blocking, so both
+# this gate and the pre-push gate (bash_guard imports this module) would silently let everything through.
+SCENARIOS_FILE = Path(__file__).resolve().parents[2] / "tests" / "golden" / "scenarios.json"
+try:
+    _SCENARIOS = json.loads(SCENARIOS_FILE.read_text())
+    _DAYS = int(_SCENARIOS["days"])
+    _NAMES = [str(n) for n in _SCENARIOS["scenarios"]]
+    if _DAYS <= 0 or not _NAMES:
+        raise ValueError("days must be positive and at least one scenario is needed")
+    SCENARIOS_ERROR = None
+except (OSError, ValueError, KeyError, TypeError) as _e:
+    _DAYS, _NAMES, SCENARIOS_ERROR = 0, [], f"{SCENARIOS_FILE} is unreadable or invalid: {_e}"
 GOLDEN_RUNS = tuple(
-    (f"golden {name}", f"{_SCENARIOS['days']} 0{'' if name == 'default' else ' --scenario=' + name} "
-                       f"--golden=tests/golden/{name}-{_SCENARIOS['days']}d.txt.gz "
-                       f"--state-golden=tests/golden/{name}-{_SCENARIOS['days']}d.state.txt.gz")
-    for name in _SCENARIOS["scenarios"]
+    (f"golden {name}", f"{_DAYS} 0{'' if name == 'default' else ' --scenario=' + name} "
+                       f"--golden=tests/golden/{name}-{_DAYS}d.txt.gz "
+                       f"--state-golden=tests/golden/{name}-{_DAYS}d.state.txt.gz")
+    for name in _NAMES
 )
 
 
 def golden_check() -> Outcome:
     """Each golden run must print `Golden : OK`; a mismatch means Kotlin behaviour changed without re-recording tests/golden."""
+    if SCENARIOS_ERROR or not GOLDEN_RUNS:
+        return Outcome(False, f"cannot check the goldens: {SCENARIOS_ERROR or 'no scenarios listed'}")
     for label, args in GOLDEN_RUNS:
         o = _run([sys.executable, "-I", "tools/lw_remote.py", "--gradle", f":desktopApp:run --args='{args}'", "--tail", "200"], 900)
         m = re.search(r"^Golden\s*:\s*(.+)$", o.output, re.M)

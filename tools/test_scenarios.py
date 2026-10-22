@@ -6,7 +6,10 @@ runner (`InspectorMain`), the mirror runner and recording the goldens - and this
 import importlib.util
 import json
 import re
+import shutil
+import subprocess
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -18,14 +21,20 @@ DAYS = CONFIG["days"]
 
 
 def _load(name, path):
+    """Import a tool by path, leaving sys.modules and sys.path as they were."""
     spec = importlib.util.spec_from_file_location(name, path)
     module = importlib.util.module_from_spec(spec)
-    sys.modules[name] = module  # a dataclass in the module looks itself up here
+    previous = sys.modules.get(name)
+    sys.modules[name] = module  # a dataclass in the module looks itself up here while it is being created
     sys.path.insert(0, str(path.parent))  # hooks import their sibling `telemetry`
     try:
         spec.loader.exec_module(module)
     finally:
         sys.path.pop(0)
+        if previous is None:
+            sys.modules.pop(name, None)
+        else:
+            sys.modules[name] = previous
     return module
 
 
@@ -82,6 +91,84 @@ class ScenarioListTests(unittest.TestCase):
         loop = re.search(r"for s in ([^;]*); do", workflow)
         self.assertIsNotNone(loop, "CI has no scenario loop")
         self.assertNotIn("turmoil", loop.group(1), "CI repeats the scenario names instead of reading the file")
+
+
+
+@unittest.skipUnless(shutil.which("jq"), "jq is needed (CI's ubuntu-latest has it)")
+class ListScenariosScriptTests(unittest.TestCase):
+    """The CI golden step captures tools/list_scenarios.sh under set -e: every bad file must fail it and print nothing."""
+
+    def run_script(self, content):
+        with tempfile.TemporaryDirectory() as d:
+            f = Path(d) / "scenarios.json"
+            f.write_text(content)
+            return subprocess.run(["bash", str(ROOT / "tools" / "list_scenarios.sh"), str(f)],
+                                  capture_output=True, text=True, check=False)
+
+    def test_the_real_file_prints_the_days_then_every_scenario(self):
+        run = subprocess.run(["bash", str(ROOT / "tools" / "list_scenarios.sh"), str(GOLDEN / "scenarios.json")],
+                             capture_output=True, text=True, check=False)
+        self.assertEqual(0, run.returncode, run.stderr)
+        self.assertEqual([str(DAYS)] + NAMES, run.stdout.split())
+
+    def test_every_kind_of_bad_file_fails_and_prints_nothing(self):
+        bad = {
+            "empty list": '{"days": 10, "scenarios": []}',
+            "no scenarios key": '{"days": 10}',
+            "scenarios is a string": '{"days": 10, "scenarios": "default"}',
+            "a number among the names": '{"days": 10, "scenarios": ["default", 5]}',
+            "a name with a space": '{"days": 10, "scenarios": ["a b"]}',
+            "a name that is a shell command": '{"days": 10, "scenarios": ["x;touch pwned"]}',
+            "an upper-case name": '{"days": 10, "scenarios": ["Default"]}',
+            "days is a string": '{"days": "10", "scenarios": ["default"]}',
+            "days is fractional": '{"days": 10.5, "scenarios": ["default"]}',
+            "days is zero": '{"days": 0, "scenarios": ["default"]}',
+            "no days": '{"scenarios": ["default"]}',
+            "not json": "not json",
+            "empty file": "",
+        }
+        for label, content in bad.items():
+            with self.subTest(label):
+                run = self.run_script(content)
+                self.assertNotEqual(0, run.returncode, f"accepted: {label}")
+                self.assertEqual("", run.stdout, "a rejected file must print nothing")
+
+    def test_a_missing_file_fails_too(self):
+        run = subprocess.run(["bash", str(ROOT / "tools" / "list_scenarios.sh"), "/nonexistent/scenarios.json"],
+                             capture_output=True, text=True, check=False)
+        self.assertNotEqual(0, run.returncode)
+
+    def test_ci_uses_the_script_under_set_e(self):
+        workflow = (ROOT / ".github/workflows/ci.yml").read_text()
+        self.assertIn("config=$(bash tools/list_scenarios.sh tests/golden/scenarios.json)", workflow)
+        self.assertIn("set -euo pipefail", workflow)
+
+
+class StopGateFailsClosedTests(unittest.TestCase):
+    """A hook that raises exits 1, which Claude Code does not treat as a block: a bad scenario file must BLOCK instead."""
+
+    def gate_with_file(self, content):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            hooks = root / "tools" / "hooks"
+            hooks.mkdir(parents=True)
+            for f in (ROOT / "tools" / "hooks").glob("*.py"):
+                shutil.copy(f, hooks / f.name)
+            if content is not None:
+                (root / "tests" / "golden").mkdir(parents=True)
+                (root / "tests" / "golden" / "scenarios.json").write_text(content)
+            gate = _load("stop_gate_probe", hooks / "stop_gate.py")  # importing it must not raise
+            return gate.SCENARIOS_ERROR, gate.golden_check()
+
+    def test_a_missing_or_bad_scenario_file_blocks_instead_of_crashing(self):
+        for label, content in {"missing": None, "junk": "not json", "empty list": '{"days": 10, "scenarios": []}',
+                               "zero days": '{"days": 0, "scenarios": ["default"]}',
+                               "no days": '{"scenarios": ["default"]}'}.items():
+            with self.subTest(label):
+                error, outcome = self.gate_with_file(content)
+                self.assertTrue(error, "the problem should be recorded")
+                self.assertFalse(outcome.ok, "the golden check must not pass")
+                self.assertIn("cannot check the goldens", outcome.output)
 
 
 if __name__ == "__main__":

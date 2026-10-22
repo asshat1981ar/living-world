@@ -65,11 +65,11 @@ jobs:
           set -euo pipefail
           mkdir -p build/golden-logs
           # tests/golden/scenarios.json is the one list of scenarios (tools/test_scenarios.py keeps everything in step).
-          # jq -e and select(length > 0) make an unreadable file, a missing key or an empty list fail the step instead of
-          # running zero goldens; names must be plain words because they reach the shell and the Gradle arguments.
-          days=$(jq -er '.days | select(. > 0)' tests/golden/scenarios.json)
-          list=$(jq -ce '.scenarios | select(length > 0)' tests/golden/scenarios.json)
-          mapfile -t scenarios < <(jq -r '.[]' <<< "$list")
+          # tools/list_scenarios.sh validates the file (tools/test_scenarios.py runs it on bad inputs) and exits non-zero
+          # on any problem; capturing its output as a plain assignment lets set -e stop the step.
+          config=$(bash tools/list_scenarios.sh tests/golden/scenarios.json)
+          days=${config%%$'\n'*}
+          mapfile -t scenarios <<< "${config#*$'\n'}"
           for s in "${scenarios[@]}"; do
             [[ "$s" =~ ^[a-z][a-z0-9_]*$ ]] || { echo "bad scenario name: $s"; exit 1; }
             extra=""
