@@ -103,6 +103,21 @@ class StopGateTests(unittest.TestCase):
         finally:
             sg._run = orig
 
+    def test_a_warning_is_logged_with_its_reason(self):
+        # 18 of 72 runs were "warn" with no reason recorded; the log must say why a turn went unverified.
+        from io import StringIO
+        from unittest import mock
+        logged = []
+        answer = {"systemMessage": "stop gate: Kotlin tests (:game-core:jvmTest) on awsbox could not run: session expired"}
+        with mock.patch.object(sg, "decide_quick", lambda data, run_remote: answer), \
+                mock.patch.object(sg.telemetry, "record", lambda *a, **kw: logged.append((a, kw))), \
+                mock.patch("sys.stdin", StringIO(json.dumps({"hook_event_name": "Stop"}))), \
+                mock.patch("sys.stdout", StringIO()):
+            sg.main()
+        (args, kwargs), = logged
+        self.assertEqual("warn", args[1])
+        self.assertIn("session expired", kwargs.get("reason", ""))
+
     def test_garbage_input_allows(self):
         p = subprocess.run([sys.executable, "-I", str(HOOK)], input="nope", text=True, capture_output=True)
         self.assertEqual((0, ""), (p.returncode, p.stdout))

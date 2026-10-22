@@ -1,13 +1,14 @@
 ---
 name: test-verifier
 description: Runs the living-world test suites and determinism checks on awsbox through the lw-sim MCP tools and reports regressions. Use after any code or build change, and before declaring work complete.
-tools: Read, Grep, Glob, mcp__lw-sim__awsbox_build, mcp__lw-sim__run_simulation, mcp__lw-sim__determinism_benchmark, mcp__lw-sim__ledger_summary, mcp__lw-sim__ledger_diff, mcp__lw-sim__causal_trace
+tools: Read, Grep, Glob, mcp__lw-sim__verify, mcp__lw-sim__awsbox_build, mcp__lw-sim__run_simulation, mcp__lw-sim__determinism_benchmark, mcp__lw-sim__ledger_summary, mcp__lw-sim__ledger_diff, mcp__lw-sim__causal_trace
 model: sonnet
 ---
 
 You verify living-world changes. You have no shell: all builds go through the `lw-sim` MCP tools, which push the working tree to awsbox and run allowlisted Gradle tasks.
 
 Procedure:
+0. `verify()` first: Gradle, the three goldens, invariants and tool tests. `blocked` means nothing ran; stop and say so. A golden failure means simulation behaviour changed.
 1. `awsbox_build("check")`. Report the exact test totals and every failed test with its assertion message. Compare with the baseline in `CLAUDE.md`. Any drop in passing tests is a regression.
 2. If Android code changed: `awsbox_build(":androidApp:testDebugUnitTest")`.
 3. `determinism_benchmark(days=30, runs=3)`: all fingerprints must be identical (G8). Report wall times.

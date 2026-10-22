@@ -159,6 +159,30 @@ class HookTests(unittest.TestCase):
         r = subprocess.run([sys.executable, "-I", str(HOOK)], input="not json", text=True, capture_output=True)
         self.assertEqual(0, r.returncode)
 
+    def test_blocks_when_root_and_file_are_spelled_through_different_paths_to_the_same_dir(self):
+        # On this phone the project is reachable as /data/... and /root/termux-home/... (a proot mount), and
+        # Path.resolve() does not unify them, so the guard used to fail open silently. Simulate that: the root is a
+        # symlinked alias and resolve() is a no-op, as it effectively was there.
+        import importlib.util
+        from contextlib import redirect_stderr
+        from io import StringIO
+        from unittest import mock
+        alias = Path(self.root + "-alias")
+        alias.symlink_to(self.root)
+        self.addCleanup(alias.unlink)
+        spec = importlib.util.spec_from_file_location("invariant_guard_under_test", HOOK)
+        guard = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(guard)
+        payload = json.dumps({"tool_name": "Edit", "tool_input": {"file_path": str(self.file),
+                              "old_string": "val a = 1", "new_string": "import java.io.File\nval a = 1"}})
+        err = StringIO()
+        with mock.patch.object(Path, "resolve", lambda self, strict=False: self), \
+                mock.patch.dict(os.environ, {"CLAUDE_PROJECT_DIR": str(alias)}), \
+                mock.patch.object(guard.telemetry, "record"), \
+                mock.patch("sys.stdin", StringIO(payload)), redirect_stderr(err):
+            code = guard.main()
+        self.assertEqual(2, code, err.getvalue())
+
     def test_ignores_non_kotlin_and_outside_repo(self):
         r = self.run_hook({"tool_name": "Write", "tool_input": {"file_path": "/tmp/x.kt",
                            "content": "import java.io.File\n"}}, self.root)
