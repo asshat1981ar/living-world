@@ -39,6 +39,14 @@ COMMON_RULES: list[tuple[str, str, str, re.Pattern[str], str]] = [
     ("hash-collection", "G8", "error", re.compile(r"\b(HashMap|HashSet|hashMapOf|hashSetOf)\b"),
      "hash-ordered collection; iteration order is not a cross-platform contract"),
     ("hashcode", "G8", "warn", re.compile(r"\.hashCode\(\)"), "hashCode() is not stable across platforms; use Fnv1a"),
+    # java.lang needs no import, so the import rule cannot see these; they are still JVM-only.
+    ("jvm-lang-class", "G9", "error", re.compile(r"(?<![\w.])(Thread|Runtime)\.\w|(?<![\w.])ProcessBuilder\s*\("),
+     "java.lang runtime classes are JVM-only (no import needed, so the import rule cannot see them)"),
+    ("jvm-math", "G9", "error", re.compile(r"(?<![\w.])Math\."), "java.lang.Math is JVM-only; use kotlin.math"),
+    ("monotonic-clock", "G8", "error", re.compile(r"TimeSource\.Monotonic"),
+     "a monotonic clock is not deterministic; a simulation must not read the clock"),
+    ("kotlin-jvm-import", "G9", "warn", re.compile(r"^\s*import\s+kotlin\.jvm\."),
+     "kotlin.jvm is a platform package (allowed for @JvmInline, but it should be visible)"),
 ]
 CORE_RULES = [
     ("ai-import", "G1", "error", re.compile(r"^\s*import\s+org\.livingworld\.ai\b"), "game-core must not import AI modules"),

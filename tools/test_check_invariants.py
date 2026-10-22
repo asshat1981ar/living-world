@@ -53,6 +53,16 @@ class RuleTests(unittest.TestCase):
     def test_platform_code_outside_common_is_fine(self):
         self.assertEqual(set(), rules(ANDROID, "import java.io.File\nval s = \"%.2f\".format(x)\n"))
 
+    def test_jvm_only_classes_without_an_import_are_caught(self):
+        # java.lang needs no import, so the import rule cannot see these.
+        self.assertIn("jvm-lang-class", rules(CORE, "fun f() { Thread.sleep(1) }\n"))
+        self.assertIn("jvm-lang-class", rules(CORE, "val p = ProcessBuilder(\"ls\")\n"))
+        self.assertIn("jvm-math", rules(CORE, "val x = Math.random()\n"))
+        self.assertIn("monotonic-clock", rules(CORE, "val t = TimeSource.Monotonic.markNow()\n"))
+        self.assertIn("kotlin-jvm-import", rules(CORE, "import kotlin.jvm.JvmInline\n"))
+        self.assertNotIn("jvm-math", rules(CORE, "import kotlin.math.round\nval x = round(1.5)\n"))
+        self.assertNotIn("jvm-lang-class", rules(CORE, "fun f() { ThreadLocal() }\n"))
+
     def test_comments_ignored(self):
         self.assertEqual(set(), rules(CORE, "// import java.io.File\n * String.format(x)\n"))
 
