@@ -60,6 +60,18 @@ class CharacterizationTest {
     }
 
     @Test
+    fun items_are_conserved_over_thirty_days() = runTest {
+        val world = TestWorld.create()
+        val before = totalItems(world.state)
+        world.advance(30)
+        assertEquals(before, totalItems(world.state), "items appeared or vanished on the way")
+    }
+
+    /** Every item the world holds: in the NPCs' pockets and in the player's. */
+    private fun totalItems(state: org.livingworld.core.world.WorldState): Int =
+        state.npcs.values.sumOf { it.resources.items.size } + state.player.inventory.size
+
+    @Test
     fun a_thirty_day_run_leaves_every_npc_alive_and_accounted_for() = runTest {
         val world = TestWorld.create()
         world.advance(30)
