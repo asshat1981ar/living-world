@@ -52,7 +52,7 @@ class DefaultWorldReducer : WorldReducer {
             is GameEvent.FactionHostilityDeclared -> applyFactionHostility(baseState, event)
             is GameEvent.EntitiesMet -> applyEntitiesMet(baseState, event)
             is GameEvent.NpcAttacked -> applyNpcAttacked(baseState, event)
-            is GameEvent.NpcRoutineCompleted -> applyRoutineCompleted(baseState, this, event)
+            is GameEvent.NpcRoutineCompleted -> applyRoutineCompleted(baseState, event)
             is GameEvent.PlayerMoved -> applyPlayerMoved(baseState, event)
             is GameEvent.PlayerAttacked -> applyPlayerAttacked(baseState, event)
             is GameEvent.OpportunityDispatched -> applyOpportunityDispatched(baseState, event)
@@ -591,7 +591,6 @@ class DefaultWorldReducer : WorldReducer {
 
     private fun applyRoutineCompleted(
         state: WorldState,
-        reducer: WorldReducer,
         event: GameEvent.NpcRoutineCompleted
     ): WorldState {
         val npc = state.npcs[event.npc] ?: return state
@@ -599,34 +598,14 @@ class DefaultWorldReducer : WorldReducer {
         // Coins are a transfer with the treasury (wage in, upkeep out), limited by what the paying side has.
         val coinShift = if (event.deltaCoins >= 0f) minOf(event.deltaCoins, state.economy.treasury.coerceAtLeast(0f))
             else -minOf(-event.deltaCoins, npc.resources.coins)
-        val nextFood = (npc.resources.food + event.deltaFood).coerceIn(0f, 100f)
+        val nextFood = (npc.resources.food + event.deltaFood).coerceIn(0.5f, 100f)
         val updatedNpc = npc.copy(
             resources = npc.resources.copy(health = nextHealth, coins = npc.resources.coins + coinShift, food = nextFood),
             emotionalState = npc.emotionalState.shifted(deltaFear = event.deltaFear)
         )
         val nextNpcs = state.npcs + (npc.id to updatedNpc)
         val economy = state.economy.copy(treasury = state.economy.treasury - coinShift)
-        val nextState = state.copy(npcs = nextNpcs, economy = withBreadScarcity(economy, nextNpcs))
-        // Starvation: if food is 0, apply health damage each tick. Starved to death -> NpcKilled event.
-        if (nextFood <= 0f) {
-            val starvationDamage = 5f
-            val starvationHealth = (nextHealth - starvationDamage).coerceIn(0f, 100f)
-            if (starvationHealth <= 0f) {
-                val killEvent = GameEvent.NpcKilled(
-                    id = nextState.events.nextId(),
-                    time = event.time,
-                    victim = npc.id,
-                    killer = null,
-                    witnesses = emptyList(),
-                    location = npc.identity.currentLocation,
-                    motive = "Starvation"
-                )
-                return this.apply(nextState, killEvent)
-            }
-            val starvedNpc = updatedNpc.copy(resources = updatedNpc.resources.copy(health = starvationHealth))
-            return nextState.copy(npcs = nextNpcs + (npc.id to starvedNpc))
-        }
-        return nextState
+        return state.copy(npcs = nextNpcs, economy = withBreadScarcity(economy, nextNpcs))
     }
 
     /**
