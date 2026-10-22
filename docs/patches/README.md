@@ -1,5 +1,23 @@
 # Patches that need a credential this environment does not have
 
+## `ci-android-sdk-36.patch`
+
+**What it does.** Makes CI install the Android SDK the project now compiles against: `platforms;android-36` and
+`build-tools;36.0.0` instead of 34.
+
+**Why it is a patch.** The same reason as the patch above: the pushing App token has no `workflows` permission.
+
+**How to apply.**
+
+```sh
+git apply docs/patches/ci-android-sdk-36.patch
+git add .github/workflows/ci.yml
+git commit -m "ci: install Android SDK 36"
+git push
+```
+
+**Check it afterwards.** The next CI run must show `Install Android SDK 36` and the `Kotlin goldens` step passing.
+
 ## `ci-goldens-and-dependency-gate.patch`
 
 **What it does.** Adds two gates to `.github/workflows/ci.yml`:

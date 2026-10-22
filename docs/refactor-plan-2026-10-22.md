@@ -712,10 +712,17 @@ check, all three goldens), the Python mirror matches the new goldens byte for by
 unchanged (45,615 events, ~1.3 s) with the fingerprint `7ae29cd5c158da35` (the digest sees the whole world, so it moved
 with the behaviour).
 
-**Still open in W2:** C2.10 grounding v2 (a curated vocabulary, so a lowercase invention is rejected), C2.11 the
-entity-existence pre-conditions as a reusable `EventValidator`, C2.12 a fourth scenario that exercises allegiance,
-flee, war and NPC-to-NPC trades, and the dump v2 format (the state section of the dump - best written as a separate
-state dump so the goldens do not have to be re-recorded again).
+**Still open in W2:** C2.12 a fourth scenario that exercises allegiance, flee, war and NPC-to-NPC trades, and the dump v2
+format (the state section of the dump - best written as a separate state dump so the goldens do not have to be
+re-recorded again).
+
+### W2 leftovers, done (2026-10-22)
+
+| Item | State | Commit |
+|---|---|---|
+| Grounding v2 | **done** — every word of a reply must be known (the facts, the speaker and place, or a curated small-talk vocabulary), so an invented lower-case sentence is dropped and the kernel line is used | `d81eafd` |
+| `EventValidator` | **done** — one object holds the pre-conditions (the entities an event names must exist, the dead must not act, a trade needs a living seller that holds the item); the reducer and the Python mirror ask it the same question; an event that fails is not recorded at all | `578cff1` |
+| C5.4 toolchain | **done on `feature/toolchain-sdk36`** — Gradle 8.14.6 (sha256-pinned), AGP 8.13.0, compileSdk/targetSdk 36, Compose BOM 2026.06.01; the goldens and the 90-day fingerprint are unchanged, the APK builds, and CI needs `docs/patches/ci-android-sdk-36.patch` (the pushing token may not write workflow files) | — |
 
 **W1 exit gate (verified 2026-10-22):** the three goldens are byte-identical, the 90-day fingerprint is unchanged, the
 full local gate (`python3 -I tools/verify.py --local`) is green, and a 30-day world still saves through the hardened

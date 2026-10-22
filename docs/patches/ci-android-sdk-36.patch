@@ -1,0 +1,15 @@
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index dcab3b5..b25ee69 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -48,8 +48,8 @@ jobs:
+         with:
+           # Default is "tools platform-tools"; the "tools" package no longer exists and fails sdkmanager.
+           packages: ""
+-      - name: Install Android SDK 34
+-        run: sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
++      - name: Install Android SDK 36
++        run: sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+       - uses: gradle/actions/setup-gradle@v4
+       - name: Validate Gradle wrapper
+         uses: gradle/actions/wrapper-validation@v4

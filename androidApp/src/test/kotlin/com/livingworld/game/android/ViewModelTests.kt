@@ -129,7 +129,7 @@ class ViewModelTests {
 
     @Test
     fun aPreparedAiLineIsShownAtOnceAndAShownLineNeverChanges() = runTest {
-        val vm = DialogueViewModel(world, manifest, lines = linesSaying("Verily, the hour grows late."), scope = this)
+        val vm = DialogueViewModel(world, manifest, lines = linesSaying("Aye, friend. Well met, traveler."), scope = this)
         vm.loadNpc(NpcId("merchant"))
         assertEquals("nothing is prepared on a first meeting", greeting, vm.uiState.value.dialogueHistory.last().text)
         advanceUntilIdle()
@@ -138,11 +138,11 @@ class ViewModelTests {
         vm.chooseOption(2)
         val history = vm.uiState.value.dialogueHistory
         assertEquals(listOf(false, true, false), history.map { it.isPlayer })
-        assertEquals("prepared while the player read the greeting", "Verily, the hour grows late.", history.last().text)
+        assertEquals("prepared while the player read the greeting", "Aye, friend. Well met, traveler.", history.last().text)
         assertTrue(history.last().byAi)
 
         vm.loadNpc(NpcId("merchant"))
-        assertEquals("the greeting is prepared for the next visit", "Verily, the hour grows late.", vm.uiState.value.dialogueHistory.last().text)
+        assertEquals("the greeting is prepared for the next visit", "Aye, friend. Well met, traveler.", vm.uiState.value.dialogueHistory.last().text)
         assertEquals(LineUsage(npcLines = 3, aiLines = 2), vm.lineUsage.value)
     }
 
