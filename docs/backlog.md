@@ -41,15 +41,16 @@ log and the commits). The first items need no approval and no golden re-record.
 - [ ] **Conservation and append-only tests over 30 days** M. `CharacterizationTest` covers coins and the ledger order;
       add item conservation and a "the ledger only grows" test.
 
-**W4 — one world in the app** (no golden change)
+**W4 — one world in the app** (no golden change; on `feature/w4-app-world`)
 
-- [ ] **One shared world in the Android app** L. `MainActivity` hands one `marketVillage()` to four view models that
-      each keep a private copy (`InventoryViewModel.kt` `private var world`); nothing ticks the simulation or saves
-      (`SaveManager` is only used by desktopApp); state is lost on Activity recreation. Introduce a `WorldStore`.
-- [ ] **The inventory comes from the world** M. `InventoryViewModel` starts from a hardcoded `mapOf("bread" to 3, …)`
-      instead of `world.player.inventory`, and the catalog is not refreshed after a trade.
-- [ ] **Player travel is an event** M. `MapViewModel.travelToSelected` mutates the state with `world.copy(player = …)`
-      and no `GameEvent`, so a replay cannot reproduce the player's location.
+- [x] **One shared world in the Android app** L. A `WorldStore` owns the single world; the four screens read and write it
+      instead of keeping private copies, so a trade in the market is a trade in the village.
+- [x] **The world ticks and is saved** M. The store ticks an hour at a time while the app is in front and saves/restores
+      the world, so the village survives the process.
+- [x] **The inventory comes from the world** M. The counts are `world.player.inventory`, the catalog is refreshed after a
+      trade, and you cannot sell what you do not have.
+- [x] **Player travel is an event** M. `GameEvent.PlayerMoved` goes through the reducer, so a replay reproduces where the
+      player stands.
 - [ ] **A duel can be lost** M. The duel is one-sided (the opponent never attacks) and the player has no health.
 
 **W5 — AI, Android and shipping** (`[ask]` for the dependency part)

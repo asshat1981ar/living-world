@@ -724,6 +724,17 @@ re-recorded again).
 | `EventValidator` | **done** — one object holds the pre-conditions (the entities an event names must exist, the dead must not act, a trade needs a living seller that holds the item); the reducer and the Python mirror ask it the same question; an event that fails is not recorded at all | `578cff1` |
 | C5.4 toolchain | **done** — Gradle 8.14.6 (sha256-pinned), AGP 8.13.0, compileSdk/targetSdk 36, Compose BOM 2026.06.01. AGP downloads the missing platform 36 itself, so CI needs no workflow change (`docs/patches/ci-android-sdk-36.patch` stays as a fallback). The goldens and the 90-day fingerprint are unchanged | `799cde6` |
 
+### W4 — one world in the app (branch `feature/w4-app-world`)
+
+| Item | State | Commit |
+|---|---|---|
+| C4.1 one shared world | **done** — a `WorldStore` owns the single `WorldState`; the four screens read and write it instead of keeping private copies | `6728870` |
+| C4.2 the world ticks and is saved | **done** — the store ticks an hour at a time while the app is in front, and saves/restores the world (`SaveManager` envelope in `filesDir`) | `6728870` |
+| C4.3 the inventory comes from the world | **done** — the counts are `world.player.inventory`, the catalog is refreshed, and you cannot sell what you do not have | `6728870` |
+| C4.4 player travel is an event | **done** — `GameEvent.PlayerMoved` through the reducer, so a replay reproduces where the player stands (the mirror knows it too) | `e6b2e80` |
+| C4.5 a duel can be lost | **open** — the duel is still one-sided and the player has no health | — |
+| C4.6 dialogue and AI | **partly done** — the dialogue addresses the world's player id; the prepared-line cache still ignores location and relationship, and a released request still hangs | — |
+
 **W1 exit gate (verified 2026-10-22):** the three goldens are byte-identical, the 90-day fingerprint is unchanged, the
 full local gate (`python3 -I tools/verify.py --local`) is green, and a 30-day world still saves through the hardened
 gate.
