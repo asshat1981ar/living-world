@@ -168,11 +168,11 @@ DETERMINISM_SCENARIOS = (("default", "{days} 0"), ("turmoil", "15 0 --scenario=t
 
 
 # (label, runner args): the Kotlin run must reproduce its checked-in golden dump, which the Python mirror is also held to.
-GOLDEN_RUNS = (
-    ("golden default", "10 0 --golden=tests/golden/default-10d.txt.gz"),
-    ("golden turmoil", "10 0 --scenario=turmoil --golden=tests/golden/turmoil-10d.txt.gz"),
-    ("golden feud", "10 0 --scenario=feud --golden=tests/golden/feud-10d.txt.gz"),
-    ("golden famine", "10 0 --scenario=famine --golden=tests/golden/famine-10d.txt.gz"),
+GOLDEN_RUNS = tuple(
+    (f"golden {name}", f"10 0{extra} --golden=tests/golden/{name}-10d.txt.gz "
+                       f"--state-golden=tests/golden/{name}-10d.state.txt.gz")
+    for name, extra in (("default", ""), ("turmoil", " --scenario=turmoil"), ("feud", " --scenario=feud"),
+                        ("famine", " --scenario=famine"))
 )
 
 
@@ -186,6 +186,10 @@ def golden_check() -> Outcome:
         if not m.group(1).startswith("OK"):
             return Outcome(False, f"{label}: Kotlin output no longer matches tests/golden ({m.group(1)[:300]}). "
                                   "If the behaviour change is intended, regenerate the goldens (see tools/mirror_parity.py) and update lw_mirror until `python3 tools/mirror_parity.py` passes.")
+        state = re.search(r"^StateGolden\s*:\s*(.+)$", o.output, re.M)
+        if state and not state.group(1).startswith("OK"):
+            return Outcome(False, f"{label}: the end state no longer matches tests/golden/*.state.txt.gz ({state.group(1)[:300]}). "
+                                  "Beliefs, memories, items, quests or the player changed; if intended, run tools/regen_golden.py and update lw_mirror.")
     return Outcome(True, "goldens match")
 
 

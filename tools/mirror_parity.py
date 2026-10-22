@@ -29,6 +29,14 @@ def goldens(scenario: str | None):
             yield m.group(1), int(m.group(2)), path
 
 
+def state_goldens(scenario: str | None):
+    """The state dumps (CanonicalStateDump): tests/golden/<scenario>-<days>d.state.txt.gz."""
+    for path in sorted(GOLDEN.glob("*-*d.state.txt.gz")):
+        m = re.fullmatch(r"(\w+)-(\d+)d\.state\.txt\.gz", path.name)
+        if m and (scenario is None or m.group(1) == scenario):
+            yield m.group(1), int(m.group(2)), path
+
+
 def compare(expected: list[str], actual: list[str], context: int) -> str | None:
     """None when identical, else a report of the first divergence."""
     for i in range(max(len(expected), len(actual))):
@@ -68,6 +76,15 @@ def main(argv=None) -> int:
         else:
             failures += 1
             print(f"FAIL {scenario} {days}d: {report}")
+    for scenario, days, path in state_goldens(args.scenario):
+        expected = gzip.open(path, "rt").read().splitlines()
+        actual = runner.run_state(scenario, days)
+        report = compare(expected, actual, args.context)
+        if report is None:
+            print(f"PASS {scenario} {days}d state: {len(expected)} lines identical")
+        else:
+            failures += 1
+            print(f"FAIL {scenario} {days}d state: {report}")
     return 1 if failures else 0
 
 

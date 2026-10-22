@@ -22,9 +22,6 @@ log and the commits). The first items need no approval and no golden re-record.
 
 **W2 leftovers**
 
-- [ ] **A separate state dump (dump v2)** M. The canonical dump still omits belief content, items, traits, the player,
-      the quests and the places, so changes there stay invisible to the goldens (the digest sees them now, the dump does
-      not). Write it as its own file so the goldens need no re-record.
 - [ ] **A golden scenario for uncovered kernel paths** M. Allegiance, flee, faction war, NPC-to-NPC trades and
       `EntitiesMet` are still unexercised by any golden, and the mirror ports of those paths are unverified. Adds a
       fourth scenario (a new golden file, not a re-record).
@@ -79,6 +76,10 @@ log and the commits). The first items need no approval and no golden re-record.
 
 ## Done
 
+- [x] **A separate state dump (dump v2)** M. `CanonicalStateDump` (desktopApp) prints belief content, memories, items,
+      traits, goals, emotions, factions, quests and the player; `tests/golden/<scenario>-10d.state.txt.gz` holds the four
+      reference dumps, `lw_mirror/state_dump.py` reproduces them byte for byte, and `verify.py`, the stop gate and CI
+      check them. The four event goldens were not touched.
 - [x] **`EventValidator` for entity existence** M. One object holds the pre-conditions (`578cff1`, `a00f7b6`); it now has
       its own `EventValidatorTest` (unknown victim/killer/thief/owner/parties/places/factions, the dead, trade stock and
       price).

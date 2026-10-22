@@ -65,10 +65,10 @@ jobs:
             log="build/golden-logs/$s.log"
             # The runner exits 0 even on a mismatch, so the "Golden : OK" line is the actual verdict.
             if ! ./gradlew :desktopApp:run --no-daemon --console=plain -q \
-                 --args="10 0 $extra --golden=tests/golden/$s-10d.txt.gz" > "$log" 2>&1; then
+                 --args="10 0 $extra --golden=tests/golden/$s-10d.txt.gz --state-golden=tests/golden/$s-10d.state.txt.gz" > "$log" 2>&1; then
               cat "$log"; exit 1
             fi
-            if ! grep -q "Golden *: OK" "$log"; then
+            if ! grep -q "^Golden *: OK" "$log" || ! grep -q "^StateGolden *: OK" "$log"; then
               echo "golden $s does not match tests/golden/$s-10d.txt.gz"
               cat "$log"; exit 1
             fi

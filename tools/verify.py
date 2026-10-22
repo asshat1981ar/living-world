@@ -41,8 +41,9 @@ def remote_script(gradle_cmd: str, tasks: str, goldens: bool) -> str:
         for name, args in GOLDENS.items():
             log = f"/tmp/lw-verify-golden-{name}.log"
             steps.append(
-                f"{gradle_cmd} :desktopApp:run --args='{args} --golden=tests/golden/{name}-10d.txt.gz' > {log} 2>&1; "
-                f"if grep -q 'Golden *: OK' {log}; then echo \"VERIFY golden-{name} 0\"; "
+                f"{gradle_cmd} :desktopApp:run --args='{args} --golden=tests/golden/{name}-10d.txt.gz "
+                f"--state-golden=tests/golden/{name}-10d.state.txt.gz' > {log} 2>&1; "
+                f"if grep -q '^Golden *: OK' {log} && grep -q '^StateGolden *: OK' {log}; then echo \"VERIFY golden-{name} 0\"; "
                 f"else echo \"VERIFY golden-{name} 1\"; grep -E 'Golden|mismatch|FAIL' {log} | head -5; fi"
             )
     return "; ".join(steps)
@@ -97,13 +98,17 @@ def golden_verdict(output: str) -> bool:
 
     The runner exits 0 even when the dump differs, so this line is the actual verdict (the CI step checks it too).
     """
-    return re.search(r"^Golden\s*:\s*OK", output, re.M) is not None
+    if re.search(r"^Golden\s*:\s*OK", output, re.M) is None:
+        return False
+    # The state dump is checked in the same run; when its line is present it must be OK too.
+    state = re.search(r"^StateGolden\s*:\s*(\S+)", output, re.M)
+    return state is None or state.group(1) == "OK"
 
 
 def local_golden(name: str, args: str, root: Path = ROOT) -> tuple:
     """Run one scenario against its checked-in golden and report pass/fail from the output."""
     cmd = ["./gradlew", ":desktopApp:run", "--no-daemon", "--console=plain", "-q",
-           f"--args={args} --golden=tests/golden/{name}-10d.txt.gz"]
+           f"--args={args} --golden=tests/golden/{name}-10d.txt.gz --state-golden=tests/golden/{name}-10d.state.txt.gz"]
     p = subprocess.run(cmd, cwd=root, capture_output=True, text=True, check=False)
     out = p.stdout + p.stderr
     tail = out.strip().splitlines()[-3:]

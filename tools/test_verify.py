@@ -71,6 +71,14 @@ class VerifyTests(unittest.TestCase):
         self.assertFalse(verify.golden_verdict("Golden          : MISMATCH at line 6: expected [a] actual [b]"))
         self.assertFalse(verify.golden_verdict("no golden line here"))
 
+    def test_golden_verdict_also_needs_the_state_golden_when_it_is_reported(self):
+        ok = "Golden          : OK (5117 lines)\n"
+        self.assertTrue(verify.golden_verdict(ok + "StateGolden     : OK (525 lines)"))
+        self.assertFalse(verify.golden_verdict(ok + "StateGolden     : MISMATCH at line 3: expected [a] actual [b]"))
+        self.assertFalse(verify.golden_verdict(ok + "StateGolden     : MISSING golden file tests/golden/x.state.txt.gz"))
+        # A state line alone is not a verdict on the event dump.
+        self.assertFalse(verify.golden_verdict("StateGolden     : OK (525 lines)"))
+
 
 if __name__ == "__main__":
     unittest.main()

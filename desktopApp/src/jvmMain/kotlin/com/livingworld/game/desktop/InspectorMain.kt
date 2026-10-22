@@ -17,6 +17,8 @@ fun main(args: Array<String>) = runBlocking {
     val positional = args.filterNot { it.startsWith("--") }
     val goldenPath = args.firstOrNull { it.startsWith("--golden=") }?.removePrefix("--golden=")
     val dumpPath = args.firstOrNull { it.startsWith("--dump=") }?.removePrefix("--dump=")
+    val stateGoldenPath = args.firstOrNull { it.startsWith("--state-golden=") }?.removePrefix("--state-golden=")
+    val stateDumpPath = args.firstOrNull { it.startsWith("--state-dump=") }?.removePrefix("--state-dump=")
     val scenario = args.firstOrNull { it.startsWith("--scenario=") }?.removePrefix("--scenario=") ?: "default"
     val days = positional.getOrNull(0)?.toIntOrNull() ?: 30
     val tail = positional.getOrNull(1)?.toIntOrNull() ?: 10
@@ -48,6 +50,11 @@ fun main(args: Array<String>) = runBlocking {
     if (dumpPath != null) {
         File(dumpPath).apply { parentFile?.mkdirs() }.writeText(CanonicalDump.dump(world).joinToString("\n") + "\n")
         println("Canonical dump  : $dumpPath")
+    }
+    if (stateGoldenPath != null) println("StateGolden     : ${GoldenCheck.compare(stateGoldenPath, CanonicalStateDump.dump(world))}")
+    if (stateDumpPath != null) {
+        File(stateDumpPath).apply { parentFile?.mkdirs() }.writeText(CanonicalStateDump.dump(world).joinToString("\n") + "\n")
+        println("State dump      : $stateDumpPath")
     }
     if (savePath != null) {
         File(savePath).apply { parentFile?.mkdirs() }.writeText(SaveManager.serializeEnvelope(world))

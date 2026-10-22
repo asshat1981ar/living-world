@@ -33,11 +33,15 @@ def main(argv=None) -> int:
     (ROOT / "tests" / "golden").mkdir(parents=True, exist_ok=True)
     for i, name in enumerate(wanted):
         dump = f"/tmp/lw-golden-{name}.txt"
+        state_dump = f"/tmp/lw-golden-{name}.state.txt"
         rel = f"tests/golden/{name}-{DAYS}d.txt.gz"
+        state_rel = f"tests/golden/{name}-{DAYS}d.state.txt.gz"
         remote(*(["--push"] if i == 0 else []), "--gradle",
-               f":desktopApp:run --args='{DAYS} 0{SCENARIOS[name]} --dump={dump}'", "--tail", "5")
-        remote("--run", f"mkdir -p ~/living-world/tests/golden && gzip -9 -n -c {dump} > ~/living-world/{rel}")
+               f":desktopApp:run --args='{DAYS} 0{SCENARIOS[name]} --dump={dump} --state-dump={state_dump}'", "--tail", "5")
+        remote("--run", f"mkdir -p ~/living-world/tests/golden && gzip -9 -n -c {dump} > ~/living-world/{rel}"
+                        f" && gzip -9 -n -c {state_dump} > ~/living-world/{state_rel}")
         remote("--pull", rel, rel)
+        remote("--pull", state_rel, state_rel)
     print("goldens re-recorded; now run: python3 tools/mirror_parity.py")
     return 0
 
