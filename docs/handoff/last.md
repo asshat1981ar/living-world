@@ -1,3 +1,13 @@
+# Handoff — 2026-10-22 (unattended session)
+
+  - Done, all verified with `python3 -I tools/verify.py` (exit 0) and committed on `cline/6cjpf2h3`, nothing pushed:
+    backlog corrected (Grounding v2 and `EventValidator` were already in the tree), `EventValidatorTest` (`2cf3748`),
+    state dump v2 with four `*.state.txt.gz` goldens, the mirror port and the gates (`d748c68`).
+  - Next in `docs/backlog.md`: "A golden scenario for uncovered kernel paths" (a fourth scenario, new golden files; the
+    state dump needs a matching `.state` golden too), then `game-ai cleanups`. `[ask]`/`[human]` items wait for the user.
+  - `docs/reports/env-tuning-2026-10-22.md` has the tooling proposals (GateGuard friction, skill tweaks, unused agents).
+    The guard-loosening ones need the user's decision; none was applied.
+
 # Handoff — 2026-10-21
 
 ## Where things stand
