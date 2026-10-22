@@ -196,7 +196,7 @@ def main() -> int:
     if relevant:
         telemetry.record("bash_guard", "block" if code else "warn" if message else "pass", started)
     elif "LW_SKIP_PREPUSH=" in command and "push" in command:
-        telemetry.record("bash_guard", "skip")
+        telemetry.record("bash_guard", "skip", started, reason="LW_SKIP_PREPUSH")
     if message:
         print(message, file=sys.stderr)
     return code

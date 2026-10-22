@@ -11,6 +11,7 @@ from __future__ import annotations
 import json
 import os
 import sys
+import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -57,11 +58,12 @@ def main() -> int:
     path = ti.get("file_path", "")
     if tool not in ("Edit", "Write", "MultiEdit") or not path.endswith(".kt"):
         return 0
+    started = time.monotonic()
     root = Path(os.environ.get("CLAUDE_PROJECT_DIR") or Path(__file__).resolve().parents[2])
     rel = repo_relative(path, root)
     if rel is None:
         # Visible in telemetry, so a guard that never checks anything cannot hide as silence again.
-        telemetry.record("invariant_guard", "skip")
+        telemetry.record("invariant_guard", "skip", started, reason="outside_repo")
         return 0
     p = Path(path)
     old = p.read_text(encoding="utf-8", errors="replace") if p.is_file() else ""
@@ -69,7 +71,7 @@ def main() -> int:
     if new is None:
         return 0
     errors = [f for f in introduced(rel, old, new) if f.severity == "error"]
-    telemetry.record("invariant_guard", "block" if errors else "pass")
+    telemetry.record("invariant_guard", "block" if errors else "pass", started)
     if not errors:
         return 0
     print("Blocked by living-world invariant guard (INSTRUCTIONS.md G1/G8/G9):", file=sys.stderr)
