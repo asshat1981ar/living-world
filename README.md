@@ -80,6 +80,14 @@ One living world that ticks and saves in the app; real hunger, sleep and investi
 travel between villages; a chronicle screen that tells the story of any NPC; moddable scenarios. The working queue is
 [`docs/backlog.md`](docs/backlog.md).
 
+## Status
+
+The simulation kernel is solid and verified; the Android shell around it is early (screens over the kernel, no shared
+world yet, no save). Two reviews from 2026-10-22 list what still needs fixing —
+[`recon`](docs/reports/recon-2026-10-22.md) and
+[`adversarial`](docs/reports/adversarial-2026-10-22.md) — and
+[`docs/refactor-plan-2026-10-22.md`](docs/refactor-plan-2026-10-22.md) is the plan that fixes them.
+
 ## License
 
 [Apache-2.0](LICENSE).
