@@ -229,8 +229,8 @@ goldens green, 85 Python tests green, `check` green.
 
 | # | Commit | Files | Tests | Gate |
 |---|---|---|---|---|
-| C0.1 | `ci: compare Kotlin output with the committed goldens` | `.github/workflows/ci.yml` | – | CI job runs the three `:desktopApp:run --golden=` commands and fails on `MISMATCH` |
-| C0.2 | `ci: enforce the dependency isolation gate` | `.github/workflows/ci.yml`, `tools/check_invariants.py` (new `--base <ref>` mode) | `tools/test_check_invariants.py`: base-diff mode finds an added `implementation(...)` line and honours `LW_ALLOW_DEPS=1` | CI fails a PR that adds a dependency without the env var |
+| C0.1 | `ci: compare Kotlin output with the committed goldens` | `.github/workflows/ci.yml` | – | CI job runs the three `:desktopApp:run --golden=` commands and fails on `MISMATCH` — **delivered as `docs/patches/ci-goldens-and-dependency-gate.patch`** (the pushing App token has no `workflows` scope) |
+| C0.2 | `ci: enforce the dependency isolation gate` | `.github/workflows/ci.yml`, `tools/check_invariants.py` (new `--base <ref>` mode) | `tools/test_check_invariants.py`: base-diff mode finds an added `implementation(...)` line and honours `LW_ALLOW_DEPS=1` | CI fails a PR that adds a dependency without the env var — the tool half landed; the CI half is in the same patch |
 | C0.3 | `tools: verify.py can run the gate locally` | `tools/verify.py` (`--local`), `tools/test_verify.py` | `--local` runs Gradle + goldens locally; `--no-remote` unchanged | `python3 -I tools/verify.py --local` green on a machine with JDK 17 + SDK |
 | C0.4 | `tools: pre-push gate runs the determinism tier` | `tools/hooks/stop_gate.py`, `tools/test_stop_gate.py` | `decide()` calls `determinism_check`; infra failure still warns, not blocks (documented) | `python3 -m unittest discover -s tools` green |
 | C0.5 | `tools: invariant checker covers more platform leaks` | `tools/check_invariants.py` (+ `Thread.`, `Math.random`, `TimeSource.Monotonic`, `kotlin.jvm` import warning, fully-qualified `Random`), tests | new rule cases in `tools/test_check_invariants.py` | checker tests green; `--all` still 0 errors on the tree |
