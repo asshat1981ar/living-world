@@ -71,6 +71,33 @@ class SecretScanTests(unittest.TestCase):
         (self.root / "secret_art.png").write_bytes(b"\x89PNG")
         self.assertEqual(bg.suspicious_untracked(self.root), [])
 
+    def test_more_token_shapes_are_flagged(self):
+        for i, token in enumerate([
+            "xoxb-" + "a" * 20,
+            "sk-" + "b" * 30,
+            "AIza" + "c" * 35,
+            "hf_" + "d" * 30,
+            "glpat-" + "e" * 20,
+            "eyJ" + "f" * 12 + "." + "g" * 12 + "." + "h" * 12,
+        ]):
+            (self.root / f"t{i}.txt").write_text(f"value = {token}\n")
+        self.assertEqual(6, len(bg.suspicious_untracked(self.root)))
+
+    def test_placeholders_are_not_flagged(self):
+        (self.root / "a.txt").write_text('password = "changeme-please"\napi_key = "<your-token>"\n')
+        (self.root / "b.txt").write_text("token = ghp_" + "A" * 40 + " # example\n")
+        self.assertEqual(bg.suspicious_untracked(self.root), [])
+
+    def test_a_token_in_staged_content_is_flagged(self):
+        (self.root / "staged.txt").write_text("hf_" + "z" * 30 + "\n")
+        subprocess.run(["git", "add", "staged.txt"], cwd=self.root, check=True)
+        found = bg.suspicious_staged(self.root)
+        self.assertEqual(len(found), 1)
+        self.assertIn("staged.txt", found[0])
+        code, msg = bg.evaluate("git add -A", self.root)
+        self.assertEqual(code, 2)
+        self.assertIn("staged.txt", msg)
+
     def test_evaluate_blocks_broad_add_but_not_explicit_add(self):
         (self.root / ".env").write_text("X=1\n")
         code, msg = bg.evaluate("git add -A", self.root)

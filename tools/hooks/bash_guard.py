@@ -33,8 +33,21 @@ SECRET_NAME = re.compile(
     re.IGNORECASE,
 )
 SECRET_CONTENT = re.compile(
-    r"github_pat_[A-Za-z0-9_]{20,}|gh[pousr]_[A-Za-z0-9]{30,}|AKIA[0-9A-Z]{16}|-----BEGIN [A-Z ]*PRIVATE KEY-----"
+    r"github_pat_[A-Za-z0-9_]{20,}"
+    r"|gh[pousr]_[A-Za-z0-9]{30,}"
+    r"|glpat-[A-Za-z0-9_-]{20,}"
+    r"|hf_[A-Za-z0-9]{30,}"
+    r"|sk-[A-Za-z0-9]{20,}"
+    r"|xox[baprs]-[A-Za-z0-9-]{10,}"
+    r"|AIza[0-9A-Za-z_-]{35}"
+    r"|AKIA[0-9A-Z]{16}"
+    r"|-----BEGIN [A-Z ]*PRIVATE KEY-----"
+    r"|eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}"
+    r"|(?i:aws_secret_access_key|aws_session_token)\s*[:=]\s*[\"']?[A-Za-z0-9/+=]{16,}"
+    r"|(?i:(api[_-]?key|secret[_-]?key|access[_-]?token|auth[_-]?token|password))\s*[:=]\s*[\"'][^\"'\s]{12,}[\"']"
 )
+# Obvious placeholders are not secrets; flagging them would only train people to bypass the guard.
+PLACEHOLDER = re.compile(r"(?i)(example|changeme|placeholder|dummy|redacted|your[_-]?token|xxxx|<[^>]+>)")
 BINARY_EXT = {".png", ".jpg", ".jpeg", ".gif", ".webp", ".gguf", ".zip", ".pdf", ".jar", ".apk", ".aab", ".ogg", ".wav", ".mp3"}
 MAX_SCAN_BYTES = 200_000
 
@@ -93,6 +106,17 @@ def is_push(seg: list[str]) -> bool:
     return any(os.path.basename(t) == "publish_github.sh" for t in seg[:3])
 
 
+def _secret_hits(text: str) -> list[str]:
+    """The token-shaped matches in `text`, ignoring obvious placeholders."""
+    hits = []
+    for m in SECRET_CONTENT.finditer(text):
+        around = text[max(0, m.start() - 60): m.end() + 60]
+        if PLACEHOLDER.search(around):
+            continue
+        hits.append(m.group(0)[:6] + "…")
+    return hits
+
+
 def suspicious_untracked(root: Path) -> list[str]:
     out = subprocess.run(["git", "ls-files", "-o", "--exclude-standard", "-z"], cwd=root, capture_output=True)
     found = []
@@ -104,10 +128,26 @@ def suspicious_untracked(root: Path) -> list[str]:
         if p.suffix.lower() in BINARY_EXT or not p.is_file() or p.stat().st_size > MAX_SCAN_BYTES:
             continue
         try:
-            if SECRET_CONTENT.search(p.read_text(encoding="utf-8", errors="ignore")):
-                found.append(f"{rel}  (contains a token or private key)")
+            hits = _secret_hits(p.read_text(encoding="utf-8", errors="ignore"))
         except OSError:
             continue
+        if hits:
+            found.append(f"{rel}  (contains a token: {hits[0]})")
+    return found
+
+
+def suspicious_staged(root: Path) -> list[str]:
+    """Tokens in the content that is about to be committed (not just in untracked files)."""
+    out = subprocess.run(["git", "diff", "--cached", "--name-only", "--diff-filter=ACM", "-z"],
+                         cwd=root, capture_output=True)
+    found = []
+    for rel in filter(None, out.stdout.decode(errors="replace").split("\0")):
+        blob = subprocess.run(["git", "show", f":{rel}"], cwd=root, capture_output=True, text=True, errors="replace")
+        if blob.returncode != 0:
+            continue
+        hits = _secret_hits(blob.stdout)
+        if hits:
+            found.append(f"{rel}  (staged content contains a token: {hits[0]})")
     return found
 
 
@@ -127,7 +167,7 @@ def evaluate(command: str, root: Path = REPO, run_gate=None) -> tuple[int, str]:
         return 0, ""
     for seg in segs:
         if is_broad_stage(seg):
-            bad = suspicious_untracked(root)
+            bad = suspicious_untracked(root) + suspicious_staged(root)
             if bad:
                 return 2, ("Blocked: this git command stages every untracked file, and these look like secrets:\n  "
                            + "\n  ".join(bad)
