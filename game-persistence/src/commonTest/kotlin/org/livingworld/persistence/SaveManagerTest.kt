@@ -132,4 +132,50 @@ class SaveManagerTest {
         assertTrue(first.source is EntityId.Npc, "entity kind must survive the round trip")
         assertEquals(SaveManager.computeDeterministicFingerprint(world), decoded.deterministicDigestHex)
     }
+
+    @Test
+    fun an_envelope_without_a_digest_is_refused() {
+        val world = DefaultVillageFactory.marketVillage()
+        val forged = SaveEnvelope(
+            savedAtTick = 0, eventCount = 0, stateHash = 0,
+            deterministicDigestHex = "", worldState = world
+        )
+        val raw = SaveManager.jsonConfig.encodeToString(SaveEnvelope.serializer(), forged)
+        assertFailsWith<IllegalArgumentException> { SaveManager.deserializeEnvelope(raw) }
+    }
+
+    @Test
+    fun an_envelope_whose_metadata_does_not_match_its_world_is_refused() {
+        val world = DefaultVillageFactory.marketVillage()
+        val digest = SaveManager.computeDeterministicFingerprint(world)
+        val wrongCount = SaveEnvelope(
+            savedAtTick = 0, eventCount = 99, stateHash = SaveManager.stateHashOf(digest),
+            deterministicDigestHex = digest, worldState = world
+        )
+        val raw = SaveManager.jsonConfig.encodeToString(SaveEnvelope.serializer(), wrongCount)
+        assertFailsWith<IllegalArgumentException> { SaveManager.deserializeEnvelope(raw) }
+    }
+
+    @Test
+    fun replaying_a_ledger_with_a_repeated_event_id_is_refused() {
+        val world = DefaultVillageFactory.marketVillage()
+        val event = GameEvent.PriceAdjusted(
+            id = EventId(1L), time = WorldTime(1L), merchant = NpcId("merchant"), item = ItemId("bread"),
+            oldPrice = 5f, newPrice = 6f, reason = "t"
+        )
+        assertFailsWith<IllegalArgumentException> {
+            SaveManager.replayEvents(world, listOf(event, event))
+        }
+    }
+
+    @Test
+    fun the_save_gate_refuses_a_world_that_breaks_its_own_rules() {
+        val world = DefaultVillageFactory.marketVillage()
+        val merchant = world.npc(NpcId("merchant"))
+        val broken = world.copy(
+            npcs = world.npcs + (merchant.id to merchant.copy(resources = merchant.resources.copy(health = 0f)))
+        )
+        assertTrue(SaveManager.validateWorldIntegrity(broken).isFailure)
+        assertTrue(SaveManager.validateWorldIntegrity(world).isSuccess)
+    }
 }

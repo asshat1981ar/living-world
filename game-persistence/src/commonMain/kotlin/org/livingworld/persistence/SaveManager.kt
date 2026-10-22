@@ -9,6 +9,7 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import org.livingworld.core.events.GameEvent
 import org.livingworld.core.world.DefaultWorldReducer
+import org.livingworld.core.world.WorldInvariants
 import org.livingworld.core.world.WorldReducer
 import org.livingworld.core.world.WorldState
 
@@ -80,11 +81,21 @@ object SaveSchemaMigrator {
             else -> {
                 val v3Envelope = json.decodeFromString<SaveEnvelope>(rawJson)
                 SaveManager.validateWorldIntegrity(v3Envelope.worldState).getOrThrow()
-                if (v3Envelope.deterministicDigestHex.isNotBlank()) {
-                    val actualDigest = SaveManager.computeDeterministicFingerprint(v3Envelope.worldState)
-                    require(actualDigest == v3Envelope.deterministicDigestHex) {
-                        "SaveEnvelope digest mismatch: expected ${v3Envelope.deterministicDigestHex}, got $actualDigest"
-                    }
+                // A v3 envelope must carry the digest of the world it holds; without it nothing is verified.
+                require(v3Envelope.deterministicDigestHex.isNotBlank()) {
+                    "SaveEnvelope has no deterministic digest, so its world cannot be verified"
+                }
+                val actualDigest = SaveManager.computeDeterministicFingerprint(v3Envelope.worldState)
+                require(actualDigest == v3Envelope.deterministicDigestHex) {
+                    "SaveEnvelope digest mismatch: expected ${v3Envelope.deterministicDigestHex}, got $actualDigest"
+                }
+                require(v3Envelope.eventCount == v3Envelope.worldState.events.size) {
+                    "SaveEnvelope says ${v3Envelope.eventCount} events but the world holds " +
+                        "${v3Envelope.worldState.events.size}"
+                }
+                require(v3Envelope.savedAtTick == v3Envelope.worldState.time.tick) {
+                    "SaveEnvelope says tick ${v3Envelope.savedAtTick} but the world is at " +
+                        "${v3Envelope.worldState.time.tick}"
                 }
                 v3Envelope
             }
@@ -188,6 +199,13 @@ object SaveManager {
             if (!npc.identity.isAlive && npc.resources.health > 0f) {
                 return Result.failure(IllegalStateException("Deceased NPC ${npcId.value} has positive health (${npc.resources.health})"))
             }
+            if (npc.identity.isAlive && npc.resources.health <= 0f) {
+                return Result.failure(IllegalStateException("NPC ${npcId.value} is alive with no health (${npc.resources.health})"))
+            }
+        }
+        val violations = WorldInvariants.violations(state)
+        if (violations.isNotEmpty()) {
+            return Result.failure(IllegalStateException("The world breaks its own rules: " + violations.joinToString("; ")))
         }
         return Result.success(Unit)
     }
@@ -197,6 +215,14 @@ object SaveManager {
         events: List<GameEvent>,
         reducer: WorldReducer = DefaultWorldReducer()
     ): WorldState {
+        // The ledger is strictly ordered and unique; a replay that does not satisfy that is not a replay.
+        var last = Long.MIN_VALUE
+        for (event in events) {
+            require(event.id.value > last) {
+                "Event ${event.id.value} does not follow the previous event ($last): the ledger must increase"
+            }
+            last = event.id.value
+        }
         var state = initialState
         for (event in events) {
             state = reducer.apply(state, event)
