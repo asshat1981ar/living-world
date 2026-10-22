@@ -39,12 +39,33 @@ class WorldReducerTest {
     // --- Ledger and time (every branch) ---
 
     @Test
-    fun applying_the_same_event_twice_records_it_once() {
+    fun applying_the_same_event_twice_changes_nothing() {
         val event = GameEvent.PriceAdjusted(EventId(1), WorldTime(1), merchant, ItemId("bread"), 5f, 6f, "test")
         val once = reducer.apply(world(), event)
         val twice = reducer.apply(once, event)
         assertEquals(1, twice.events.size)
         assertEquals(once.events, twice.events)
+        assertEquals(once.economy, twice.economy, "a recorded event was applied a second time")
+        assertEquals(once.npcs, twice.npcs, "a recorded event was applied a second time")
+    }
+
+    @Test
+    fun the_dead_do_not_work_trade_or_heal() {
+        val dead = world().apply { id, t -> GameEvent.NpcKilled(id, t, merchant, killer = null, witnesses = emptyList()) }
+
+        val afterRoutine = dead.apply { id, t ->
+            GameEvent.NpcRoutineCompleted(id, t, merchant, "WORK", square, deltaHealth = 10f)
+        }
+        assertEquals(dead.events.size, afterRoutine.events.size, "a dead NPC worked")
+        assertEquals(0f, afterRoutine.npc(merchant).resources.health, "a dead NPC was healed")
+
+        val afterTrade = dead.apply { id, t ->
+            GameEvent.TradeCompleted(id, t, buyer = NpcId("apprentice").toEntityId(), seller = merchant.toEntityId(),
+                item = ItemId("bread"), price = 5f)
+        }
+        assertEquals(dead.events.size, afterTrade.events.size, "a dead merchant sold something")
+        assertEquals(dead.npc(apprentice).resources.coins, afterTrade.npc(apprentice).resources.coins)
+        assertEquals(dead.npc(merchant).resources.coins, afterTrade.npc(merchant).resources.coins)
     }
 
     @Test

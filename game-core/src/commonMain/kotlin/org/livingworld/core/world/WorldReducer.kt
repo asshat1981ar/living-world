@@ -26,11 +26,13 @@ class DefaultWorldReducer : WorldReducer {
         state: WorldState,
         event: GameEvent
     ): WorldState {
-        val updatedLedger = if (state.events.find(event.id) == null) {
-            state.events.record(event)
-        } else {
-            state.events
-        }
+        // Applying an event that is already in the ledger changes nothing. The ledger is the record of what
+        // happened: re-applying it (a retry, a duplicated queue entry, a replay that overlaps) must not change the
+        // world a second time (G5).
+        if (state.events.find(event.id) != null) return state
+        // An event that cannot happen to a dead NPC is not recorded either: the ledger must not contain a lie.
+        if (!isApplicable(state, event)) return state
+        val updatedLedger = state.events.record(event)
 
         val nextTime = if (event.time > state.time) event.time else state.time
         val baseState = state.copy(time = nextTime, events = updatedLedger)
@@ -53,6 +55,30 @@ class DefaultWorldReducer : WorldReducer {
             is GameEvent.NpcRoutineCompleted -> applyRoutineCompleted(baseState, event)
             is GameEvent.OpportunityDispatched -> applyOpportunityDispatched(baseState, event)
         }
+    }
+
+    /**
+     * Whether the event can happen at all in this world. The dead do not work, trade, speak, inherit or fight, so
+     * such an event is not recorded: the ledger must not contain a lie (G4). An entity that is not in the world at all
+     * keeps the old behaviour (the event is recorded, nothing changes) - that is a different gap.
+     */
+    private fun isApplicable(state: WorldState, event: GameEvent): Boolean = when (event) {
+        is GameEvent.NpcRoutineCompleted -> isNotDead(state, event.npc)
+        is GameEvent.TradeCompleted -> isNotDead(state, event.buyer) && isNotDead(state, event.seller)
+        is GameEvent.RationPurchased -> isNotDead(state, event.buyer) && isNotDead(state, event.seller)
+        is GameEvent.AllegianceChanged -> isNotDead(state, event.npc)
+        is GameEvent.ShopInherited -> isNotDead(state, event.heir)
+        is GameEvent.RumorTransmitted -> isNotDead(state, event.target)
+        is GameEvent.NpcAttacked -> isNotDead(state, event.target)
+        else -> true
+    }
+
+    /** An NPC that is in the world but dead cannot act; the player and unknown entities are not NPCs. */
+    private fun isNotDead(state: WorldState, npcId: NpcId): Boolean = state.npcs[npcId]?.isAlive != false
+
+    private fun isNotDead(state: WorldState, entity: EntityId): Boolean = when (entity) {
+        is EntityId.Npc -> isNotDead(state, entity.id)
+        else -> true
     }
 
     /** The world graph is the single source of truth for relationships (NPCs hold no private copy). */
