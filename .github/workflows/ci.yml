@@ -18,11 +18,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Full history: the dependency isolation gate diffs the PR against its base commit.
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
       - name: G1/G8/G9 invariant check
         run: python3 tools/check_invariants.py --all
+      - name: Dependency isolation gate (vs the base commit)
+        env:
+          # The base commit of the PR, or the pushed commit itself on a push to main.
+          CI_BASE_REF: ${{ github.event.pull_request.base.sha || github.sha }}
+        run: python3 tools/check_invariants.py --base "$CI_BASE_REF"
       - name: Tooling tests
         run: python3 -m unittest discover -s tools -p 'test_*.py'
 
@@ -47,6 +55,25 @@ jobs:
         uses: gradle/actions/wrapper-validation@v4
       - name: Check
         run: ./gradlew check --no-daemon --console=plain
+      - name: Kotlin goldens (the kernel must still match tests/golden)
+        run: |
+          set -euo pipefail
+          mkdir -p build/golden-logs
+          for s in default turmoil feud; do
+            extra=""
+            if [ "$s" != "default" ]; then extra="--scenario=$s"; fi
+            log="build/golden-logs/$s.log"
+            # The runner exits 0 even on a mismatch, so the "Golden : OK" line is the actual verdict.
+            if ! ./gradlew :desktopApp:run --no-daemon --console=plain -q \
+                 --args="10 0 $extra --golden=tests/golden/$s-10d.txt.gz" > "$log" 2>&1; then
+              cat "$log"; exit 1
+            fi
+            if ! grep -q "Golden *: OK" "$log"; then
+              echo "golden $s does not match tests/golden/$s-10d.txt.gz"
+              cat "$log"; exit 1
+            fi
+            echo "golden $s OK"
+          done
       - name: Build the debug APK
         run: ./gradlew :androidApp:assembleDebug --no-daemon --console=plain
       - name: Upload the debug APK
@@ -64,3 +91,4 @@ jobs:
           path: |
             **/build/reports/
             **/build/test-results/
+            build/golden-logs/
