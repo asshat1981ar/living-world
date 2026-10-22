@@ -22,9 +22,6 @@ log and the commits). The first items need no approval and no golden re-record.
 
 **W2 leftovers**
 
-- [ ] **Grounding v2** M. `GroundingCheck` only treats capitalised or numeric tokens as claims, so an invented
-      lowercase sentence passes (`docs/reports/adversarial-2026-10-22.md` §2.3.4). Needs a curated small-talk
-      vocabulary, plus a test that "alden poisoned the well" is rejected without facts.
 - [ ] **`EventValidator` for entity existence** M. The reducer's pre-checks are inline; make them one reusable object and
       cover "every event actor, owner and victim exists" (plan C1.1/C2.11).
 - [ ] **A separate state dump (dump v2)** M. The canonical dump still omits belief content, items, traits, the player,
@@ -84,6 +81,9 @@ log and the commits). The first items need no approval and no golden re-record.
 
 ## Done
 
+- [x] **Grounding v2** M. Every word of a reply must be known (facts, speaker and place, or the curated small-talk
+      vocabulary); "alden poisoned the well" is rejected without facts (`d81eafd`, test
+      `an_invented_lowercase_sentence_is_rejected`).
 - [x] **Push and let CI pass** `[ask]` S. PR #1 merged into `main` (`c152626`); CI now runs the goldens and the dependency
       isolation gate, and the `main` run is green.
 - [x] W0 — the gate: `verify.py --local`, the pre-push determinism tier, the extra invariant rules, the wider secret
