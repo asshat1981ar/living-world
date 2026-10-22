@@ -29,9 +29,101 @@ def apply(state, event):
     return handler(base, event)
 
 
-def _not_dead(state, npc_id):
+def _npc_exists(state, npc_id):
     npc = state.npcs.get(npc_id)
-    return npc is None or npc.is_alive
+    return npc is not None
+
+
+def _alive(state, npc_id):
+    npc = state.npcs.get(npc_id)
+    return npc is not None and npc.is_alive
+
+
+def _entity_exists(state, entity):
+    if entity is None:
+        return False
+    if entity[0] == "npc":
+        return _npc_exists(state, entity[1])
+    if entity[0] == "player":
+        return entity[1] == state.player.id[1]
+    return True
+
+
+def _entity_alive(state, entity):
+    if entity is None:
+        return False
+    if entity[0] == "npc":
+        return _alive(state, entity[1])
+    return True
+
+
+def _holds(state, entity, item):
+    if entity is None:
+        return False
+    if entity[0] == "npc":
+        npc = state.npcs.get(entity[1])
+        return npc is not None and item in npc.resources.items
+    if entity[0] == "player":
+        return item in state.player.inventory
+    return False
+
+
+def _is_applicable(state, event):
+    """The mirror of EventValidator: an event that cannot happen is not recorded at all."""
+    if isinstance(event, ev.NpcKilled):
+        if not _npc_exists(state, event.victim):
+            return False
+        if event.killer is not None and event.killer[0] == "npc" and not _npc_exists(state, event.killer[1]):
+            return False
+        return True
+    if isinstance(event, ev.ItemStolen):
+        if not _entity_exists(state, event.thief):
+            return False
+        if event.owner is None or not _entity_exists(state, event.owner):
+            return False
+        return _holds(state, event.owner, event.item)
+    if isinstance(event, ev.TradeCompleted):
+        return _trade_possible(state, event)
+    if isinstance(event, ev.RationPurchased):
+        return (_npc_exists(state, event.buyer) and _npc_exists(state, event.seller)
+                and _alive(state, event.buyer) and _alive(state, event.seller))
+    if isinstance(event, ev.NpcRoutineCompleted):
+        return _npc_exists(state, event.npc) and _alive(state, event.npc)
+    if isinstance(event, ev.AllegianceChanged):
+        if not (_npc_exists(state, event.npc) and _alive(state, event.npc)):
+            return False
+        return event.newFaction in state.factions
+    if isinstance(event, ev.ShopInherited):
+        if not (_npc_exists(state, event.heir) and _alive(state, event.heir)):
+            return False
+        return _npc_exists(state, event.predecessor)
+    if isinstance(event, ev.RumorTransmitted):
+        if not (_npc_exists(state, event.source) and _npc_exists(state, event.target)):
+            return False
+        return _alive(state, event.target)
+    if isinstance(event, ev.NpcAttacked):
+        if not (_npc_exists(state, event.target) and _alive(state, event.target)):
+            return False
+        if event.attacker[0] == "npc":
+            return _npc_exists(state, event.attacker[1])
+        return True
+    if isinstance(event, ev.RelationshipShifted):
+        for entity in (event.source, event.target):
+            if entity[0] == "npc" and not _npc_exists(state, entity[1]):
+                return False
+        return True
+    if isinstance(event, ev.EntitiesMet):
+        for entity in (event.entityA, event.entityB):
+            if entity[0] == "npc" and not _npc_exists(state, entity[1]):
+                return False
+        return True
+    if isinstance(event, ev.PriceAdjusted):
+        return _npc_exists(state, event.merchant)
+    if isinstance(event, ev.OpportunityDispatched):
+        return all(_npc_exists(state, a[1]) for a in event.actors if a[0] == "npc")
+    if isinstance(event, ev.FactionHostilityDeclared):
+        return event.declaringFaction in state.factions and event.targetFaction in state.factions
+    return True
 
 
 def _is_player(state, entity):
@@ -39,28 +131,8 @@ def _is_player(state, entity):
     return entity is not None and entity[0] == "player" and entity[1] == state.player.id[1]
 
 
-def _is_applicable(state, event):
-    if isinstance(event, ev.NpcRoutineCompleted):
-        return _not_dead(state, event.npc)
-    if isinstance(event, ev.TradeCompleted):
-        return _trade_possible(state, event)
-    if isinstance(event, ev.ItemStolen):
-        return _theft_possible(state, event)
-    if isinstance(event, ev.RationPurchased):
-        return _not_dead(state, event.buyer) and _not_dead(state, event.seller)
-    if isinstance(event, ev.AllegianceChanged):
-        return _not_dead(state, event.npc)
-    if isinstance(event, ev.ShopInherited):
-        return _not_dead(state, event.heir)
-    if isinstance(event, ev.RumorTransmitted):
-        return _not_dead(state, event.target)
-    if isinstance(event, ev.NpcAttacked):
-        return _not_dead(state, event.target)
-    return True
-
-
 def _trade_possible(state, event):
-    """Two parties that exist, a seller that holds the item and a buyer that can pay."""
+    """Two parties that exist, a living seller that holds the item and a buyer that can pay."""
     if event.price != event.price or event.price <= 0.0:
         return False
     buyer = state.npcs.get(event.buyer[1]) if event.buyer[0] == "npc" else None
@@ -82,21 +154,6 @@ def _trade_possible(state, event):
     buyer_can_pay = (buyer.resources.coins >= event.price) if buyer is not None else (
         buyer_is_player and state.player.coins >= event.price)
     return buyer_can_pay
-
-
-def _theft_possible(state, event):
-    """A thief that exists and an owner that holds the item."""
-    thief = state.npcs.get(event.thief[1]) if event.thief[0] == "npc" else None
-    if thief is None and not _is_player(state, event.thief):
-        return False
-    if event.owner is None:
-        return False
-    owner = state.npcs.get(event.owner[1]) if event.owner[0] == "npc" else None
-    if owner is None and not _is_player(state, event.owner):
-        return False
-    owner_holds = (event.item in owner.resources.items) if owner is not None else (
-        _is_player(state, event.owner) and event.item in state.player.inventory)
-    return owner_holds
 
 
 def _modify(rels, frm, to, dt=0.0, da=0.0, dr=0.0, dfear=0.0, dres=0.0, event_id=None):

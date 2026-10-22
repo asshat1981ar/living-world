@@ -41,12 +41,13 @@ class WorldInvariantsTest {
     }
 
     @Test
-    fun an_event_that_names_an_unknown_npc_is_a_violation() {
+    fun an_event_that_names_an_unknown_npc_is_never_recorded() {
         val reducer = DefaultWorldReducer()
         val state = reducer.apply(world(), GameEvent.NpcKilled(
             id = EventId(1), time = WorldTime(1), victim = NpcId("nobody"), killer = null, witnesses = emptyList()
         ))
-        assertTrue(WorldInvariants.violations(state).any { it.contains("unknown NPC nobody") })
+        assertEquals(0, state.events.size, "a death of someone who never existed was recorded")
+        assertEquals(emptyList(), WorldInvariants.violations(state), "the world should still be sound")
     }
 
     @Test

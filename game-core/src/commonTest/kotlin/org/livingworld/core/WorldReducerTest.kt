@@ -120,11 +120,11 @@ class WorldReducerTest {
     }
 
     @Test
-    fun shop_inheritance_by_an_unknown_heir_changes_nothing_but_the_ledger() {
+    fun shop_inheritance_by_an_unknown_heir_is_not_recorded() {
         val before = world()
         val after = before.apply { id, t -> GameEvent.ShopInherited(id, t, NpcId("nobody"), merchant, "Shop") }
         assertEquals(before.npcs, after.npcs)
-        assertEquals(1, after.events.size)
+        assertEquals(before.events.size, after.events.size, "an impossible inheritance was recorded")
     }
 
     // --- FactionHostilityDeclared ---
@@ -164,9 +164,11 @@ class WorldReducerTest {
 
     // Current behaviour, may change: the NPC joins a faction id that does not exist, leaving a dangling reference.
     @Test
-    fun current_behaviour_allegiance_to_an_unknown_faction_still_updates_the_npc() {
-        val after = world().apply { id, t -> GameEvent.AllegianceChanged(id, t, baker, null, FactionId("bandits"), "coin") }
-        assertEquals(setOf(FactionId("bandits")), after.npc(baker).factions)
+    fun an_allegiance_to_an_unknown_faction_is_refused() {
+        val before = world()
+        val after = before.apply { id, t -> GameEvent.AllegianceChanged(id, t, baker, null, FactionId("bandits"), "coin") }
+        assertEquals(before.npc(baker).factions, after.npc(baker).factions)
+        assertEquals(before.events.size, after.events.size, "an impossible allegiance was recorded")
         assertNull(after.factions[FactionId("bandits")])
     }
 
@@ -468,10 +470,10 @@ class WorldReducerTest {
     }
 
     @Test
-    fun killing_an_unknown_npc_changes_nothing_but_the_ledger() {
+    fun killing_an_unknown_npc_is_not_recorded() {
         val before = world()
         val after = before.apply { id, t -> GameEvent.NpcKilled(id, t, NpcId("nobody"), killer = null, witnesses = emptyList()) }
         assertEquals(before.npcs, after.npcs)
-        assertEquals(1, after.events.size)
+        assertEquals(before.events.size, after.events.size, "a death of someone who never existed was recorded")
     }
 }

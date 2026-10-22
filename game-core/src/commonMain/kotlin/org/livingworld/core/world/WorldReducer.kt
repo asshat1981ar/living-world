@@ -30,8 +30,8 @@ class DefaultWorldReducer : WorldReducer {
         // happened: re-applying it (a retry, a duplicated queue entry, a replay that overlaps) must not change the
         // world a second time (G5).
         if (state.events.find(event.id) != null) return state
-        // An event that cannot happen to a dead NPC is not recorded either: the ledger must not contain a lie.
-        if (!isApplicable(state, event)) return state
+        // An event that cannot happen is not recorded either: the ledger must not contain a lie.
+        if (!EventValidator.canApply(state, event)) return state
         val updatedLedger = state.events.record(event)
 
         val nextTime = if (event.time > state.time) event.time else state.time
@@ -55,67 +55,6 @@ class DefaultWorldReducer : WorldReducer {
             is GameEvent.NpcRoutineCompleted -> applyRoutineCompleted(baseState, event)
             is GameEvent.OpportunityDispatched -> applyOpportunityDispatched(baseState, event)
         }
-    }
-
-    /**
-     * Whether the event can happen at all in this world. The dead do not work, trade, speak, inherit or fight, so
-     * such an event is not recorded: the ledger must not contain a lie (G4). An entity that is not in the world at all
-     * keeps the old behaviour (the event is recorded, nothing changes) - that is a different gap.
-     */
-    private fun isApplicable(state: WorldState, event: GameEvent): Boolean = when (event) {
-        is GameEvent.NpcRoutineCompleted -> isNotDead(state, event.npc)
-        is GameEvent.TradeCompleted -> tradeIsPossible(state, event)
-        is GameEvent.ItemStolen -> theftIsPossible(state, event)
-        is GameEvent.RationPurchased -> isNotDead(state, event.buyer) && isNotDead(state, event.seller)
-        is GameEvent.AllegianceChanged -> isNotDead(state, event.npc)
-        is GameEvent.ShopInherited -> isNotDead(state, event.heir)
-        is GameEvent.RumorTransmitted -> isNotDead(state, event.target)
-        is GameEvent.NpcAttacked -> isNotDead(state, event.target)
-        else -> true
-    }
-
-    /**
-     * A trade needs two parties that exist, a seller that holds the item and a buyer that can pay the price. Without
-     * this, a trade with an unknown seller destroyed the buyer's coins and a trade minted the seller's stock.
-     */
-    private fun tradeIsPossible(state: WorldState, event: GameEvent.TradeCompleted): Boolean {
-        if (event.price.isNaN() || event.price <= 0f) return false
-        val buyer = (event.buyer as? EntityId.Npc)?.id?.let { state.npcs[it] }
-        val seller = (event.seller as? EntityId.Npc)?.id?.let { state.npcs[it] }
-        val buyerIsPlayer = isPlayer(state, event.buyer)
-        val sellerIsPlayer = isPlayer(state, event.seller)
-        if (buyer == null && !buyerIsPlayer) return false
-        if (seller == null && !sellerIsPlayer) return false
-        if (buyer != null && !buyer.isAlive) return false
-        if (seller != null && !seller.isAlive) return false
-        val sellerHolds = if (seller != null) seller.resources.items.contains(event.item)
-        else sellerIsPlayer && state.player.inventory.contains(event.item)
-        if (!sellerHolds) return false
-        val buyerCanPay = if (buyer != null) buyer.resources.coins >= event.price
-        else buyerIsPlayer && state.player.coins >= event.price
-        return buyerCanPay
-    }
-
-    /** A theft needs a thief that exists and an owner that holds the item; the item moves to the thief. */
-    private fun theftIsPossible(state: WorldState, event: GameEvent.ItemStolen): Boolean {
-        val thief = (event.thief as? EntityId.Npc)?.id?.let { state.npcs[it] }
-        val thiefIsPlayer = isPlayer(state, event.thief)
-        if (thief == null && !thiefIsPlayer) return false
-        val owner = event.owner ?: return false
-        val ownerNpc = (owner as? EntityId.Npc)?.id?.let { state.npcs[it] }
-        val ownerIsPlayer = isPlayer(state, owner)
-        if (ownerNpc == null && !ownerIsPlayer) return false
-        val ownerHolds = if (ownerNpc != null) ownerNpc.resources.items.contains(event.item)
-        else ownerIsPlayer && state.player.inventory.contains(event.item)
-        return ownerHolds
-    }
-
-    /** An NPC that is in the world but dead cannot act; the player and unknown entities are not NPCs. */
-    private fun isNotDead(state: WorldState, npcId: NpcId): Boolean = state.npcs[npcId]?.isAlive != false
-
-    private fun isNotDead(state: WorldState, entity: EntityId): Boolean = when (entity) {
-        is EntityId.Npc -> isNotDead(state, entity.id)
-        else -> true
     }
 
     /** The world graph is the single source of truth for relationships (NPCs hold no private copy). */

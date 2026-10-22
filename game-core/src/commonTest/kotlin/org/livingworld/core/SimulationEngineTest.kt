@@ -245,13 +245,24 @@ class SimulationEngineTest {
 
     // Current behaviour, may change: the faction left is just the first in the NPC's set; any other memberships stay.
     @Test
-    fun current_behaviour_changing_allegiance_leaves_only_the_first_listed_faction() = runTest {
+    fun changing_allegiance_leaves_only_the_first_listed_faction() = runTest {
         val both = setOf(FactionId("iron_guild"), FactionId("verdant_order"))
         val s = world(listOf(baker)).edit(baker) { it.copy(factions = both) }
-        val after = oneTick(s, baker, Intent.ChangeAllegiance(FactionId("bandits"), "coin"))
+        val after = oneTick(s, baker, Intent.ChangeAllegiance(FactionId("verdant_order"), "coin"))
         val e = after.events.all().filterIsInstance<GameEvent.AllegianceChanged>().single()
         assertEquals(FactionId("iron_guild"), e.oldFaction)
-        assertEquals(setOf(FactionId("verdant_order"), FactionId("bandits")), after.npc(baker).factions)
+        assertEquals(setOf(FactionId("verdant_order")), after.npc(baker).factions)
+    }
+
+    @Test
+    fun an_allegiance_to_an_unknown_faction_is_refused() = runTest {
+        val s = world(listOf(baker)).edit(baker) { it.copy(factions = setOf(FactionId("iron_guild"))) }
+        val after = oneTick(s, baker, Intent.ChangeAllegiance(FactionId("bandits"), "coin"))
+        assertTrue(
+            after.events.all().none { it is GameEvent.AllegianceChanged },
+            "an allegiance to a faction that does not exist was recorded"
+        )
+        assertEquals(setOf(FactionId("iron_guild")), after.npc(baker).factions)
     }
 
     @Test
