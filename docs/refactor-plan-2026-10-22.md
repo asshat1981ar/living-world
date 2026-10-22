@@ -668,3 +668,30 @@ W0 can be prepared in parallel with W1 but should land first, because it is what
 3. Work the queue one item per pass with `feature-loop`, verifying with `python3 -I tools/verify.py --local` once W0.3
    lands (until then, use the remote gate or a local JDK).
 
+## 15. Progress log
+
+| Item | State | Commit |
+|---|---|---|
+| C0.1 CI goldens | the CI half is delivered as `docs/patches/ci-goldens-and-dependency-gate.patch` (the pushing App token has no `workflows` scope); the step itself is written and was verified locally, including that a corrupted golden fails it | — |
+| C0.2 dependency gate | tool half done (`check_invariants.py --base <rev>`), CI half in the same patch | `312c1af` |
+| C0.3 `verify.py --local` | done — the whole gate (invariants, tool tests, Gradle check, three goldens) now runs on one machine with no AWS session | `6c447ed` |
+| C0.4 pre-push determinism tier | done — `decide()` now proves G8 and the goldens; an infra failure still only warns | `1c4b654` |
+| C0.5 checker rules | done — four new rules; the tree now reports 6 `kotlin.jvm` visibility warnings (no errors) | `d48ccd3` |
+| C0.6 secret guard | done — more token shapes, placeholders ignored, staged content scanned | `0967b8c` |
+| C0.7 publish script | done — the token no longer appears in `ps` | `0e45222` |
+| C0.8 docs mark the falsified claims | done (CLAUDE.md known issues, README status) | `8cb209d` |
+| C0.9 characterisation tests | done — coins conserved over 30 days, a strictly ordered ledger, and a replay that rebuilds the whole world | `8128cd6` |
+| C0.10 Gradle checksum | done | `890a356` |
+| C1.2 idempotency | done — a recorded event applies once (goldens unchanged) | `c704c76` |
+| C1.3 life guards | done — the dead do not work, trade or heal (goldens unchanged) | `c704c76` |
+| C1.4 `WorldInvariants` | done | `3e6f2fa` |
+| C1.5 save gate | done — the world's own rules, a required digest and metadata cross-checks | `240a342` |
+| C1.6 replay refuses a repeated id | done | `240a342` |
+| C1.7 90-day fingerprint test | done — the documented fingerprint is now a test, not a sentence in a file | `e1c0f4a` |
+| C1.1 `EventValidator` | **deferred to W2**: the pre-conditions are only worth enforcing once the stock and life rules exist (W2), and the reducer now refuses the dead cases directly. Throwing in the reducer before that would break tests that deliberately apply odd events. | — |
+
+**W1 exit gate (verified 2026-10-22):** the three goldens are byte-identical, the 90-day fingerprint is unchanged, the
+full local gate (`python3 -I tools/verify.py --local`) is green, and a 30-day world still saves through the hardened
+gate.
+
+
