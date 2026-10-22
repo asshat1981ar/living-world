@@ -51,7 +51,8 @@ class RelationshipGraph:
 
     @staticmethod
     def key(frm, to):
-        return f"{frm[1]}->{to[1]}"
+        """The kind and the name of both parties: an NPC and a player that share a name are different relationships."""
+        return f"{frm[0]}:{frm[1]}->{to[0]}:{to[1]}"
 
     def get(self, frm, to):
         return self._edges.get(self.key(frm, to), NEUTRAL)

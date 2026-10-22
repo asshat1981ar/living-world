@@ -7,6 +7,20 @@ import kotlin.jvm.JvmInline
 sealed interface EntityId {
     val identifier: String
 
+    /**
+     * The kind of the entity: `npc`, `player`, `faction` or `location`. Two entities of different kinds may share a
+     * name (an NPC called "player"), so anything that identifies an entity must use the kind as well as the name.
+     */
+    fun kind(): String = when (this) {
+        is EntityId.Npc -> "npc"
+        is EntityId.Player -> "player"
+        is EntityId.Faction -> "faction"
+        is EntityId.Location -> "location"
+    }
+
+    /** The kind and the name of the entity, e.g. `npc:merchant`. */
+    fun typedId(): String = "${kind()}:$identifier"
+
     // Subclasses are data classes, not value classes: a value class cannot carry the polymorphic "type"
     // discriminator, and kotlinx.serialization then wrote it into the next JSON structure (corrupt, unloadable saves).
     @Serializable

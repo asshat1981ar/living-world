@@ -19,6 +19,13 @@ object CanonicalDump {
 
     private fun ids(list: List<org.livingworld.core.ids.NpcId>) = if (list.isEmpty()) "-" else list.joinToString(",") { it.value }
 
+    /**
+     * The dump keeps the historical `a->b` edge form, so the committed goldens stay comparable; the typed key
+     * (`npc:a->player:b`) lives in the world and in the save format.
+     */
+    private fun edgeKey(key: String): String =
+        key.replace(Regex("^[a-z]+:"), "").replace(Regex("(?<=->)[a-z]+:"), "")
+
     fun line(e: GameEvent): String {
         val body = when (e) {
             is GameEvent.NpcKilled -> listOf(e.victim.value, e.killer?.identifier ?: "-", e.location?.value ?: "-", e.motive ?: "-")
@@ -61,8 +68,8 @@ object CanonicalDump {
         out += "TR|${f4(world.economy.treasury)}"
         for (q in world.activeQuests.sortedBy { it.id }) out += "Q|${q.id}|${q.status.name}|${f4(q.reward)}"
         out += "PL|${f4(world.player.coins)}"
-        for ((k, r) in world.relationships.allEdges().entries.sortedBy { it.key })
-            out += "R|$k|${f4(r.trust)}|${f4(r.affection)}|${f4(r.respect)}|${f4(r.fear)}|${f4(r.resentment)}"
+        for ((k, r) in world.relationships.allEdges().entries.sortedBy { edgeKey(it.key) })
+            out += "R|${edgeKey(k)}|${f4(r.trust)}|${f4(r.affection)}|${f4(r.respect)}|${f4(r.fear)}|${f4(r.resentment)}"
         return out
     }
 }

@@ -1,4 +1,6 @@
 """CanonicalDump (desktopApp) in Python."""
+import re
+
 from . import events as ev
 from .f32 import f4
 
@@ -50,6 +52,11 @@ def line(e):
     return "|".join(head + body)
 
 
+def _edge_key(key: str) -> str:
+    """The dump keeps the historical `a->b` edge form; the typed key lives in the world."""
+    return re.sub(r"(?<=->)[a-z]+:", "", re.sub(r"^[a-z]+:", "", key))
+
+
 def dump(world):
     out = [line(e) for e in world.events.all()]
     out.append(f"T|{world.time}")
@@ -70,6 +77,6 @@ def dump(world):
     for q in sorted(world.activeQuests, key=lambda q: q.id):
         out.append(f"Q|{q.id}|{q.status}|{f4(q.reward)}")
     out.append(f"PL|{f4(world.player.coins)}")
-    for k, r in sorted(world.relationships.all_edges().items()):
-        out.append(f"R|{k}|{f4(r.trust)}|{f4(r.affection)}|{f4(r.respect)}|{f4(r.fear)}|{f4(r.resentment)}")
+    for k, r in sorted(world.relationships.all_edges().items(), key=lambda kv: _edge_key(kv[0])):
+        out.append(f"R|{_edge_key(k)}|{f4(r.trust)}|{f4(r.affection)}|{f4(r.respect)}|{f4(r.fear)}|{f4(r.resentment)}")
     return out

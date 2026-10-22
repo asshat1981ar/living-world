@@ -75,7 +75,7 @@ class SimulationInspector(
         }
 
         appendLine("\n--- Relationships ---")
-        val relevantEdges = world.relationships.allEdges().filter { it.key.startsWith("${npc.id.value}->") }
+        val relevantEdges = world.relationships.allEdges().filter { it.key.startsWith("${npc.id.toEntityId().typedId()}->") }
         if (relevantEdges.isEmpty()) {
             appendLine(" (No prominent relationships established)")
         } else {

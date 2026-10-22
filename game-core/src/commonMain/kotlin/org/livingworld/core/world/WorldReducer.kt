@@ -267,7 +267,8 @@ class DefaultWorldReducer : WorldReducer {
             )
         }
 
-        val ownerNpcId = (event.owner as? EntityId.Npc)?.id ?: event.owner?.identifier?.let { NpcId(it) }
+        // The owner is looked up by kind, not by name: a player called "merchant" is not the merchant.
+        val ownerNpcId = (event.owner as? EntityId.Npc)?.id
         val ownerNpc = ownerNpcId?.let { nextNpcs[it] }
         if (ownerNpc != null) {
             val updatedItems = ownerNpc.resources.items - event.item
@@ -396,11 +397,12 @@ class DefaultWorldReducer : WorldReducer {
         var nextNpcs = state.npcs
         var nextPlayer = state.player
 
-        val buyerNpcId = (event.buyer as? EntityId.Npc)?.id ?: NpcId(event.buyer.identifier)
-        val sellerNpcId = (event.seller as? EntityId.Npc)?.id ?: NpcId(event.seller.identifier)
+        // Parties are looked up by kind: an NPC and a player that share a name are different parties.
+        val buyerNpcId = (event.buyer as? EntityId.Npc)?.id
+        val sellerNpcId = (event.seller as? EntityId.Npc)?.id
 
-        val buyerNpc = nextNpcs[buyerNpcId]
-        val sellerNpc = nextNpcs[sellerNpcId]
+        val buyerNpc = buyerNpcId?.let { nextNpcs[it] }
+        val sellerNpc = sellerNpcId?.let { nextNpcs[it] }
 
         // Coins are conserved: the seller is credited only what the buyer actually paid.
         var paid = 0f
@@ -464,8 +466,9 @@ class DefaultWorldReducer : WorldReducer {
         )
     }
 
+    /** The player is the player: an NPC that happens to be called "player" is not. */
     private fun isPlayer(state: WorldState, entity: EntityId): Boolean =
-        entity is EntityId.Player || entity.identifier == state.player.id.identifier
+        entity is EntityId.Player && entity.identifier == state.player.id.identifier
 
     private fun applyPriceAdjustment(
         state: WorldState,

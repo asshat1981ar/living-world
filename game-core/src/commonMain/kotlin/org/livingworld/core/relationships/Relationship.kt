@@ -70,7 +70,11 @@ data class RelationshipGraph(
     private val edges: Map<String, Relationship> = emptyMap(),
     private val changeCount: Long = 0L
 ) {
-    private fun key(from: EntityId, to: EntityId): String = "${from.identifier}->${to.identifier}"
+    /**
+     * Relationships are keyed by the kind *and* the name of both parties, so an NPC and a player that share a name
+     * are different relationships (`npc:merchant->player:player`).
+     */
+    private fun key(from: EntityId, to: EntityId): String = "${from.typedId()}->${to.typedId()}"
 
     fun get(from: EntityId, to: EntityId): Relationship =
         edges[key(from, to)] ?: Relationship.NEUTRAL
@@ -120,8 +124,9 @@ data class RelationshipGraph(
     )
 
     fun remove(entity: EntityId): RelationshipGraph {
-        val prefix = "${entity.identifier}->"
-        val suffix = "->${entity.identifier}"
+        val id = entity.typedId()
+        val prefix = "$id->"
+        val suffix = "->$id"
         val filtered = edges.filterKeys { !it.startsWith(prefix) && !it.endsWith(suffix) }
         return copy(
             edges = filtered,
@@ -130,4 +135,8 @@ data class RelationshipGraph(
     }
 
     fun allEdges(): Map<String, Relationship> = edges
+
+    /** Replaces the edges wholesale (used by the save migration that re-types old keys). */
+    fun withEdges(newEdges: Map<String, Relationship>): RelationshipGraph =
+        copy(edges = newEdges, changeCount = changeCount + 1L)
 }
