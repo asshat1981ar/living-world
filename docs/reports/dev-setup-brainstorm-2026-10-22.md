@@ -1,6 +1,6 @@
 # Development-setup brainstorm — 2026-10-22
 
-**Path:** spike (research whose output is a recommendation). Nothing in this report has been applied **except A11's file permissions** (done after your "approve"; see A11). Tier A adds tests,
+**Path:** spike (research whose output is a recommendation). Nothing in this report has been applied **except A11 (file permissions) and A1 (telemetry fields, commit `89bda00`)**, both done after your "approve". Tier A adds tests,
 reports, docs or additive fields and does **not** change when, whether or in what order any guard blocks. Everything that
 does (a guard, a hook's trigger, order, timing or exit behaviour, plugin scope, a build file, a dependency) is Tier B and
 waits for you. (An earlier draft put four hook changes in Tier A; a review caught it.)
@@ -11,7 +11,7 @@ synthesis in which the claims I rely on were re-checked against the code. Estima
 ## 1. Evidence base
 
 Measured (from `.git/lw-telemetry/events.jsonl`, snapshot of 168 rows taken about 10:40 UTC on 2026-10-22, 127 of them with
-a duration; the live log keeps growing, 173 rows when re-read):
+a duration; the live log keeps growing (about 177 rows when last read, with more `stop_gate` rows), so every figure below is at the snapshot and will not re-measure exactly):
 
 | Fact | Number |
 |---|---|
@@ -44,12 +44,14 @@ Verified in the code or on disk while writing this (so they are facts, not subag
 - The ECC plugin ships 311 skills and 71 agents, all listed in every session; most are irrelevant to a Kotlin game.
 - The continuous-learning observations file is 3.5 MB, **mode 644**, and holds raw tool input/output (the lens found
   ~11 % of lines contain secret-looking words; its contents were deliberately not quoted). The observer is off: 0 instincts.
-- Provenance: the telemetry numbers, file sizes, process states and the action versions (looked up with `gh api`) were
-  measured in this session. These come from a subagent reading the code or a comment and were **not** independently
+- Provenance: the telemetry numbers, file sizes, process states were
+  measured in this session; the action versions were looked up with `gh api` (not checked against the repository). These come from a subagent reading the code or a comment and were **not** independently
   measured: the ~3 GB free on awsbox (a `gradle.properties` comment), the 42.5 s preflight, the ~31 s lost per dead-session
   stop (derived from the median warning duration, which is an inference), and every "estimated saving" in Tier B.
-- A second, older Claude session in this terminal is suspended (state `T`) mid pre-push gate with an SSM job stopped for
-  2.7 h. That, not a status-line command, is the confirmed cause of a frozen status line (there is no `statusLine` key).
+- A second, older Claude session in this terminal was suspended (state `T`) in the middle of a pre-push gate, with an SSM
+  job stopped for 2.7 h; it has since been killed. That, not a status-line command, is the confirmed cause of a frozen
+  status line: neither the repository's `.claude/settings.json` nor `~/.claude/settings.json` has a `statusLine` key
+  (a plugin could still supply one; that was not checked).
   Nothing in the gate can time it out while it is stopped.
 
 ## 2. Ranked plan
@@ -59,7 +61,7 @@ Ranking is value per effort. "Strictness" says what each change does to what the
 ### Tier A — safe to do on your word: local, adds checks or measurement, loosens nothing (A11 touches a file outside the repo)
 | # | Change | Evidence | Effort | Strictness |
 |---|---|---|---|---|
-| A1 | **Telemetry completeness** (additive fields only): every outcome records `s`, a short `reason`, `sha`; add `telemetry.py stale` (a guard with zero rows is flagged) | all 41 `invariant_guard` rows lack a duration, 21 warns unexplained | S | adds |
+| A1 | **Telemetry completeness** (additive fields only) — **applied in `89bda00`**: every guard row can carry a duration, a short `reason` and the commit; `invariant_guard` now times checked edits and gives a skip a reason; `telemetry.py stale` lists wired guards with no recent row and rows without a duration. Verified by `tools/test_telemetry.py` (it runs the real guard as a subprocess); the old 41 `invariant_guard` rows stay untimed and the stale report says so | all 41 `invariant_guard` rows lack a duration, 21 warns unexplained | S | adds |
 | A3 | **Backlog-vs-git check** (`tools/check_backlog.py`, advisory first): flag an unchecked item whose title/hash/id appears in a recent commit subject or is marked done in `docs/refactor-plan-2026-10-22.md` §15 | 2 of the first 3 backlog items were already done | S | adds |
 | A4 | **lw-sim `verify` returns structured counts** (parse `TESTCOUNT`; it also drops `--local`'s three-token lines `PASS  gradle check` and `PASS  golden <name>`; `verify.py:144,147` help text still says three goldens), fix its docstring (`lw_sim_server.py:141` still names three goldens, there are five), the SDK-34 text in the `awsbox-build` skill, and the `CLAUDE.md` sentence about the pre-push gate (it runs `decide()`, which skips an unchanged digest, not always the full `check`) | verified above | S | adds (docs and a parser) |
 | A5 | **Guard canary tests**: feed each real hook a synthetic bad input (a banned import under *both* path spellings, `git add -A` with a secret-like file) and assert it blocks; run in the tool tests | `invariant_guard` was a silent no-op for its whole life and was found by accident | M | adds |
@@ -71,7 +73,7 @@ Ranking is value per effort. "Strictness" says what each change does to what the
 ### Tier B — needs your approval (changes a guard, hook, plugin scope, build file or dependency)
 | # | Change | Why it needs you |
 |---|---|---|
-| B18 | **Fix a fail-open in `stop_gate.decide()` (found by the review of this report)**: it writes the "this digest is green" marker (`last-green`, `stop_gate.py:111-113`) *before* the determinism tier runs; when that tier then hits an infrastructure failure it only warns (`:120-122`), and `last-green-determinism` is written at `:119` but **read nowhere** in `tools/hooks`. So after one infrastructure failure, every later Stop or push on the same code skips Kotlin, G8 and the goldens. Fix: write the marker only after determinism passes (or make the skip depend on both markers), plus a test with an injected infra failure that expects the next call to re-run. Related and by design: `bash_guard` treats an expired AWS session as a warning, so a push can go out with only a warning | changes a guard's skip rule; it **tightens**. Highest value in Tier B: a small change that restores a gate |
+| B18 | **Fix a fail-open in the pre-push path, `stop_gate.decide()` (found by the review of this report)**: it writes the "this digest is green" marker (`last-green`, `stop_gate.py:111-113`) *before* the determinism tier runs; when that tier then hits an infrastructure failure it only warns (`:120-122`), and `last-green-determinism` is written at `:119` but **read nowhere** in `tools/hooks`. So after one infrastructure failure, later **pushes** on the same code skip Kotlin, G8 and the goldens (`bash_guard` calls `decide`). The **Stop hook is not affected**: `decide_quick` saves its determinism marker only when the tier passes (`:279-285`) and so retries after a failure; it is the model for the fix. Fix: make `decide` save its markers the way `decide_quick` does (determinism marker only after a pass, and the skip keyed on it), plus a test with an injected infra failure that expects the next call to re-run. Related and by design: `bash_guard` treats an expired AWS session as a warning, so a push can go out with only a warning | changes a guard's skip rule; it **tightens**. Highest value in Tier B: a small change that restores a gate |
 | B13 | **Narrow and widen the determinism trigger** (was A2): ignore test source sets; add `game-persistence`/`game-ai`/`game-ui` code, the `build` group, `tests/golden/**` and `scenarios.json` to what re-runs G8 and the goldens at Stop. Write its negative test together with the A5 canary | changes a guard's trigger. It **tightens** by closing three real gaps and **loosens** one thing, stated plainly: after a test-only edit, Stop would no longer re-run the G8 repeat and the goldens (they cannot change from a test-only edit, because tests are not on the runner's classpath, and the `jvmTest` tiers still run). It must change **both** paths: the Stop path (`module_digests`, `determinism_digest`) and the pre-push path (`kotlin_digest`) are separate functions that filter on the same `KOTLIN_INPUTS`, so both digests and that list need widening. Estimated saving ~40 min over the recorded history (a lens estimate) |
 | B14 | **Fail-closed wrapper** (was A6): any exception in a *blocking* decision exits 2 and records `crash`. **Scope it**: `bash_guard` runs before every Bash call, so a bug there would block all Bash use. Fail closed only for the push and secret decisions; every other Bash command fails open with a visible warning. Advisory hooks never fail closed | changes exit behaviour of guards; the brick-the-session risk must be accepted explicitly |
 | B15 | **Local checks in parallel with the remote run, and test the AWS session first** (was A7) | changes the order and timing inside `verify.py` and the stop gate; same checks, estimated 40–55 s per verify |
@@ -100,7 +102,7 @@ Ranking is value per effort. "Strictness" says what each change does to what the
    before/after census and economy curve.
 3. **Retire the stale `ck_2026-10-18` memory entry** (its "next steps" are out of date).
 4. **Pushing.** `origin/main` is at `a70304b`, the starvation commit that was later reverted and redone; local `main` and
-   the working branch are about two dozen commits ahead of it, so a push is a fast-forward (`git log origin/main..HEAD`). Nothing after `3b7be85` has been
+   the working branch are 27 commits ahead of it at 12:15 UTC on 2026-10-22 (`git log origin/main..HEAD` gives the current number), so a push is a fast-forward. Nothing after `3b7be85` has been
    pushed. CI only runs on pushes to `main`, on pull requests and on manual dispatch.
 
 Five hand-written instincts worth saving (each atomic, evidence-backed):
