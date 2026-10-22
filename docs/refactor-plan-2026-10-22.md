@@ -732,8 +732,11 @@ re-recorded again).
 | C4.2 the world ticks and is saved | **done** — the store ticks an hour at a time while the app is in front, and saves/restores the world (`SaveManager` envelope in `filesDir`) | `6728870` |
 | C4.3 the inventory comes from the world | **done** — the counts are `world.player.inventory`, the catalog is refreshed, and you cannot sell what you do not have | `6728870` |
 | C4.4 player travel is an event | **done** — `GameEvent.PlayerMoved` through the reducer, so a replay reproduces where the player stands (the mirror knows it too) | `e6b2e80` |
-| C4.5 a duel can be lost | **open** — the duel is still one-sided and the player has no health | — |
-| C4.6 dialogue and AI | **partly done** — the dialogue addresses the world's player id; the prepared-line cache still ignores location and relationship, and a released request still hangs | — |
+| C4.5 a duel can be lost | **done** — the player has health in the world, the opponent answers with a counter-blow (`GameEvent.PlayerAttacked`), and the duel screen shows the wounds; both fighters must be in the same place | `77ecee6` |
+| C4.6 dialogue and AI | **done** — the dialogue addresses the world's player id, the prepared-line cache carries the place and the facts, and a released request fails at once | `68c1521` |
+| W5.1 model digest on load | **done** — the installed model is verified by sha256 (a stamp file keeps the common case free); a same-size file no longer passes | `68c1521` |
+| W5.2 backup rules | **done** — `fullBackupContent` and `dataExtractionRules` exclude the 345 MB model directory | `68c1521` |
+| W5.3 redirect target | **done** — redirects are followed only to https hosts on huggingface.co | `68c1521` |
 
 **W1 exit gate (verified 2026-10-22):** the three goldens are byte-identical, the 90-day fingerprint is unchanged, the
 full local gate (`python3 -I tools/verify.py --local`) is green, and a 30-day world still saves through the hardened

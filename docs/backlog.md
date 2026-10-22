@@ -51,15 +51,16 @@ log and the commits). The first items need no approval and no golden re-record.
       trade, and you cannot sell what you do not have.
 - [x] **Player travel is an event** M. `GameEvent.PlayerMoved` goes through the reducer, so a replay reproduces where the
       player stands.
-- [ ] **A duel can be lost** M. The duel is one-sided (the opponent never attacks) and the player has no health.
+- [x] **A duel can be lost** M. The player has health in the world, the opponent answers with a counter-blow, and
+      the duel screen shows the wounds.
 
 **W5 — AI, Android and shipping** (`[ask]` for the dependency part)
 
-- [ ] **Verify the model digest on every load** M. `ModelDownloader.isInstalled` checks the size only
-      (`AiSetup.kt:106`); `AndroidModelAssetManager.verifyChecksum` exists but is used only by a test.
-- [ ] **Keep the model out of backups** S. `android:allowBackup="true"` with no rules covers the 345 MB model directory.
-- [ ] **Validate the redirect target** S. `AiController.openHttps` follows redirects without re-checking the host.
-- [ ] **Fail a pending request on release** S. `OnDeviceChatModel.release` leaves the request hanging for 120 s.
+- [x] **Verify the model digest on every load** M. The installed model is checked by sha256, with a stamp file so the
+      common case stays free; a same-size file no longer passes.
+- [x] **Keep the model out of backups** S. `fullBackupContent` and `dataExtractionRules` exclude the model directory.
+- [x] **Validate the redirect target** S. Redirects are followed only to https hosts on huggingface.co.
+- [x] **Fail a pending request on release** S. A released request fails at once instead of hanging for 120 s.
 - [ ] **game-ai cleanups** S. `DeterministicAiFallback` adds the same goal bonus to every candidate and treats any text
       containing "fallback" as a fallback (`AiReasoningPort.kt`); `extractLastJsonObject` / `isFallbackProposal` have no
       callers; `game-ui` declares a `game-ai` dependency only its tests use. Also fix the "half-life of 14 days" comment
