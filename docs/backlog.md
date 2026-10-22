@@ -22,8 +22,6 @@ log and the commits). The first items need no approval and no golden re-record.
 
 **W2 leftovers**
 
-- [ ] **`EventValidator` for entity existence** M. The reducer's pre-checks are inline; make them one reusable object and
-      cover "every event actor, owner and victim exists" (plan C1.1/C2.11).
 - [ ] **A separate state dump (dump v2)** M. The canonical dump still omits belief content, items, traits, the player,
       the quests and the places, so changes there stay invisible to the goldens (the digest sees them now, the dump does
       not). Write it as its own file so the goldens need no re-record.
@@ -81,6 +79,9 @@ log and the commits). The first items need no approval and no golden re-record.
 
 ## Done
 
+- [x] **`EventValidator` for entity existence** M. One object holds the pre-conditions (`578cff1`, `a00f7b6`); it now has
+      its own `EventValidatorTest` (unknown victim/killer/thief/owner/parties/places/factions, the dead, trade stock and
+      price).
 - [x] **Grounding v2** M. Every word of a reply must be known (facts, speaker and place, or the curated small-talk
       vocabulary); "alden poisoned the well" is rejected without facts (`d81eafd`, test
       `an_invented_lowercase_sentence_is_rejected`).
