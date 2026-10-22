@@ -689,6 +689,18 @@ W0 can be prepared in parallel with W1 but should land first, because it is what
 | C1.6 replay refuses a repeated id | done | `240a342` |
 | C1.7 90-day fingerprint test | done — the documented fingerprint is now a test, not a sentence in a file | `6a82338` |
 | C1.1 `EventValidator` | **deferred to W2**: the pre-conditions are only worth enforcing once the stock and life rules exist (W2), and the reducer now refuses the dead cases directly. Throwing in the reducer before that would break tests that deliberately apply odd events. | — |
+| C2.1 typed entity keys | **done in W2a** — edges are `npc:merchant->player:player`, the reducers resolve parties by kind, save schema v4 migrates v1/v2/v3; the dump keeps the old edge form, so the goldens are unchanged | `89b8d05` |
+| C2.6 knowledge-scoped snapshot | **done in W2a** — `knownEvents(npc)`: what the NPC witnessed, did, or saw happen in public where it stands; the advisor gets that instead of the world's last ten events | `158971a` |
+| C2.7 full-state digest | **done in W2a** — `StateDigest` sees beliefs, memories, items, traits, feelings, the player, the treasury, the quests, the places and the ledger; the 90-day fingerprint is now `e1aea58880101b51` | `86fae5a` |
+
+**W2a exit gate (verified 2026-10-22):** the three goldens are byte-identical, the 90-day run is unchanged
+(45,615 events, ~1.3 s) and only its fingerprint moved, `python3 -I tools/verify.py --local` is green, and the Python
+mirror still matches the goldens (the mirror keys relationships by kind as well).
+
+**Still to come in W2b** (the behaviour half, one golden re-record at the end): C2.2 trade rules (stock, alive, no
+mint), C2.3 theft moves the item, C2.4 quest issuers and problem lifecycle, C2.5 causes point backwards, C2.10
+grounding v2, C2.11 entity-existence checks, C2.12 the fourth scenario, the dump v2 format, the mirror port and the
+re-record.
 
 **W1 exit gate (verified 2026-10-22):** the three goldens are byte-identical, the 90-day fingerprint is unchanged, the
 full local gate (`python3 -I tools/verify.py --local`) is green, and a 30-day world still saves through the hardened
