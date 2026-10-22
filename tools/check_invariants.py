@@ -7,6 +7,7 @@ not a Kotlin parser. Comment lines are ignored.
     python3 tools/check_invariants.py --all            # whole tree
     python3 tools/check_invariants.py --files a.kt b.kt
     python3 tools/check_invariants.py --staged         # git index (pre-commit); also runs the isolation gate
+    python3 tools/check_invariants.py --base origin/main   # whole tree + isolation gate against a base rev (CI)
 
 Exit 1 when any error is found. Warnings never fail.
 """
@@ -103,6 +104,17 @@ def isolation_gate(diff: str) -> list[str]:
     return hits
 
 
+def base_diff(base: str, repo: Path = REPO) -> str:
+    """The `*.gradle.kts` diff between `base` and HEAD, for the isolation gate.
+
+    `base` may be any rev the repository knows (a branch, a tag or a commit SHA). The three-dot form diffs from the
+    merge base, so a branch that moved on does not report the base's own changes. An unknown rev yields an empty diff.
+    """
+    p = subprocess.run(["git", "diff", "--unified=0", f"{base}...HEAD", "--", "*.gradle.kts"],
+                       cwd=repo, capture_output=True, text=True, check=False)
+    return p.stdout if p.returncode == 0 else ""
+
+
 def _rel(p: Path) -> str:
     try:
         return p.resolve().relative_to(REPO).as_posix()
@@ -116,6 +128,7 @@ def main(argv: list[str] | None = None) -> int:
     g.add_argument("--all", action="store_true")
     g.add_argument("--files", nargs="+")
     g.add_argument("--staged", action="store_true")
+    g.add_argument("--base", help="whole-tree check plus the isolation gate against this rev (e.g. origin/main)")
     a = ap.parse_args(argv)
     findings: list[Finding] = []
     deps: list[str] = []
@@ -130,10 +143,12 @@ def main(argv: list[str] | None = None) -> int:
         deps = isolation_gate(subprocess.run(["git", "diff", "--cached", "-U0", "--", "*.gradle.kts"], cwd=REPO,
                                              capture_output=True, text=True).stdout)
     else:
-        paths = sorted(REPO.glob("*/src/**/*.kt")) if a.all else [Path(f) for f in a.files]
+        paths = sorted(REPO.glob("*/src/**/*.kt")) if (a.all or a.base) else [Path(f) for f in a.files]
         for p in paths:
             if "_archive" not in p.parts and p.is_file():
                 findings += check_text(_rel(p), p.read_text(encoding="utf-8", errors="replace"))
+        if a.base:
+            deps = isolation_gate(base_diff(a.base))
     errors = [f for f in findings if f.severity == "error"]
     for f in findings:
         print(f)

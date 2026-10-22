@@ -71,6 +71,42 @@ class RuleTests(unittest.TestCase):
         self.assertIn("ktor", hits[0])
 
 
+class BaseModeTests(unittest.TestCase):
+    """`--base`: whole-tree check plus the isolation gate against a base rev (what CI runs)."""
+
+    def _repo(self, tmp: str):
+        repo = Path(tmp)
+
+        def run(*args):
+            return subprocess.run(["git", *args], cwd=repo, capture_output=True, text=True, check=True)
+
+        run("init", "-q")
+        run("config", "user.email", "test@example.com")
+        run("config", "user.name", "test")
+        return repo, run
+
+    def test_base_diff_finds_a_dependency_added_since_the_base(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            repo, run = self._repo(tmp)
+            (repo / "build.gradle.kts").write_text("dependencies {\n}\n")
+            run("add", "-A")
+            run("commit", "-qm", "base")
+            (repo / "build.gradle.kts").write_text(
+                'dependencies {\n    implementation("io.ktor:ktor-client-core:3.0.0")\n}\n')
+            run("add", "-A")
+            run("commit", "-qm", "dep")
+            diff = ci.base_diff("HEAD~1", repo)
+            self.assertEqual(1, len(ci.isolation_gate(diff)))
+
+    def test_base_diff_is_empty_for_an_unknown_rev(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            repo, _ = self._repo(tmp)
+            self.assertEqual("", ci.base_diff("no-such-rev", repo))
+
+    def test_base_mode_checks_the_whole_tree_and_passes_on_a_clean_tree(self):
+        self.assertEqual(0, ci.main(["--base", "HEAD"]))
+
+
 class HookTests(unittest.TestCase):
     def run_hook(self, payload: dict, root: str) -> subprocess.CompletedProcess:
         env = dict(os.environ, CLAUDE_PROJECT_DIR=root)
