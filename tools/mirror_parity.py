@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import argparse
 import gzip
+import json
 import re
 import sys
 from pathlib import Path
@@ -55,7 +56,7 @@ def compare(expected: list[str], actual: list[str], context: int) -> str | None:
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--scenario", choices=["default", "turmoil", "feud", "famine", "schism"])
+    ap.add_argument("--scenario", choices=json.loads((GOLDEN / "scenarios.json").read_text())["scenarios"])
     ap.add_argument("--context", type=int, default=2)
     args = ap.parse_args(argv)
 

@@ -168,11 +168,13 @@ DETERMINISM_SCENARIOS = (("default", "{days} 0"), ("turmoil", "15 0 --scenario=t
 
 
 # (label, runner args): the Kotlin run must reproduce its checked-in golden dump, which the Python mirror is also held to.
+# The scenario list lives in tests/golden/scenarios.json (one source for verify, the stop gate, regen, parity and CI).
+_SCENARIOS = json.loads((Path(__file__).resolve().parents[2] / "tests" / "golden" / "scenarios.json").read_text())
 GOLDEN_RUNS = tuple(
-    (f"golden {name}", f"10 0{extra} --golden=tests/golden/{name}-10d.txt.gz "
-                       f"--state-golden=tests/golden/{name}-10d.state.txt.gz")
-    for name, extra in (("default", ""), ("turmoil", " --scenario=turmoil"), ("feud", " --scenario=feud"),
-                        ("famine", " --scenario=famine"), ("schism", " --scenario=schism"))
+    (f"golden {name}", f"{_SCENARIOS['days']} 0{'' if name == 'default' else ' --scenario=' + name} "
+                       f"--golden=tests/golden/{name}-{_SCENARIOS['days']}d.txt.gz "
+                       f"--state-golden=tests/golden/{name}-{_SCENARIOS['days']}d.state.txt.gz")
+    for name in _SCENARIOS["scenarios"]
 )
 
 

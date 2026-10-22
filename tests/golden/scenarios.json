@@ -1,0 +1,4 @@
+{
+  "days": 10,
+  "scenarios": ["default", "turmoil", "feud", "famine", "schism"]
+}

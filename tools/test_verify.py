@@ -14,9 +14,9 @@ class VerifyTests(unittest.TestCase):
     def test_one_remote_script_runs_gradle_and_all_five_goldens(self):
         script = verify.remote_script("GRADLE", "check", goldens=True)
         self.assertIn("GRADLE check", script)
-        for name in ("default", "turmoil", "feud", "famine", "schism"):
-            self.assertIn(f"--golden=tests/golden/{name}-10d.txt.gz", script)
-            self.assertIn(f"--state-golden=tests/golden/{name}-10d.state.txt.gz", script)
+        for name in verify.GOLDENS:
+            self.assertIn(f"--golden=tests/golden/{name}-{verify.DAYS}d.txt.gz", script)
+            self.assertIn(f"--state-golden=tests/golden/{name}-{verify.DAYS}d.state.txt.gz", script)
             self.assertIn(f"VERIFY golden-{name}", script)
         self.assertIn("--scenario=turmoil", script)
         self.assertNotIn("golden", verify.remote_script("GRADLE", "check", goldens=False))
@@ -56,8 +56,7 @@ class VerifyTests(unittest.TestCase):
             verify._local, verify.local_golden = original_local, original_golden
             verify.local_toolchain_missing = original_missing
         self.assertIn("gradle check", calls)
-        self.assertEqual(["golden default", "golden turmoil", "golden feud", "golden famine", "golden schism"],
-                         [c for c in calls if c.startswith("golden ")])
+        self.assertEqual([f"golden {name}" for name in verify.GOLDENS], [c for c in calls if c.startswith("golden ")])
 
     def test_local_mode_is_blocked_when_the_toolchain_is_missing(self):
         original = verify.local_toolchain_missing
@@ -66,6 +65,53 @@ class VerifyTests(unittest.TestCase):
             self.assertEqual(2, verify.main(["--local"]))
         finally:
             verify.local_toolchain_missing = original
+
+    def test_the_run_length_comes_from_the_scenario_file_not_from_the_code(self):
+        original = verify.DAYS
+        try:
+            verify.DAYS = 7
+            script = verify.remote_script("GRADLE", "check", goldens=True)
+            self.assertIn("--args='7 0", script)
+            self.assertIn("default-7d.txt.gz", script)
+            self.assertIn("schism-7d.state.txt.gz", script)
+            self.assertNotIn("10d", script, "a golden path still names the old run length")
+            self.assertNotIn("--args='10 0", script)
+        finally:
+            verify.DAYS = original
+
+    def test_a_golden_run_needs_a_zero_gradle_exit_as_well_as_both_verdict_lines(self):
+        script = verify.remote_script("GRADLE", "check", goldens=True)
+        self.assertIn("rc=$?", script)
+        self.assertIn("[ $rc -eq 0 ]", script)
+
+    def test_the_local_golden_run_uses_the_configured_days_too(self):
+        import subprocess
+        seen = []
+        original_run, original_days = subprocess.run, verify.DAYS
+        subprocess.run = lambda cmd, **kw: (seen.append(cmd), type("P", (), {"stdout": "", "stderr": "", "returncode": 0})())[1]
+        try:
+            verify.DAYS = 7
+            verify.local_golden("feud", "7 0 --scenario=feud")
+        finally:
+            subprocess.run, verify.DAYS = original_run, original_days
+        self.assertIn("feud-7d.txt.gz", " ".join(seen[0]))
+        self.assertNotIn("10d", " ".join(seen[0]))
+
+    def test_the_remote_script_reports_the_kotlin_test_count(self):
+        script = verify.remote_script("GRADLE", "check", goldens=False)
+        self.assertIn("TESTCOUNT", script)
+        self.assertIn("build/test-results", script)
+
+    def test_the_test_count_step_sums_junit_suites(self):
+        import subprocess, tempfile
+        with tempfile.TemporaryDirectory() as d:
+            for i, (tests, failures) in enumerate([(5, 0), (7, 1)]):
+                out = Path(d) / f"mod{i}" / "build" / "test-results" / "jvmTest"
+                out.mkdir(parents=True)
+                (out / f"TEST-x{i}.xml").write_text(
+                    f'<?xml version="1.0"?><testsuite name="x{i}" tests="{tests}" skipped="0" failures="{failures}" errors="0">')
+            run = subprocess.run(["sh", "-c", verify.TEST_COUNT_STEP], cwd=d, capture_output=True, text=True, check=False)
+        self.assertEqual("TESTCOUNT tests=12 failures=1", run.stdout.strip(), run.stderr)
 
     def test_golden_verdict_reads_the_output_line(self):
         state = "\nStateGolden     : OK (525 lines)"

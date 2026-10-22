@@ -4,10 +4,14 @@ on:
   push:
     branches: [main]
   pull_request:
+  # Run it by hand on any branch: gh workflow run CI --ref <branch>
+  workflow_dispatch:
 
+# A newer push to a pull request replaces its older run. Every other run (a commit on main, a manual run) has a group of
+# its own, so nothing is cancelled or replaced and a quick follow-up commit never leaves the earlier one without a result.
 concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  group: ci-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
@@ -16,6 +20,7 @@ jobs:
   invariants-and-python:
     name: Invariants + Python tests
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
         with:
@@ -59,17 +64,24 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p build/golden-logs
-          for s in default turmoil feud famine schism; do
+          # tests/golden/scenarios.json is the one list of scenarios (tools/test_scenarios.py keeps everything in step).
+          # jq -e and select(length > 0) make an unreadable file, a missing key or an empty list fail the step instead of
+          # running zero goldens; names must be plain words because they reach the shell and the Gradle arguments.
+          days=$(jq -er '.days | select(. > 0)' tests/golden/scenarios.json)
+          list=$(jq -ce '.scenarios | select(length > 0)' tests/golden/scenarios.json)
+          mapfile -t scenarios < <(jq -r '.[]' <<< "$list")
+          for s in "${scenarios[@]}"; do
+            [[ "$s" =~ ^[a-z][a-z0-9_]*$ ]] || { echo "bad scenario name: $s"; exit 1; }
             extra=""
             if [ "$s" != "default" ]; then extra="--scenario=$s"; fi
             log="build/golden-logs/$s.log"
             # The runner exits 0 even on a mismatch, so the "Golden : OK" line is the actual verdict.
             if ! ./gradlew :desktopApp:run --no-daemon --console=plain -q \
-                 --args="10 0 $extra --golden=tests/golden/$s-10d.txt.gz --state-golden=tests/golden/$s-10d.state.txt.gz" > "$log" 2>&1; then
+                 --args="$days 0 $extra --golden=tests/golden/$s-${days}d.txt.gz --state-golden=tests/golden/$s-${days}d.state.txt.gz" > "$log" 2>&1; then
               cat "$log"; exit 1
             fi
             if ! grep -q "^Golden *: OK" "$log" || ! grep -q "^StateGolden *: OK" "$log"; then
-              echo "golden $s does not match tests/golden/$s-10d.txt.gz"
+              echo "golden $s does not match tests/golden/$s-${days}d(.state).txt.gz"
               cat "$log"; exit 1
             fi
             echo "golden $s OK"

@@ -14,6 +14,7 @@ as a pass.
 
 import argparse
 import importlib.util
+import json
 import os
 import re
 import shutil
@@ -23,13 +24,23 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_TASKS = "check -x lint -x lintDebug -x lintRelease --continue"
-GOLDENS = {
-    "default": "10 0",
-    "turmoil": "10 0 --scenario=turmoil",
-    "feud": "10 0 --scenario=feud",
-    "famine": "10 0 --scenario=famine",
-    "schism": "10 0 --scenario=schism",
-}
+# The scenario list lives in tests/golden/scenarios.json (one source for verify, the stop gate, regen, parity and CI).
+_SCENARIOS = json.loads((ROOT / "tests" / "golden" / "scenarios.json").read_text())
+DAYS = _SCENARIOS["days"]
+_FLAGS = {name: "" if name == "default" else f" --scenario={name}" for name in _SCENARIOS["scenarios"]}
+GOLDENS = {name: f"{DAYS} 0{flag}" for name, flag in _FLAGS.items()}
+
+
+def golden_files(name: str) -> str:
+    """The `--golden=` and `--state-golden=` arguments of one scenario, for the configured run length."""
+    return f"--golden=tests/golden/{name}-{DAYS}d.txt.gz --state-golden=tests/golden/{name}-{DAYS}d.state.txt.gz"
+
+
+TEST_COUNT_STEP = (
+    "find . -path '*/build/test-results/*' -name 'TEST-*.xml' -exec grep -ho '<testsuite [^>]*' {} + 2>/dev/null "
+    "| sed -E 's/.*tests=\"([0-9]+)\".*failures=\"([0-9]+)\".*/\\1 \\2/' "
+    "| awk '{t+=$1; f+=$2} END {print \"TESTCOUNT tests=\" t+0 \" failures=\" f+0}'"
+)
 
 
 def remote_script(gradle_cmd: str, tasks: str, goldens: bool) -> str:
@@ -37,14 +48,17 @@ def remote_script(gradle_cmd: str, tasks: str, goldens: bool) -> str:
     steps = [
         f"{gradle_cmd} {tasks} > /tmp/lw-verify-gradle.log 2>&1; echo \"VERIFY gradle $?\"",
         "grep -E '\\] FAILED|^> Task .*FAILED|What went wrong' /tmp/lw-verify-gradle.log | head -20",
+        # Gradle prints nothing for an UP-TO-DATE test task, so the count comes from the JUnit XML it leaves behind.
+        TEST_COUNT_STEP,
     ]
     if goldens:
-        for name, args in GOLDENS.items():
+        for name, flag in _FLAGS.items():
             log = f"/tmp/lw-verify-golden-{name}.log"
+            # The runner exits 0 even on a mismatch, so the verdict lines decide; a non-zero Gradle exit fails it too.
             steps.append(
-                f"{gradle_cmd} :desktopApp:run --args='{args} --golden=tests/golden/{name}-10d.txt.gz "
-                f"--state-golden=tests/golden/{name}-10d.state.txt.gz' > {log} 2>&1; "
-                f"if grep -q '^Golden *: OK' {log} && grep -q '^StateGolden *: OK' {log}; then echo \"VERIFY golden-{name} 0\"; "
+                f"{gradle_cmd} :desktopApp:run --args='{DAYS} 0{flag} {golden_files(name)}' > {log} 2>&1; rc=$?; "
+                f"if [ $rc -eq 0 ] && grep -q '^Golden *: OK' {log} && grep -q '^StateGolden *: OK' {log}; "
+                f"then echo \"VERIFY golden-{name} 0\"; "
                 f"else echo \"VERIFY golden-{name} 1\"; grep -E 'Golden|mismatch|FAIL' {log} | head -5; fi"
             )
     return "; ".join(steps)
@@ -110,7 +124,7 @@ def golden_verdict(output: str) -> bool:
 def local_golden(name: str, args: str, root: Path = ROOT) -> tuple:
     """Run one scenario against its checked-in golden and report pass/fail from the output."""
     cmd = ["./gradlew", ":desktopApp:run", "--no-daemon", "--console=plain", "-q",
-           f"--args={args} --golden=tests/golden/{name}-10d.txt.gz --state-golden=tests/golden/{name}-10d.state.txt.gz"]
+           f"--args={args} {golden_files(name)}"]
     p = subprocess.run(cmd, cwd=root, capture_output=True, text=True, check=False)
     out = p.stdout + p.stderr
     tail = out.strip().splitlines()[-3:]

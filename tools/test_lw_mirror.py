@@ -1,11 +1,13 @@
 """Tests for the lw_mirror Python kernel mirror (float emulation, text rules, parity with the Kotlin goldens)."""
 import gzip
+import json
 import math
 import sys
 import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+DAYS = json.loads((ROOT / "tests" / "golden" / "scenarios.json").read_text())["days"]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tools"))
 
@@ -75,7 +77,7 @@ class ParityTest(unittest.TestCase):
         for scenario in ("default", "turmoil"):
             with self.subTest(scenario=scenario):
                 lines = runner.run(scenario, 2)
-                self.assertEqual(lines[:50], golden(f"{scenario}-10d.txt.gz")[:50])
+                self.assertEqual(lines[:50], golden(f"{scenario}-{DAYS}d.txt.gz")[:50])
 
     def test_full_parity(self):
         self.assertEqual(mirror_parity.main([]), 0)
