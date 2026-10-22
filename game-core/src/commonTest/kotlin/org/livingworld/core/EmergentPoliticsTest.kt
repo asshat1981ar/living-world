@@ -84,11 +84,13 @@ class EmergentPoliticsTest {
 
     @Test
     fun a_defector_does_not_switch_back_and_forth() {
-        var world = resent(village(), derek, titus)
+        // Derek hates both leaders: after moving to the order he would be unhappy again, but the guild's leader is
+        // exactly who he fled, so there is nowhere bearable to go.
+        var world = resent(resent(village(), derek, titus), derek, rowan)
         world = DefaultWorldReducer().apply(world, GameEvent.AllegianceChanged(
             id = world.events.nextId(), time = world.time, npc = derek, oldFaction = guild, newFaction = order, reason = "test"
         ))
-        assertTrue(candidates(world, derek).none { it is Intent.ChangeAllegiance }, "it would go straight back")
+        assertTrue(candidates(world, derek).none { it is Intent.ChangeAllegiance || it is Intent.DeclareHostility })
     }
 
     @Test
@@ -161,11 +163,20 @@ class EmergentPoliticsTest {
         assertTrue(order in world.npc(krag).factions && guild !in world.npc(krag).factions)
     }
 
+    // Current behaviour, may change: Attack (0.6 - 0.5 x 0.9 + 0.5 for a vengeful NPC) ties defection (0.65) and wins
+    // only because it is listed first; a vengeful member fights its leader before it leaves him.
     @Test
-    fun a_vengeful_member_fights_its_leader_before_it_defects() = runTest {
-        // Attack and defection tie at 0.65 for a vengeful NPC; Attack comes first in the candidate list.
+    fun current_behaviour_a_vengeful_member_attacks_its_leader_before_it_defects() = runTest {
         val world = resent(village(), derek, titus)
         val decided = engine.decide(world.npc(derek), world).intent
         assertTrue(decided is Intent.Attack, "decided $decided")
+    }
+
+    @Test
+    fun an_honest_member_who_resents_its_leader_chooses_to_defect() = runTest {
+        val krag = NpcId("blacksmith_krag")
+        val world = resent(village(), krag, titus)
+        val decided = engine.decide(world.npc(krag), world).intent
+        assertTrue(decided is Intent.ChangeAllegiance, "decided $decided")
     }
 }

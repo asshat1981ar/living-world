@@ -197,7 +197,7 @@ class DefaultNpcDecisionEngine(
         // resent; needing that is what stops it from switching back and forth every hour.
         val home = npc.factions.firstOrNull()?.let { world.factions[it] }
         val homeLeader = home?.leadership?.leader
-        if (home != null && homeLeader != null && homeLeader != npc.id && world.npcs[homeLeader]?.isAlive == true) {
+        if (home != null && homeLeader != null && homeLeader != npc.id) {
             val faith = world.relationships.get(npc.id.toEntityId(), homeLeader.toEntityId())
             if (faith.resentment > 0.7f || faith.trust < -0.6f) {
                 val refuge = world.factions.values

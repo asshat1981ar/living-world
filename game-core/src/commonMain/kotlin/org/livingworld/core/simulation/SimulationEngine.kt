@@ -303,7 +303,7 @@ class SimulationEngine(
                 val warEvent = GameEvent.FactionHostilityDeclared(
                     id = eventId,
                     time = time,
-                    causalEventId = CausalLinks.deathOf(state.events, intent.victim) ?: cause,
+                    causalEventId = CausalLinks.deathOf(state.events, intent.victim, time) ?: cause,
                     declaringFaction = intent.declaring,
                     targetFaction = intent.target,
                     reason = intent.reason

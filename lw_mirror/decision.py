@@ -142,18 +142,16 @@ def _politics(npc, world, cands):
     home = world.factions.get(npc.factions[0]) if npc.factions else None
     home_leader = home.leadership.leader if home is not None else None
     if home is not None and home_leader is not None and home_leader != npc.id:
-        leader_npc = world.npcs.get(home_leader)
-        if leader_npc is not None and leader_npc.is_alive:
-            faith = world.relationships.get(("npc", npc.id), ("npc", home_leader))
-            if faith.resentment > F(0.7) or faith.trust < F(-0.6):
-                refuge = None
-                for f in sorted(world.factions.values(), key=lambda f: f.id):
-                    if f.id != home.id and f.id not in npc.factions and _leader_is_bearable(npc, f, world):
-                        refuge = f
-                        break
-                if refuge is not None:
-                    cands.append(Candidate(ac.ChangeAllegiance(refuge.id, f"Lost faith in {home_leader}"),
-                                           [DEFECTION_UTILITY]))
+        faith = world.relationships.get(("npc", npc.id), ("npc", home_leader))
+        if faith.resentment > F(0.7) or faith.trust < F(-0.6):
+            refuge = None
+            for f in sorted(world.factions.values(), key=lambda f: f.id):
+                if f.id != home.id and f.id not in npc.factions and _leader_is_bearable(npc, f, world):
+                    refuge = f
+                    break
+            if refuge is not None:
+                cands.append(Candidate(ac.ChangeAllegiance(refuge.id, f"Lost faith in {home_leader}"),
+                                       [DEFECTION_UTILITY]))
     factions = sorted(world.factions.values(), key=lambda f: f.id)
     for faction in factions:
         if faction.leadership.leader != npc.id:
