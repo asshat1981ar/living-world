@@ -187,7 +187,12 @@ def golden_check() -> Outcome:
             return Outcome(False, f"{label}: Kotlin output no longer matches tests/golden ({m.group(1)[:300]}). "
                                   "If the behaviour change is intended, regenerate the goldens (see tools/mirror_parity.py) and update lw_mirror until `python3 tools/mirror_parity.py` passes.")
         state = re.search(r"^StateGolden\s*:\s*(.+)$", o.output, re.M)
-        if state and not state.group(1).startswith("OK"):
+        if state is None or "GRADLE_EXIT 0" not in o.output:
+            # Every run passes --state-golden, so no StateGolden line (or a failed Gradle exit) means it crashed after
+            # printing the first verdict. It is an infrastructure problem only when Gradle never reported an exit.
+            return Outcome(False, f"{label}: the run did not finish its state check.\n{o.output[-1500:]}",
+                           infra="GRADLE_EXIT" not in o.output)
+        if not state.group(1).startswith("OK"):
             return Outcome(False, f"{label}: the end state no longer matches tests/golden/*.state.txt.gz ({state.group(1)[:300]}). "
                                   "Beliefs, memories, items, quests or the player changed; if intended, run tools/regen_golden.py and update lw_mirror.")
     return Outcome(True, "goldens match")

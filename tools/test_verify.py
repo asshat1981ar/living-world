@@ -68,12 +68,15 @@ class VerifyTests(unittest.TestCase):
             verify.local_toolchain_missing = original
 
     def test_golden_verdict_reads_the_output_line(self):
-        self.assertTrue(verify.golden_verdict("Golden          : OK (5117 lines)"))
-        self.assertFalse(verify.golden_verdict("Golden          : MISMATCH at line 6: expected [a] actual [b]"))
+        state = "\nStateGolden     : OK (525 lines)"
+        self.assertTrue(verify.golden_verdict("Golden          : OK (5117 lines)" + state))
+        self.assertFalse(verify.golden_verdict("Golden          : MISMATCH at line 6: expected [a] actual [b]" + state))
         self.assertFalse(verify.golden_verdict("no golden line here"))
 
-    def test_golden_verdict_also_needs_the_state_golden_when_it_is_reported(self):
+    def test_golden_verdict_needs_the_state_golden_too(self):
         ok = "Golden          : OK (5117 lines)\n"
+        # A crash after the first verdict leaves no state line: that must fail, not pass.
+        self.assertFalse(verify.golden_verdict(ok))
         self.assertTrue(verify.golden_verdict(ok + "StateGolden     : OK (525 lines)"))
         self.assertFalse(verify.golden_verdict(ok + "StateGolden     : MISMATCH at line 3: expected [a] actual [b]"))
         self.assertFalse(verify.golden_verdict(ok + "StateGolden     : MISSING golden file tests/golden/x.state.txt.gz"))

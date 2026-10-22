@@ -195,6 +195,8 @@ class QuickTierTests(unittest.TestCase):
         self.assertEqual(self.det_calls, 2)
 
     golden = "OK (4832 lines)"
+    state_golden = "OK (525 lines)"  # None = the run printed no StateGolden line (it crashed)
+    gradle_exit = "GRADLE_EXIT 0"
 
     def _det_with(self, fingerprints):
         """Run determinism_check with _run faked; returns (outcome, argv list seen)."""
@@ -203,7 +205,8 @@ class QuickTierTests(unittest.TestCase):
         def fake(argv, timeout):
             seen.append(argv)
             if any("--golden=" in a for a in argv):
-                return sg.Outcome(True, "Golden          : " + self.golden + "\nGRADLE_EXIT 0")
+                state = "" if self.state_golden is None else "\nStateGolden     : " + self.state_golden
+                return sg.Outcome(True, "Golden          : " + self.golden + state + "\n" + self.gradle_exit)
             return sg.Outcome(True, f"Fingerprint     : {next(it)}\nGRADLE_EXIT 0")
         sg._run = fake
         try:
@@ -226,6 +229,33 @@ class QuickTierTests(unittest.TestCase):
         self.assertFalse(out.ok)
         self.assertIn("no longer matches tests/golden", out.output)
         self.golden = "OK (4832 lines)"
+
+    def test_a_state_golden_mismatch_blocks(self):
+        self.state_golden = "MISMATCH at line 4: expected [a] actual [b]"
+        try:
+            out, _ = self._det_with(["aa", "aa", "bb", "bb"])
+        finally:
+            self.state_golden = "OK (525 lines)"
+        self.assertFalse(out.ok)
+        self.assertIn("end state no longer matches", out.output)
+
+    def test_a_run_that_crashed_before_the_state_check_blocks(self):
+        self.state_golden = None
+        try:
+            out, _ = self._det_with(["aa", "aa", "bb", "bb"])
+        finally:
+            self.state_golden = "OK (525 lines)"
+        self.assertFalse(out.ok)
+        self.assertIn("did not finish its state check", out.output)
+        self.assertFalse(out.infra, "Gradle reported an exit, so this is a verdict, not an infrastructure problem")
+
+    def test_a_failed_gradle_exit_after_both_golden_lines_still_blocks(self):
+        self.gradle_exit = "GRADLE_EXIT 1"
+        try:
+            out, _ = self._det_with(["aa", "aa", "bb", "bb"])
+        finally:
+            self.gradle_exit = "GRADLE_EXIT 0"
+        self.assertFalse(out.ok)
 
     def test_determinism_blocks_when_only_the_turmoil_scenario_differs(self):
         out, _ = self._det_with(["aa", "aa", "bb", "cc"])

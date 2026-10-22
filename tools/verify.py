@@ -101,9 +101,10 @@ def golden_verdict(output: str) -> bool:
     """
     if re.search(r"^Golden\s*:\s*OK", output, re.M) is None:
         return False
-    # The state dump is checked in the same run; when its line is present it must be OK too.
+    # The state dump is checked in the same run and every caller passes --state-golden, so a missing line means the run
+    # crashed after the first verdict (or the flag was dropped): that is a failure, not "old behaviour".
     state = re.search(r"^StateGolden\s*:\s*(\S+)", output, re.M)
-    return state is None or state.group(1) == "OK"
+    return state is not None and state.group(1) == "OK"
 
 
 def local_golden(name: str, args: str, root: Path = ROOT) -> tuple:
@@ -113,7 +114,7 @@ def local_golden(name: str, args: str, root: Path = ROOT) -> tuple:
     p = subprocess.run(cmd, cwd=root, capture_output=True, text=True, check=False)
     out = p.stdout + p.stderr
     tail = out.strip().splitlines()[-3:]
-    return f"golden {name}", golden_verdict(out), tail
+    return f"golden {name}", p.returncode == 0 and golden_verdict(out), tail
 
 
 def main(argv=None) -> int:

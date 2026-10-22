@@ -22,6 +22,12 @@ log and the commits). The first items need no approval and no golden re-record.
 
 **W2 leftovers**
 
+- [ ] **Adversarial leftovers (2026-10-22 review of dump v2 and schism)** S. (a) `tools/regen_golden.py` pulls the event
+      golden and then the state golden, so a failure in between leaves a new event golden next to an old state golden;
+      pull both to temp names and move them together, and give the script a test. (b) The faction-war quest description
+      names one faction by its display name and the other by its raw id ("Open hostility between The Iron Guild and
+      verdant_order", visible in `schism-10d.state.txt.gz`); fixing it re-records the goldens (`golden`), so pin it with a
+      `current_behaviour_*` test first. (c) `golden_verdict`/`golden_check` match the prefix `OK`; match `OK (<n> lines)`.
 **W3 — test depth**
 
 - [x] **Replay and soak compare the whole state** M. Factions, relationships, economy, quests, the player and the

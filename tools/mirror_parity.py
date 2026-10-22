@@ -67,6 +67,12 @@ def main(argv=None) -> int:
         return 2
 
     failures = 0
+    # Every scenario needs both goldens: a deleted or never-committed state golden must not read as a pass.
+    events = {(s, d) for s, d, _ in goldens(args.scenario)}
+    states = {(s, d) for s, d, _ in state_goldens(args.scenario)}
+    if not events or events != states:
+        failures += 1
+        print(f"FAIL golden set: events {sorted(events)} vs state {sorted(states)} (each scenario needs both, none may be missing)")
     for scenario, days, path in goldens(args.scenario):
         expected = gzip.open(path, "rt").read().splitlines()
         actual = runner.run(scenario, days)
