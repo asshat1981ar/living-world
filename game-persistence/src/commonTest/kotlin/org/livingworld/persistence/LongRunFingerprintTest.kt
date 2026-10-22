@@ -17,7 +17,7 @@ class LongRunFingerprintTest {
     fun the_ninety_day_default_run_still_has_the_known_fingerprint() = runTest {
         val after = SimulationEngine().advance(DefaultVillageFactory.marketVillage(), WorldDuration.days(90))
         assertEquals(
-            "7ae29cd5c158da35",
+            "e6879917a1d38d09",
             SaveManager.computeDeterministicFingerprint(after),
             "the 90-day run no longer matches the documented fingerprint"
         )

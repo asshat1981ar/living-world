@@ -709,7 +709,7 @@ mirror still matches the goldens (the mirror keys relationships by kind as well)
 
 **W2b exit gate (verified 2026-10-22):** `python3 -I tools/verify.py --local` is green (invariants, 98 tool tests, Gradle
 check, all three goldens), the Python mirror matches the new goldens byte for byte, and the 90-day default run is
-unchanged (45,615 events, ~1.3 s) with the fingerprint `7ae29cd5c158da35` (the digest sees the whole world, so it moved
+unchanged (45,615 events, ~1.3 s) with the fingerprint `e6879917a1d38d09` (the digest sees the whole world, so it moved
 with the behaviour).
 
 **Still open in W2:** C2.12 a fourth scenario that exercises allegiance, flee, war and NPC-to-NPC trades, and the dump v2

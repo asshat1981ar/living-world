@@ -41,9 +41,18 @@ object StateDigest {
             b.append(":home=").append(npc.identity.homeLocation.value)
             b.append(":at=").append(npc.identity.currentLocation.value)
             b.append(":traits=").append(npc.traits.joinToString(",") { it.name })
-            b.append(":goals=").append(npc.goals.joinToString(",") { it.id })
-            b.append(":fears=").append(npc.fears.joinToString(",") { it.description })
-            b.append(":values=").append(npc.values.joinToString(",") { it.name })
+            // A goal's urgency decides whether the NPC acts, so the digest must see more than its name.
+            b.append(":goals=").append(
+                npc.goals.joinToString(",") {
+                    "${it.id}:${it.description}:${stableFloatText(it.priority)}:${stableFloatText(it.urgency)}"
+                }
+            )
+            b.append(":fears=").append(
+                npc.fears.joinToString(",") { "${it.description}:${stableFloatText(it.intensity)}" }
+            )
+            b.append(":values=").append(
+                npc.values.joinToString(",") { "${it.name}:${stableFloatText(it.weight)}" }
+            )
             b.append(":factions=").append(npc.factions.map { it.value }.sorted().joinToString(","))
             b.append(":hp=").append(stableFloatText(npc.resources.health))
             b.append(":coins=").append(stableFloatText(npc.resources.coins))

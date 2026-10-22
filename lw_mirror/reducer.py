@@ -105,7 +105,7 @@ def _is_applicable(state, event):
         if not (_npc_exists(state, event.target) and _alive(state, event.target)):
             return False
         if event.attacker[0] == "npc":
-            return _npc_exists(state, event.attacker[1])
+            return _npc_exists(state, event.attacker[1]) and _alive(state, event.attacker[1])
         return True
     if isinstance(event, ev.RelationshipShifted):
         for entity in (event.source, event.target):

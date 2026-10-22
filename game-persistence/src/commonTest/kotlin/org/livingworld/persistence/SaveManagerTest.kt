@@ -83,11 +83,23 @@ class SaveManagerTest {
     @Test
     fun a_v3_envelope_migrates_to_typed_relationship_keys() {
         val world = DefaultVillageFactory.marketVillage()
-        val asV3 = SaveManager.serializeEnvelope(world)
-            .replace("\"schemaVersion\": 4", "\"schemaVersion\": 3")
-            .replace("npc:", "")   // the old, untyped edge keys
+        // A save from the v3 era carries the old, untyped edge keys.
+        val legacyEdges = world.relationships.allEdges().entries.associate { (key, rel) ->
+            key.replace("npc:", "") to rel
+        }
+        val legacyWorld = world.copy(relationships = world.relationships.withEdges(legacyEdges))
+        val legacy = SaveManager.legacyFingerprint(legacyWorld)
+        val asV3 = SaveEnvelope(
+            schemaVersion = 3,
+            savedAtTick = legacyWorld.time.tick,
+            eventCount = legacyWorld.events.size,
+            stateHash = SaveManager.stateHashOf(legacy),
+            deterministicDigestHex = legacy,
+            worldState = legacyWorld
+        )
+        val raw = SaveManager.jsonConfig.encodeToString(SaveEnvelope.serializer(), asV3)
 
-        val migrated = SaveManager.deserializeEnvelope(asV3)
+        val migrated = SaveManager.deserializeEnvelope(raw)
         assertEquals(SaveEnvelope.CURRENT_SCHEMA_VERSION, migrated.schemaVersion)
         assertTrue(migrated.migrationHistory.any { it.startsWith("v3->v4") })
         assertTrue(
@@ -147,6 +159,25 @@ class SaveManagerTest {
         val first = decoded.worldState.events.ofType<GameEvent.RelationshipShifted>().first()
         assertTrue(first.source is EntityId.Npc, "entity kind must survive the round trip")
         assertEquals(SaveManager.computeDeterministicFingerprint(world), decoded.deterministicDigestHex)
+    }
+
+    @Test
+    fun a_tampered_v3_save_is_refused_instead_of_being_re_stamped() {
+        val world = DefaultVillageFactory.marketVillage()
+        val legacy = SaveManager.legacyFingerprint(world)
+        val v3 = SaveEnvelope(
+            schemaVersion = 3,
+            savedAtTick = world.time.tick,
+            eventCount = world.events.size,
+            stateHash = SaveManager.stateHashOf(legacy),
+            deterministicDigestHex = legacy,
+            worldState = world
+        )
+        val raw = SaveManager.jsonConfig.encodeToString(SaveEnvelope.serializer(), v3)
+        // The world was changed after the save was written; the old digest must catch it.
+        val tampered = raw.replace("\"coins\": 50.0", "\"coins\": 500.0")
+        assertTrue(tampered != raw, "the fixture must actually change the world")
+        assertFailsWith<IllegalArgumentException> { SaveManager.deserializeEnvelope(tampered) }
     }
 
     @Test

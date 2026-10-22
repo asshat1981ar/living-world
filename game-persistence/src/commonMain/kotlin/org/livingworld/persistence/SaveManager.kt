@@ -85,6 +85,16 @@ object SaveSchemaMigrator {
             }
             3 -> {
                 val v3Envelope = json.decodeFromString<SaveEnvelope>(rawJson)
+                SaveManager.validateWorldIntegrity(v3Envelope.worldState).getOrThrow()
+                // A v3 envelope carries the digest of the old projection. Verify it before migrating, so an altered
+                // v3 save is rejected instead of being quietly re-stamped with a fresh digest.
+                require(v3Envelope.deterministicDigestHex.isNotBlank()) {
+                    "a v3 save without a digest cannot be verified"
+                }
+                val legacyDigest = SaveManager.legacyFingerprint(v3Envelope.worldState)
+                require(legacyDigest == v3Envelope.deterministicDigestHex) {
+                    "SaveEnvelope digest mismatch: expected ${v3Envelope.deterministicDigestHex}, got $legacyDigest"
+                }
                 migrateV3ToV4(v3Envelope)
             }
             else -> {
@@ -157,6 +167,46 @@ object SaveManager {
      * parts that a behaviour change usually touches.
      */
     fun computeDeterministicFingerprint(state: WorldState): String = StateDigest.of(state)
+
+    /**
+     * The digest algorithm of schema v3: a projection of the world (the NPC counters, the prices, the relationship
+     * sentiment). Kept only to verify a v3 envelope before it is migrated; new envelopes use the full-state digest.
+     */
+    internal fun legacyFingerprint(state: WorldState): String {
+        val canonicalBuilder = StringBuilder()
+        canonicalBuilder.append("seed=").append(state.seed).append("|tick=").append(state.time.tick)
+        canonicalBuilder.append("|events=").append(state.events.size)
+        for ((npcId, npc) in state.npcs.entries.sortedBy { it.key.value }) {
+            canonicalBuilder.append("|npc=").append(npcId.value)
+                .append(":").append(npc.isAlive)
+                .append(":").append((npc.resources.health * 100).toInt())
+                .append(":").append((npc.resources.coins * 100).toInt())
+                .append(":").append((npc.resources.food * 100).toInt())
+                .append(":").append(npc.identity.occupation)
+                .append(":b=").append(npc.beliefs.all().size)
+                .append(":m=").append(npc.memories.size)
+        }
+        for ((factionId, faction) in state.factions.entries.sortedBy { it.key.value }) {
+            val enemiesSorted = faction.enemies.map { it.value }.sorted().joinToString(",")
+            canonicalBuilder.append("|fac=").append(factionId.value).append(":e=").append(enemiesSorted)
+        }
+        for ((edgeKey, rel) in state.relationships.allEdges().entries.sortedBy { it.key }) {
+            canonicalBuilder.append("|rel=").append(edgeKey)
+                .append(":").append((rel.overallSentiment * 100).toInt())
+        }
+        for ((item, price) in state.economy.itemPrices.entries.sortedBy { it.key }) {
+            canonicalBuilder.append("|item=").append(item).append(":").append((price * 100).toInt())
+        }
+
+        val payload = canonicalBuilder.toString()
+        var hash = -0x340d631b7bdddcdbL
+        val prime = 0x100000001b3L
+        for (ch in payload) {
+            hash = hash xor ch.code.toLong()
+            hash *= prime
+        }
+        return hash.toULong().toString(16).padStart(16, '0')
+    }
 
     /** Platform-independent 32-bit state hash: the low 32 bits of the FNV-1a digest (data-class hashCode() is not stable). */
     fun stateHashOf(digestHex: String): Int = digestHex.takeLast(8).toLong(16).toInt()

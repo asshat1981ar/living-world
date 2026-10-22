@@ -44,8 +44,12 @@ object WorldInvariants {
 
         for (quest in state.activeQuests) {
             val issuer = quest.issuer
-            if (issuer is EntityId.Npc && !state.npcs.containsKey(issuer.id)) {
-                out += "quest ${quest.id} is issued by the unknown NPC ${issuer.identifier}"
+            if (issuer is EntityId.Npc) {
+                val npc = state.npcs[issuer.id]
+                when {
+                    npc == null -> out += "quest ${quest.id} is issued by the unknown NPC ${issuer.identifier}"
+                    !npc.isAlive -> out += "quest ${quest.id} is issued by the dead NPC ${issuer.identifier}"
+                }
             }
         }
 

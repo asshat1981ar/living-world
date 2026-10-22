@@ -84,8 +84,12 @@ object EventValidator {
                 if (state.npcs[event.target] == null) out += "the target ${event.target.value} is not in the world"
                 else if (!alive(state, event.target)) out += "the target ${event.target.value} is dead"
                 val attacker = event.attacker
-                if (attacker is EntityId.Npc && state.npcs[attacker.id] == null) {
-                    out += "the attacker ${attacker.identifier} is not in the world"
+                if (attacker is EntityId.Npc) {
+                    if (state.npcs[attacker.id] == null) {
+                        out += "the attacker ${attacker.identifier} is not in the world"
+                    } else if (!alive(state, attacker.id)) {
+                        out += "the attacker ${attacker.identifier} is dead"
+                    }
                 }
             }
             is GameEvent.RelationshipShifted -> {
